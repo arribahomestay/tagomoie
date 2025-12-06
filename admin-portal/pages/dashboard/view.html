@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/content.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>City Dashboard</title>
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Modern Card Improvements */
+        .card {
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Recent Reports List */
+        .report-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s;
+        }
+
+        .report-item:last-child {
+            border-bottom: none;
+        }
+
+        .report-icon {
+            width: 40px;
+            height: 40px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: #64748b;
+        }
+
+        .report-info {
+            flex: 1;
+        }
+
+        .report-title {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .report-meta {
+            font-size: 0.8rem;
+            color: #64748b;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .user-tag {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        /* Notification Timeline */
+        .timeline-item {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 1.25rem;
+            border-left: 2px solid #e2e8f0;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+            border-left: 2px solid transparent;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -6px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #cbd5e1;
+        }
+
+        .timeline-dot.urgent {
+            background: #ef4444;
+            box-shadow: 0 0 0 3px #fee2e2;
+        }
+
+        .timeline-dot.success {
+            background: #10b981;
+        }
+
+        .timeline-dot.info {
+            background: #3b82f6;
+        }
+
+        .timeline-content {
+            font-size: 0.9rem;
+            color: #334155;
+            line-height: 1.4;
+        }
+
+        .timeline-time {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        /* Stats Card tweaks */
+        .stat-card {
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 140px;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>City Overview</h1>
+
+    <!-- Key Metrics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <div class="stat-title">New Reports Today</div>
+                    <div class="stat-value">12</div>
+                </div>
+                <div class="stat-icon-wrapper" style="background: #eff6ff; color: #3b82f6;">
+                    <i data-lucide="file-plus"></i>
+                </div>
+            </div>
+            <div style="font-size: 0.8rem; color: #10b981; font-weight: 500;">
+                <i data-lucide="trending-up"
+                    style="width: 14px; height: 14px; display: inline; vertical-align: text-bottom;"></i> +8% from
+                yesterday
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <div class="stat-title">Active Issues</div>
+                    <div class="stat-value">45</div>
+                </div>
+                <div class="stat-icon-wrapper" style="background: #fff1f2; color: #f43f5e;">
+                    <i data-lucide="alert-triangle"></i>
+                </div>
+            </div>
+            <div style="font-size: 0.8rem; color: #64748b; font-weight: 500;">
+                Urgent attention needed
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <div class="stat-title">Resolved (Week)</div>
+                    <div class="stat-value">89</div>
+                </div>
+                <div class="stat-icon-wrapper" style="background: #f0fdf4; color: #10b981;">
+                    <i data-lucide="check-circle-2"></i>
+                </div>
+            </div>
+            <div style="font-size: 0.8rem; color: #10b981; font-weight: 500;">
+                <i data-lucide="trending-up"
+                    style="width: 14px; height: 14px; display: inline; vertical-align: text-bottom;"></i> +12%
+                efficiency
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <div class="stat-title">Avg Response Time</div>
+                    <div class="stat-value">2.4h</div>
+                </div>
+                <div class="stat-icon-wrapper" style="background: #f5f3ff; color: #8b5cf6;">
+                    <i data-lucide="clock"></i>
+                </div>
+            </div>
+            <div style="font-size: 0.8rem; color: #10b981; font-weight: 500;">
+                -15m faster than avg
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Left: Recent User Reports -->
+        <div class="card">
+            <div class="section-title">
+                <i data-lucide="users" style="width: 18px; color: #6366f1;"></i>
+                Recent User Reports (News Feed)
+            </div>
+
+            <div class="report-item">
+                <div class="report-icon" style="background: #fee2e2; color: #ef4444;">
+                    <i data-lucide="zap"></i>
+                </div>
+                <div class="report-info">
+                    <div class="report-title">Walay Kuryente - Purok 4</div>
+                    <div class="report-meta">
+                        <span class="user-tag"><i data-lucide="user" width="12"></i> Whiskey Itable</span> • <span
+                            style="color: #ef4444; font-weight: 600;">Critical</span> • 12 mins ago
+                    </div>
+                </div>
+                <button class="btn-action btn-view"
+                    onclick="openDetails('#1027', 'Walay Kuryente', 'Whiskey Itable', 'Today', 'Critical', 'Walay kuryente sa among area sukad pa ganihang hapon.')"
+                    style="color: #475569; background: #f1f5f9;">View</button>
+            </div>
+
+            <div class="report-item">
+                <div class="report-icon" style="background: #e0f2fe; color: #0284c7;">
+                    <i data-lucide="alert-triangle"></i>
+                </div>
+                <div class="report-info">
+                    <div class="report-title">Guba ang Dalan</div>
+                    <div class="report-meta">
+                        <span class="user-tag"><i data-lucide="user" width="12"></i> John Vitor Vetvet</span> • <span
+                            style="color: #0284c7; font-weight: 600;">In Review</span> • 45 mins ago
+                    </div>
+                </div>
+                <button class="btn-action btn-view"
+                    onclick="openDetails('#1025', 'Guba ang Dalan', 'John Vitor Vetvet', 'Today', 'In Review', 'Naay dako nga bangag sa dalan dapit sa Purok 3. Daghan na na-disgrasya nga motor.')"
+                    style="color: #475569; background: #f1f5f9;">View</button>
+            </div>
+
+            <div class="report-item">
+                <div class="report-icon" style="background: #fef3c7; color: #d97706;">
+                    <i data-lucide="volume-2"></i>
+                </div>
+                <div class="report-info">
+                    <div class="report-title">Saba nga Karaoke</div>
+                    <div class="report-meta">
+                        <span class="user-tag"><i data-lucide="user" width="12"></i> James Paul Silayan</span> • <span
+                            style="color: #d97706; font-weight: 600;">Critical</span> • 1 hour ago
+                    </div>
+                </div>
+                <button class="btn-action btn-view"
+                    onclick="openDetails('#1024', 'Saba nga Karaoke', 'James Paul Silayan', 'Today', 'Critical', 'Saba kaayo ang karaoke sa silingan bisag lawom na ang gabii. Dili na mi katulog.')"
+                    style="color: #475569; background: #f1f5f9;">View</button>
+            </div>
+
+            <div class="report-item">
+                <div class="report-icon">
+                    <i data-lucide="users"></i>
+                </div>
+                <div class="report-info">
+                    <div class="report-title">Mga Istambay</div>
+                    <div class="report-meta">
+                        <span class="user-tag"><i data-lucide="user" width="12"></i> Elmer Solayao</span> •
+                        <span>Resolved</span> • 2 hours ago
+                    </div>
+                </div>
+                <button class="btn-action btn-view"
+                    onclick="openDetails('#1028', 'Mga Istambay', 'Elmer Solayao', 'Today', 'Resolved', 'Naay nireklamo sa mga istambay nga sabaan sa kanto.')"
+                    style="color: #475569; background: #f1f5f9;">View</button>
+            </div>
+        </div>
+
+        <!-- Right: Notifications/Activity -->
+        <div class="card">
+            <div class="section-title">
+                <i data-lucide="bell" style="width: 18px; color: #6366f1;"></i>
+                System Notifications
+            </div>
+
+            <div class="timeline-item">
+                <span class="timeline-dot urgent"></span>
+                <div class="timeline-content">High volume of reports detected in District 4 (Power Outage).</div>
+                <span class="timeline-time">15 mins ago</span>
+            </div>
+
+            <div class="timeline-item">
+                <span class="timeline-dot success"></span>
+                <div class="timeline-content">Maintenance Crew B has resolved "Main St. Pothole" ticket.</div>
+                <span class="timeline-time">2 hours ago</span>
+            </div>
+
+            <div class="timeline-item">
+                <span class="timeline-dot info"></span>
+                <div class="timeline-content">System backup completed successfully.</div>
+                <span class="timeline-time">5 hours ago</span>
+            </div>
+
+            <div class="timeline-item">
+                <span class="timeline-dot"></span>
+                <div class="timeline-content">New user "Officer K." added to the admin team.</div>
+                <span class="timeline-time">Yesterday</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function openDetails(id, name, reporter, date, status, desc) {
+            // Call the global function on the parent window
+            if (window.parent && window.parent.openGlobalModal) {
+                window.parent.openGlobalModal(id, name, reporter, date, status, desc);
+            } else {
+                console.error('Global modal function not found on parent window.');
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,24 @@
+:root {
+    /* Color Palette - Modern Slate & Indigo Theme */
+    --bg-color: #0f172a;        /* Slate 900 */
+    --card-bg: rgba(30, 41, 59, 0.7); /* Slate 800 with opacity for glassmorphism */
+    --text-primary: #f8fafc;    /* Slate 50 */
+    --text-secondary: #94a3b8;  /* Slate 400 */
+    --accent-color: #6366f1;    /* Indigo 500 */
+    --accent-hover: #4f46e5;    /* Indigo 600 */
+    --error-color: #ef4444;     /* Red 500 */
+    
+    /* Spacing & Sizing */
+    --border-radius: 16px;
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 0.75rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    
+    /* Effects */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+    --transition-speed: 0.3s;
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}

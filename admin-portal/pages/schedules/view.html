@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/content.css">
+    <title>Schedules</title>
+    <style>
+        .calendar-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .calendar-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .calendar-nav button {
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.5rem;
+            cursor: pointer;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .calendar-nav button:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e2e8f0;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .day-header,
+        .day-cell {
+            background: white;
+            padding: 1rem;
+            min-height: 120px;
+        }
+
+        .day-header {
+            min-height: auto;
+            text-align: center;
+            font-weight: 600;
+            color: #64748b;
+            padding: 1rem 0;
+            font-size: 0.875rem;
+            background: #f8fafc;
+        }
+
+        .day-cell {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .day-cell:hover {
+            background: #f8fafc;
+        }
+
+        .day-number {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .day-cell.other-month {
+            background: #f8fafc;
+            color: #ccc;
+            pointer-events: none;
+        }
+
+        .day-cell.other-month .day-number {
+            color: #cbd5e1;
+        }
+
+        .event-pill {
+            background: #e0e7ff;
+            color: #4338ca;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            border-left: 3px solid #4338ca;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Schedules & Calendar</h1>
+
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <h2 class="calendar-title" id="month-year">December 2023</h2>
+            <div class="calendar-nav">
+                <button onclick="changeMonth(-1)">&larr;</button>
+                <button onclick="changeMonth(1)">&rarr;</button>
+            </div>
+        </div>
+
+        <div class="calendar-grid" id="calendar">
+            <!-- Headers -->
+            <div class="day-header">Sun</div>
+            <div class="day-header">Mon</div>
+            <div class="day-header">Tue</div>
+            <div class="day-header">Wed</div>
+            <div class="day-header">Thu</div>
+            <div class="day-header">Fri</div>
+            <div class="day-header">Sat</div>
+
+            <!-- Days will be injected here -->
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        const monthYearEl = document.getElementById('month-year');
+        const calendarEl = document.getElementById('calendar');
+
+        const months = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        function loadSchedules() {
+            try {
+                return JSON.parse(localStorage.getItem('adminSchedules') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            monthYearEl.innerText = `${months[month]} ${year}`;
+
+            // Clear days (keep headers)
+            const headers = Array.from(calendarEl.querySelectorAll('.day-header'));
+            calendarEl.innerHTML = '';
+            headers.forEach(h => calendarEl.appendChild(h));
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            const lastDayIndex = new Date(year, month, lastDay).getDay();
+            const nextDays = 7 - lastDayIndex - 1;
+
+            const schedules = loadSchedules();
+
+            // Previous Month Days
+            const prevLastDay = new Date(year, month, 0).getDate();
+            for (let i = firstDayIndex; i > 0; i--) {
+                const day = document.createElement('div');
+                day.classList.add('day-cell', 'other-month');
+                day.innerHTML = `<span class="day-number">${prevLastDay - i + 1}</span>`;
+                calendarEl.appendChild(day);
+            }
+
+            // Current Month Days
+            for (let i = 1; i <= lastDay; i++) {
+                const day = document.createElement('div');
+                day.classList.add('day-cell');
+
+                // Format date string YYYY-MM-DD for comparison
+                const monthStr = (month + 1).toString().padStart(2, '0');
+                const dayStr = i.toString().padStart(2, '0');
+                const dateString = `${year}-${monthStr}-${dayStr}`;
+
+                day.setAttribute('onclick', `openDayModal('${dateString}')`);
+
+                let eventsHtml = '';
+                const todaysEvents = schedules.filter(s => s.date === dateString);
+
+                todaysEvents.forEach(ev => {
+                    eventsHtml += `<div class="event-pill" title="${ev.id}: ${ev.name}">${ev.id}</div>`;
+                });
+
+                day.innerHTML = `<span class="day-number">${i}</span>${eventsHtml}`;
+                calendarEl.appendChild(day);
+            }
+
+            // Next Month Days
+            for (let i = 1; i <= nextDays; i++) {
+                const day = document.createElement('div');
+                day.classList.add('day-cell', 'other-month');
+                day.innerHTML = `<span class="day-number">${i}</span>`;
+                calendarEl.appendChild(day);
+            }
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        function openDayModal(dateString) {
+            if (window.parent && window.parent.openDayModal) {
+                window.parent.openDayModal(dateString);
+            } else {
+                console.error("Parent modal function 'openDayModal' not found.");
+            }
+        }
+
+        // Initialize
+        renderCalendar();
+
+        window.addEventListener('storage', () => {
+            renderCalendar();
+        });
+    </script>
+</body>
+
+</html>

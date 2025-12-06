@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal | Dashboard</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/layout.css">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Toggle Button -->
+        <div class="toggle-btn" id="sidebar-toggle">
+            <i data-lucide="chevron-left" width="16" height="16"></i>
+        </div>
+
+        <div class="sidebar-header">
+            <div class="nav-icon">
+                <i data-lucide="shield-check" color="#6366f1"></i>
+            </div>
+            <span class="logo-text">AdminPortal</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active" data-page="dashboard">
+                <div class="nav-icon"><i data-lucide="layout-dashboard"></i></div>
+                <span class="nav-label">Dashboard</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="issues">
+                <div class="nav-icon"><i data-lucide="alert-circle"></i></div>
+                <span class="nav-label">Issues</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="schedules">
+                <div class="nav-icon"><i data-lucide="calendar"></i></div>
+                <span class="nav-label">Schedules</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="manage">
+                <div class="nav-icon"><i data-lucide="settings"></i></div>
+                <span class="nav-label">Manage</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Profile Top Nav -->
+        <div class="top-nav">
+            <!-- Notification Bell -->
+            <div class="profile-menu-container" style="margin-right: 0;">
+                <div class="notif-btn" id="notif-btn">
+                    <i data-lucide="bell" width="20" height="20"></i>
+                    <div class="notif-badge"></div>
+                </div>
+                <!-- Notif Dropdown -->
+                <div class="notif-dropdown" id="notif-dropdown">
+                    <div class="notif-header">
+                        <span>Notifications</span>
+                        <span style="font-size: 0.75rem; color: #6366f1; cursor: pointer;">Mark all read</span>
+                    </div>
+                    <div class="notif-list">
+                        <div class="notif-item unread"
+                            onclick="handleNotifClick('#1025', 'Walay Kuryente', 'James Paul Silayan', 'Critical', '2023-12-08')">
+                            <div class="notif-icon"><i data-lucide="zap" width="16"></i></div>
+                            <div class="notif-content">
+                                <div class="notif-text"><strong>Walay Kuryente</strong> report from <strong>James Paul
+                                        Silayan</strong></div>
+                                <div class="notif-time">2 mins ago</div>
+                            </div>
+                        </div>
+                        <div class="notif-item unread"
+                            onclick="handleNotifClick('#1024', 'Guba ang Dalan', 'John Vitor Vetvet', 'Error', '2023-12-08')">
+                            <div class="notif-icon"><i data-lucide="alert-triangle" width="16"></i></div>
+                            <div class="notif-content">
+                                <div class="notif-text"><strong>Guba ang Dalan</strong> report from <strong>John Vitor
+                                        Vetvet</strong></div>
+                                <div class="notif-time">1 hour ago</div>
+                            </div>
+                        </div>
+                        <div class="notif-item"
+                            onclick="handleNotifClick('#1023', 'Saba nga Karaoke', 'Khristian Dove', 'Pending', '2023-12-08')">
+                            <div class="notif-icon"><i data-lucide="volume-2" width="16"></i></div>
+                            <div class="notif-content">
+                                <div class="notif-text"><strong>Saba nga Karaoke</strong> report from <strong>Khristian
+                                        Dove</strong></div>
+                                <div class="notif-time">3 hours ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-menu-container">
+                <div class="avatar-btn" id="avatar-btn">
+                    <i data-lucide="user" width="20" height="20"></i>
+                </div>
+                <!-- Dropdown -->
+                <div class="dropdown-menu" id="profile-dropdown">
+                    <div class="dropdown-item">
+                        <i data-lucide="user-cog" width="16"></i> Profile Settings
+                    </div>
+                    <div class="dropdown-item"
+                        onclick="openSecurityModal(); document.getElementById('profile-dropdown').classList.remove('active');">
+                        <i data-lucide="shield" width="16"></i> Security
+                    </div>
+                    <div class="dropdown-item logout" id="logout-btn">
+                        <i data-lucide="log-out" width="16"></i> Logout
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-loader active" id="loader">
+            <i data-lucide="loader-2" class="animate-spin" width="32" height="32" color="#6366f1"></i>
+        </div>
+        <!-- Iframe to load sub-pages content without full reload -->
+        <iframe id="content-frame" src="pages/dashboard/view.html"></iframe>
+    </main>
+
+    <!-- Global Details Modal -->
+    <div class="modal-overlay" id="globalModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 class="modal-title">Issue Details</h2>
+                <button class="modal-close" onclick="closeGlobalModal()">&times;</button>
+            </div>
+
+            <div class="modal-detail-row">
+                <span class="label">Issue ID</span>
+                <div class="value" id="g-id">#0000</div>
+            </div>
+            <div class="modal-detail-row">
+                <span class="label">Issue Name</span>
+                <div class="value" id="g-name">Issue Name</div>
+            </div>
+            <div style="display: flex; gap: 2rem;">
+                <div class="modal-detail-row">
+                    <span class="label">Reported By</span>
+                    <div class="value" id="g-reporter">Reporter</div>
+                </div>
+                <div class="modal-detail-row">
+                    <span class="label">Date</span>
+                    <div class="value" id="g-date">Date</div>
+                </div>
+            </div>
+            <div class="modal-detail-row">
+                <span class="label">Status</span>
+                <div class="value" id="g-status">Status</div>
+            </div>
+            <div class="modal-detail-row">
+                <span class="label">Description</span>
+                <div class="value" id="g-desc" style="line-height: 1.5; color: #475569;">
+                    Description text...
+                </div>
+            </div>
+
+            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                <div id="modal-actions" style="margin-right: auto; display: flex; align-items: center;">
+                    <input type="date" id="response-date"
+                        style="display: none; margin-right: 0.5rem; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; color: #475569; font-family: inherit;">
+                    <button class="btn-action btn-respond" onclick="handleRespond()"
+                        style="background: #6366f1; color: white; margin-right: 0.5rem; padding: 0.75rem 1rem; border-radius: 8px;">Respond</button>
+                    <button class="btn-action btn-complete" onclick="updateIssueStatus('Resolved')"
+                        style="background: #10b981; color: white; padding: 0.75rem 1rem; border-radius: 8px;">Mark
+                        Completed</button>
+                </div>
+                <button class="btn-close" onclick="closeGlobalModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Settings Modal -->
+    <div class="modal-overlay" id="profileModal" style="z-index: 2000;">
+        <div class="modal-card" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Profile</h2>
+                <button class="modal-close" onclick="closeProfileModal()">&times;</button>
+            </div>
+
+            <form onsubmit="saveProfile(event)" style="display: flex; flex-direction: column; gap: 1.25rem;">
+                <!-- Photo Upload -->
+                <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 0.5rem;">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background: #e0e7ff; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; cursor: pointer; border: 2px solid #6366f1;"
+                        onclick="document.getElementById('profile-upload').click()">
+                        <img id="preview-avatar" src=""
+                            style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                        <i id="default-avatar-icon" data-lucide="user" width="40" height="40" color="#4f46e5"></i>
+                        <div
+                            style="position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.5); height: 24px; display: flex; align-items: center; justify-content: center;">
+                            <i data-lucide="camera" width="14" color="white"></i>
+                        </div>
+                    </div>
+                    <input type="file" id="profile-upload" accept="image/*" style="display: none;"
+                        onchange="handleImageUpload(event)">
+                    <span style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem;">Click to change photo</span>
+                </div>
+
+                <!-- Name -->
+                <div>
+                    <label
+                        style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 0.5rem;">Full
+                        Name</label>
+                    <input type="text" id="p-name" value="Admin User"
+                        style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 0.95rem; color: #1e293b;">
+                </div>
+
+                <!-- Username -->
+                <div>
+                    <label
+                        style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 0.5rem;">Username</label>
+                    <input type="text" id="p-username" value="admin123"
+                        style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 0.95rem; color: #1e293b;">
+                </div>
+
+                <!-- Birthdate -->
+                <div>
+                    <label
+                        style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 0.5rem;">Birthdate</label>
+                    <input type="date" id="p-dob"
+                        style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 0.95rem; color: #1e293b;">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
+                    <button type="button" onclick="closeProfileModal()"
+                        style="padding: 0.75rem 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0; background: white; color: #64748b; cursor: pointer; font-weight: 500;">Cancel</button>
+                    <button type="submit"
+                        style="padding: 0.75rem 1.5rem; border-radius: 8px; border: none; background: #6366f1; color: white; cursor: pointer; font-weight: 500;">Save
+                        Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Day Details Modal (Global) -->
+    <div class="day-modal-overlay" id="dayModal">
+        <div class="day-modal">
+            <div class="day-modal-header">
+                <h3 class="day-modal-title" id="selectedDateTitle">Date</h3>
+                <button class="day-modal-close" onclick="closeDayModal()">&times;</button>
+            </div>
+
+            <div class="filter-controls">
+                <button class="time-filter-btn active" onclick="filterTime('All', this)">All Day</button>
+                <button class="time-filter-btn" onclick="filterTime('Morning', this)">Morning</button>
+                <button class="time-filter-btn" onclick="filterTime('Afternoon', this)">Afternoon</button>
+            </div>
+
+            <div class="day-events-list" id="dayEventsList">
+                <!-- Events populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Modal -->
+    <div class="modal-overlay" id="securityModal" style="z-index: 2100;">
+        <div class="modal-card"
+            style="max-width: 700px; padding: 0; display: flex; flex-direction: column; height: 500px;">
+            <div class="modal-header" style="padding: 1.5rem; margin-bottom: 0;">
+                <h2 class="modal-title">Security Settings</h2>
+                <button class="modal-close" onclick="closeSecurityModal()">&times;</button>
+            </div>
+            <div class="sec-body">
+                <div class="sec-sidebar">
+                    <div class="sec-nav-item active" onclick="switchSecTab('password', this)">
+                        <i data-lucide="key" width="16"
+                            style="display: inline-block; vertical-align: middle; margin-right: 8px;"></i> Password
+                    </div>
+                    <div class="sec-nav-item" onclick="switchSecTab('email', this)">
+                        <i data-lucide="mail" width="16"
+                            style="display: inline-block; vertical-align: middle; margin-right: 8px;"></i> Email
+                    </div>
+                </div>
+                <div class="sec-content">
+                    <!-- Password Tab -->
+                    <div id="sec-view-password" class="sec-view active">
+                        <h3 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 1.5rem;">Change Password</h3>
+                        <div class="form-group">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" class="form-input" placeholder="Enter current password">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">New Password</label>
+                            <input type="password" class="form-input" placeholder="Enter new password">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-input" placeholder="Confirm new password">
+                        </div>
+                        <div style="text-align: right; margin-top: 2rem;">
+                            <button class="btn-primary" onclick="searchSecSave('Password changed successfully!')">Update
+                                Password</button>
+                        </div>
+                    </div>
+
+                    <!-- Email Tab -->
+                    <div id="sec-view-email" class="sec-view">
+                        <h3 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 1.5rem;">Update Email Address</h3>
+                        <div class="form-group">
+                            <label class="form-label">Current Email</label>
+                            <input type="email" class="form-input" value="admin@antigrav.com" readonly
+                                style="background: #f1f5f9;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">New Email Address</label>
+                            <input type="email" class="form-input" placeholder="Enter new email address">
+                        </div>
+                        <div style="text-align: right; margin-top: 2rem;">
+                            <button class="btn-primary" onclick="searchSecSave('Email verification sent!')">Update
+                                Email</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Widget -->
+    <div class="chat-fab" onclick="toggleChat()">
+        <i data-lucide="message-square" width="28"></i>
+        <div class="chat-badge" id="chat-count">3</div>
+    </div>
+
+    <div class="chat-window" id="chat-box">
+        <!-- List View -->
+        <div id="chat-view-list" class="chat-view">
+            <div class="chat-header">
+                <span>Messages</span>
+                <i data-lucide="x" width="20" style="cursor: pointer;" onclick="toggleChat()"></i>
+            </div>
+
+            <div class="chat-filter-bar">
+                <div class="filter-btn active" onclick="filterChats('all', this)">All</div>
+                <div class="filter-btn" onclick="filterChats('unread', this)">Unread</div>
+                <div class="filter-btn" onclick="filterChats('archived', this)">Archived</div>
+            </div>
+
+            <div class="chat-list" id="chat-list-container">
+                <!-- Chat Items Injected Here -->
+            </div>
+        </div>
+
+        <!-- Conversation View -->
+        <div id="chat-view-convo" class="chat-view" style="display: none;">
+            <div class="chat-header">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <i data-lucide="arrow-left" width="20" style="cursor: pointer;" onclick="showChatList()"></i>
+                    <span id="active-chat-name">User Name</span>
+                </div>
+            </div>
+
+            <div class="chat-body" id="chat-msgs">
+            </div>
+
+            <div class="chat-footer">
+                <input type="text" class="chat-input" id="chat-txt" placeholder="Type a reply..."
+                    onkeypress="handleChat(event)">
+                <button
+                    style="background: var(--accent-color); border: none; width: 36px; height: 36px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer;"
+                    onclick="sendChat()">
+                    <i data-lucide="send" width="16"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        } else {
+            console.warn('Lucide icons library not loaded.');
+        }
+
+        // --- NOTIFICATION DROPDOWN LOGIC ---
+        const notifBtn = document.getElementById('notif-btn');
+        const notifDropdown = document.getElementById('notif-dropdown');
+
+        if (notifBtn) {
+            notifBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Close profile if open
+                if (profileDropdown.classList.contains('active')) profileDropdown.classList.remove('active');
+
+                notifDropdown.classList.toggle('active');
+                notifBtn.classList.toggle('active');
+            });
+        }
+
+        // Profile Dropdown Logic
+        const avatarBtn = document.getElementById('avatar-btn');
+        const profileDropdown = document.getElementById('profile-dropdown');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        avatarBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('active');
+        });
+
+        // Open Profile Settings from Dropdown
+        document.querySelector('.dropdown-item:first-child').addEventListener('click', () => {
+            openProfileModal();
+            profileDropdown.classList.remove('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            // Close Profile
+            if (!profileDropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+                profileDropdown.classList.remove('active');
+            }
+            // Close Notifications
+            if (notifBtn && !notifBtn.contains(e.target) && !notifDropdown.contains(e.target)) {
+                notifDropdown.classList.remove('active');
+                notifBtn.classList.remove('active');
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            window.location.href = '../admin-login/index.html';
+        });
+
+        // Profile Modal Logic
+        const profileModal = document.getElementById('profileModal');
+
+        function openProfileModal() {
+            const savedProfile = JSON.parse(localStorage.getItem('adminProfile') || '{}');
+            if (savedProfile.name) document.getElementById('p-name').value = savedProfile.name;
+            if (savedProfile.username) document.getElementById('p-username').value = savedProfile.username;
+            if (savedProfile.dob) document.getElementById('p-dob').value = savedProfile.dob;
+            if (savedProfile.avatar) {
+                document.getElementById('preview-avatar').src = savedProfile.avatar;
+                document.getElementById('preview-avatar').style.display = 'block';
+                document.getElementById('default-avatar-icon').style.display = 'none';
+            }
+            profileModal.classList.add('active');
+        }
+
+        function closeProfileModal() {
+            profileModal.classList.remove('active');
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('preview-avatar').src = e.target.result;
+                    document.getElementById('preview-avatar').style.display = 'block';
+                    document.getElementById('default-avatar-icon').style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveProfile(e) {
+            e.preventDefault();
+            const name = document.getElementById('p-name').value;
+            const username = document.getElementById('p-username').value;
+            const dob = document.getElementById('p-dob').value;
+            const avatarSrc = document.getElementById('preview-avatar').src;
+
+            const profile = { name, username, dob, avatar: avatarSrc !== window.location.href ? avatarSrc : null };
+            localStorage.setItem('adminProfile', JSON.stringify(profile));
+
+            alert('Profile saved successfully!');
+            closeProfileModal();
+        }
+
+        // Global Modal Logic
+        const globalModal = document.getElementById('globalModal');
+        let currentIssueId = null;
+        let currentIssueName = null;
+
+        window.openGlobalModal = function (id, name, reporter, date, status, desc) {
+            currentIssueId = id;
+            currentIssueName = name;
+            document.getElementById('g-id').innerText = id;
+            document.getElementById('g-name').innerText = name;
+            document.getElementById('g-reporter').innerText = reporter;
+            document.getElementById('g-date').innerText = date;
+
+            const statusEl = document.getElementById('g-status');
+            statusEl.innerText = status;
+            statusEl.className = 'value'; // Reset
+
+            applyStatusColor(statusEl, status);
+            document.getElementById('g-desc').innerText = desc;
+            document.getElementById('response-date').valueAsDate = new Date();
+            updateModalButtons(status);
+            globalModal.classList.add('active');
+        }
+
+        function applyStatusColor(el, status) {
+            if (status === 'Critical' || status === 'Error') el.style.color = '#ef4444';
+            else if (status === 'Resolved' || status === 'Completed') el.style.color = '#10b981';
+            else if (status === 'Ongoing' || status === 'In Review') el.style.color = '#f59e0b';
+            else el.style.color = '#1e293b';
+        }
+
+        function updateModalButtons(status) {
+            const actions = document.getElementById('modal-actions');
+            const btnRespond = actions.querySelector('.btn-respond');
+            const btnComplete = actions.querySelector('.btn-complete');
+            const dateInput = document.getElementById('response-date');
+
+            btnRespond.style.display = 'none';
+            btnComplete.style.display = 'none';
+            dateInput.style.display = 'none';
+
+            if (status === 'Pending' || status === 'In Review' || status === 'Critical') {
+                btnRespond.style.display = 'inline-block';
+                dateInput.style.display = 'inline-block';
+            } else if (status === 'Ongoing') {
+                btnComplete.style.display = 'inline-block';
+            }
+        }
+
+        window.handleRespond = function () {
+            const dateInput = document.getElementById('response-date');
+            if (!dateInput.value) {
+                alert("Please select a date to schedule this response.");
+                return;
+            }
+            saveSchedule(currentIssueId, currentIssueName, dateInput.value, 'Ongoing');
+            updateIssueStatus('Ongoing');
+        }
+
+        function saveSchedule(id, name, date, status) {
+            const newIssue = { id, name, date, status };
+            let schedules = JSON.parse(localStorage.getItem('adminSchedules') || '[]');
+            schedules = schedules.filter(s => s.id !== id);
+            schedules.push(newIssue);
+            localStorage.setItem('adminSchedules', JSON.stringify(schedules));
+        }
+
+        window.updateIssueStatus = function (newStatus) {
+            const statusEl = document.getElementById('g-status');
+            statusEl.innerText = newStatus;
+            applyStatusColor(statusEl, newStatus);
+            updateModalButtons(newStatus);
+
+            const iframe = document.getElementById('content-frame');
+            if (iframe && iframe.contentWindow && iframe.contentWindow.updateRowStatus) {
+                iframe.contentWindow.updateRowStatus(currentIssueId, newStatus);
+            }
+        }
+
+        window.closeGlobalModal = function () {
+            globalModal.classList.remove('active');
+            currentIssueId = null;
+        }
+
+        globalModal.addEventListener('click', (e) => {
+            if (e.target === globalModal) {
+                closeGlobalModal();
+            }
+        });
+
+        // --- GLOBAL DAY MODAL LOGIC (Schedules) ---
+        const dayModal = document.getElementById('dayModal');
+        let currentSelectedDate = null;
+        let activeFilter = 'All';
+
+        window.openDayModal = function (dateString) {
+            currentSelectedDate = dateString;
+            // Format date for title
+            const dateObj = new Date(dateString);
+            const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            document.getElementById('selectedDateTitle').innerText = formattedDate;
+
+            filterTime('All'); // Reset filter ui
+            document.querySelectorAll('.time-filter-btn').forEach(b => {
+                b.classList.remove('active');
+                if (b.innerText === 'All Day') b.classList.add('active');
+            });
+
+            dayModal.classList.add('active');
+        }
+
+        window.closeDayModal = function () {
+            dayModal.classList.remove('active');
+        }
+
+        window.filterTime = function (time, btn) {
+            activeFilter = time;
+            if (btn) {
+                document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+            renderDayEvents();
+        }
+
+        function renderDayEvents() {
+            const list = document.getElementById('dayEventsList');
+            list.innerHTML = '';
+
+            // Load schedules from localStorage
+            let schedules = [];
+            try {
+                schedules = JSON.parse(localStorage.getItem('adminSchedules') || '[]');
+            } catch (e) {
+                schedules = [];
+            }
+
+            const events = schedules.filter(s => s.date === currentSelectedDate);
+
+            if (events.length === 0) {
+                list.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 2rem;">No responses for this day.</div>`;
+                return;
+            }
+
+            events.forEach(ev => {
+                // Simulate time (since data lacks it)
+                const idNum = parseInt(ev.id.replace('#', '')) || 0;
+                const hour = (idNum % 12) + 8; // Random hour 8am-8pm
+                const isAm = hour < 12;
+                const amPm = isAm ? 'AM' : 'PM';
+                const displayHour = hour > 12 ? hour - 12 : hour;
+                const timeOfDay = isAm ? 'Morning' : 'Afternoon';
+                const timeStr = `${displayHour}:00 ${amPm}`;
+
+                if (activeFilter === 'All' || activeFilter === timeOfDay) {
+                    const item = document.createElement('div');
+                    item.className = 'day-event-item';
+                    item.innerHTML = `
+                         <div class="event-time">${timeStr}</div>
+                         <div class="event-info">
+                            <div class="event-name">${ev.name}</div>
+                            <div class="event-status" style="text-transform: capitalize;">${ev.status} • ID: ${ev.id}</div>
+                         </div>
+                    `;
+                    list.appendChild(item);
+                }
+            });
+
+            if (list.innerHTML === '') {
+                list.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 2rem;">No events in the ${activeFilter}.</div>`;
+            }
+        }
+
+        dayModal.addEventListener('click', (e) => {
+            if (e.target === dayModal) {
+                closeDayModal();
+            }
+        });
+
+        // --- SECURITY MODAL LOGIC ---
+        const securityModal = document.getElementById('securityModal');
+
+        window.openSecurityModal = function () {
+            securityModal.classList.add('active');
+            lucide.createIcons(); // Refresh icons inside modal
+        }
+
+        window.closeSecurityModal = function () {
+            securityModal.classList.remove('active');
+        }
+
+        window.switchSecTab = function (tabName, btn) {
+            // Update Sidebar
+            document.querySelectorAll('.sec-nav-item').forEach(i => i.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            // Update View
+            document.querySelectorAll('.sec-view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`sec-view-${tabName}`).classList.add('active');
+        }
+
+        window.searchSecSave = function (msg) {
+            alert(msg);
+            closeSecurityModal();
+        }
+
+        securityModal.addEventListener('click', (e) => {
+            if (e.target === securityModal) closeSecurityModal();
+        });
+
+        window.handleNotifClick = function (id, title, reporter, status, date) {
+            // Close dropdowns
+            const notifDropdown = document.getElementById('notif-dropdown');
+            const notifBtn = document.getElementById('notif-btn');
+            if (notifDropdown) notifDropdown.classList.remove('active');
+            if (notifBtn) notifBtn.classList.remove('active');
+
+            // Switch to Issues Page
+            const issuesNav = document.querySelector('.nav-item[data-page="issues"]');
+            if (issuesNav) issuesNav.click();
+
+            // Open Modal after delay
+            setTimeout(() => {
+                openGlobalModal(id, title, reporter, date, status, 'Reported via Notification System');
+            }, 300);
+        }
+
+        // --- CHAT WIDGET LOGIC ---
+        let conversations = [
+            {
+                id: 1,
+                name: "James Paul Silayan",
+                avatar: "JS",
+                lastMsg: "hoyyyy",
+                time: "2m",
+                unread: true,
+                archived: false,
+                messages: [
+                    { text: "hoyyyy", sender: "them", time: "2 mins ago" }
+                ]
+            },
+            {
+                id: 2,
+                name: "John Vitor Vetvet",
+                avatar: "JV",
+                lastMsg: "na flat akong motor naay bangag ang kalsada",
+                time: "15m",
+                unread: true,
+                archived: false,
+                messages: [
+                    { text: "na flat akong motor naay bangag ang kalsada", sender: "them", time: "15 mins ago" }
+                ]
+            },
+            {
+                id: 3,
+                name: "Khristian Dove",
+                avatar: "KD",
+                lastMsg: "nabangaan ko ug van",
+                time: "1h",
+                unread: true,
+                archived: false,
+                messages: [
+                    { text: "nabangaan ko ug van", sender: "them", time: "1 hour ago" }
+                ]
+            },
+            {
+                id: 4,
+                name: "Paolo Malavar",
+                avatar: "PM",
+                lastMsg: "natagak akoang panty sa may kanto",
+                time: "3h",
+                unread: false,
+                archived: false,
+                messages: [
+                    { text: "natagak akoang panty sa may kanto", sender: "them", time: "3 hours ago" }
+                ]
+            },
+            {
+                id: 5,
+                name: "Whiskey Itable",
+                avatar: "WI",
+                lastMsg: "walay kurenti diri dol",
+                time: "5h",
+                unread: false,
+                archived: false,
+                messages: [
+                    { text: "walay kurenti diri dol", sender: "them", time: "5 hours ago" }
+                ]
+            },
+            {
+                id: 6,
+                name: "Elmer Solayao",
+                avatar: "ES",
+                lastMsg: "tamvike nanamn",
+                time: "1d",
+                unread: false,
+                archived: true,
+                messages: [
+                    { text: "tamvike nanamn", sender: "them", time: "Yesterday" }
+                ]
+            }
+        ];
+
+        let activeChatId = null;
+        let currentFilter = 'all';
+
+        const chatBox = document.getElementById('chat-box');
+        const chatBadge = document.getElementById('chat-count');
+
+        function toggleChat() {
+            chatBox.classList.toggle('active');
+            if (chatBox.classList.contains('active')) {
+                renderChatList();
+            } else {
+                document.querySelectorAll('.action-popup').forEach(p => p.classList.remove('active'));
+                showChatList();
+            }
+        }
+
+        function renderChatList() {
+            const listContainer = document.getElementById('chat-list-container');
+            listContainer.innerHTML = '';
+
+            let filtered = conversations.filter(c => {
+                if (currentFilter === 'unread') return c.unread && !c.archived;
+                if (currentFilter === 'archived') return c.archived;
+                return !c.archived;
+            });
+
+            const unreadCount = conversations.filter(c => c.unread && !c.archived).length;
+            chatBadge.innerText = unreadCount;
+            chatBadge.style.display = unreadCount > 0 ? 'flex' : 'none';
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<div style="padding: 2rem; text-align: center; color: #94a3b8; font-size: 0.9rem;">No messages found.</div>`;
+                return;
+            }
+
+            filtered.forEach(chat => {
+                const item = document.createElement('div');
+                item.className = `chat-list-item ${chat.unread ? 'unread' : ''}`;
+                item.onclick = (e) => {
+                    if (!e.target.closest('.chat-actions-btn') && !e.target.closest('.action-popup')) {
+                        openConversation(chat.id);
+                    }
+                };
+
+                item.innerHTML = `
+                    <div class="user-avatar">${chat.avatar}</div>
+                    <div class="chat-info">
+                        <div class="chat-name">
+                            ${chat.name}
+                            <span class="chat-time">${chat.time}</span>
+                        </div>
+                        <div class="chat-preview">${chat.lastMsg}</div>
+                    </div>
+                    <button class="chat-actions-btn" onclick="toggleActionMenu(${chat.id}, this)">
+                        <i data-lucide="more-vertical" width="16"></i>
+                    </button>
+                    <div class="action-popup" id="menu-${chat.id}">
+                        <div class="action-option" onclick="handleAction('unread', ${chat.id})">
+                             <i data-lucide="${chat.unread ? 'check' : 'message-circle'}" width="14"></i>
+                             ${chat.unread ? 'Mark Read' : 'Mark Unread'}
+                        </div>
+                        <div class="action-option" onclick="handleAction('archive', ${chat.id})">
+                             <i data-lucide="${chat.archived ? 'rotate-ccw' : 'archive'}" width="14"></i>
+                             ${chat.archived ? 'Unarchive' : 'Archive'}
+                        </div>
+                        <div class="action-option delete" onclick="handleAction('delete', ${chat.id})">
+                             <i data-lucide="trash-2" width="14"></i> Delete
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+            lucide.createIcons();
+        }
+
+        function filterChats(filter, btn) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderChatList();
+        }
+
+        function toggleActionMenu(id, btn) {
+            const menu = document.getElementById(`menu-${id}`);
+            document.querySelectorAll('.action-popup').forEach(p => {
+                if (p.id !== `menu-${id}`) p.classList.remove('active');
+            });
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.chat-actions-btn') && !e.target.closest('.action-popup')) {
+                document.querySelectorAll('.action-popup').forEach(p => p.classList.remove('active'));
+            }
+        });
+
+        function handleAction(action, id) {
+            const chat = conversations.find(c => c.id === id);
+            if (!chat) return;
+
+            if (action === 'unread') {
+                chat.unread = !chat.unread;
+            } else if (action === 'archive') {
+                chat.archived = !chat.archived;
+            } else if (action === 'delete') {
+                conversations = conversations.filter(c => c.id !== id);
+            }
+            renderChatList();
+        }
+
+        function openConversation(id) {
+            const chat = conversations.find(c => c.id === id);
+            if (!chat) return;
+
+            activeChatId = id;
+            if (chat.unread) {
+                chat.unread = false;
+                renderChatList();
+            }
+
+            document.getElementById('chat-view-list').style.display = 'none';
+            document.getElementById('chat-view-convo').style.display = 'flex';
+            document.getElementById('active-chat-name').innerText = chat.name;
+
+            const msgsBody = document.getElementById('chat-msgs');
+            msgsBody.innerHTML = '';
+
+            chat.messages.forEach(msg => {
+                const bubble = document.createElement('div');
+                bubble.className = `msg-bubble msg-${msg.sender === 'me' ? 'out' : 'in'}`;
+                bubble.innerHTML = `${msg.text}<div class="msg-meta">${msg.sender === 'me' ? 'You' : chat.name} • ${msg.time}</div>`;
+                msgsBody.appendChild(bubble);
+            });
+            msgsBody.scrollTop = msgsBody.scrollHeight;
+        }
+
+        function showChatList() {
+            document.getElementById('chat-view-convo').style.display = 'none';
+            document.getElementById('chat-view-list').style.display = 'flex';
+            activeChatId = null;
+            renderChatList();
+        }
+
+        function handleChat(e) {
+            if (e.key === 'Enter') sendChat();
+        }
+
+        function sendChat() {
+            const input = document.getElementById('chat-txt');
+            const msgText = input.value.trim();
+            if (!msgText || !activeChatId) return;
+
+            const chat = conversations.find(c => c.id === activeChatId);
+
+            chat.messages.push({ text: msgText, sender: 'me', time: 'Just now' });
+            chat.lastMsg = "You: " + msgText;
+            chat.time = "Now";
+
+            const body = document.getElementById('chat-msgs');
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble msg-out';
+            bubble.innerHTML = `${msgText}<div class="msg-meta">You • Just now</div>`;
+            body.appendChild(bubble);
+            input.value = '';
+            body.scrollTop = body.scrollHeight;
+
+            setTimeout(() => {
+                if (activeChatId === chat.id) {
+                    const replyText = "Thanks for the update!";
+                    chat.messages.push({ text: replyText, sender: 'them', time: 'Just now' });
+                    chat.lastMsg = replyText;
+
+                    const reply = document.createElement('div');
+                    reply.className = 'msg-bubble msg-in';
+                    reply.innerHTML = `${replyText}<div class="msg-meta">${chat.name} • Just now</div>`;
+                    body.appendChild(reply);
+                    body.scrollTop = body.scrollHeight;
+                }
+            }, 2000);
+        }
+    </script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/router.js"></script>
+</body>
+
+</html>

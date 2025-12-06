@@ -1,0 +1,31 @@
+:root {
+    /* Color Palette - Graphite & Indigo Theme */
+    --bg-body: #0f172a;
+    /* Slate 900 */
+    --bg-sidebar: #1e293b;
+    /* Slate 800 */
+    --bg-content: #f1f5f9;
+    /* Slate 100 */
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-dark: #1e293b;
+
+    --accent-color: #6366f1;
+    /* Indigo 500 */
+    --accent-hover: #4f46e5;
+    /* Indigo 600 */
+    --accent-light: rgba(99, 102, 241, 0.1);
+
+    /* Sidebar Dimensions */
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 80px;
+
+    /* Spacing & Sizing */
+    --header-height: 70px;
+    --border-radius: 12px;
+    --transition-speed: 0.3s;
+
+    /* Fonts */
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
