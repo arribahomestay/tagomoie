@@ -9,193 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --text-dark: #1e293b;
-            --text-light: #64748b;
-            --bg-light: #f8fafc;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
-            background: white;
-        }
-
-        /* Left Side - Form */
-        .login-section {
-            width: 50%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-            position: relative;
-        }
-
-        .login-container {
-            width: 100%;
-            max-width: 420px;
-            text-align: center;
-        }
-
-        .brand-header {
-            margin-bottom: 2.5rem;
-        }
-
-        .welcome-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 0.5rem;
-        }
-
-        .welcome-sub {
-            color: var(--text-light);
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-            position: relative;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 1.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            pointer-events: none;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 1rem 1rem 1rem 3rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 50px;
-            /* Pill shape */
-            font-family: inherit;
-            font-size: 0.95rem;
-            outline: none;
-            transition: all 0.2s;
-            color: var(--text-dark);
-        }
-
-        .form-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 1rem;
-            border: none;
-            border-radius: 50px;
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            color: white;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 1rem;
-        }
-
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.4);
-        }
-
-        /* Right Side - Image */
-        .image-section {
-            width: 50%;
-            background: url('images/TAGUM.jpg') no-repeat center center;
-            background-size: cover;
-            position: relative;
-        }
-
-        /* Overlay */
-        .image-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            /* Gradient overlay to ensure text readability + brand color tint */
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(79, 70, 229, 0.7));
-            backdrop-filter: blur(4px);
-            /* Adds the requested blur for a clean look */
-            -webkit-backdrop-filter: blur(4px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            padding: 4rem;
-            text-align: center;
-        }
-
-        .overlay-logo {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            letter-spacing: -1px;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .overlay-text {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            opacity: 0.9;
-            max-width: 500px;
-        }
-
-        /* Notifications */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border-left: 4px solid #ef4444;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            transform: translateX(120%);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 100;
-        }
-
-        .notification.active {
-            transform: translateX(0);
-        }
-
-        @media (max-width: 768px) {
-            .image-section {
-                display: none;
-            }
-
-            .login-section {
-                width: 100%;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
@@ -209,71 +23,89 @@
         </div>
     </div>
 
-    <div class="login-section">
-        <div class="login-container">
-            <div class="brand-header">
-                <div class="welcome-title" id="welcome-text">WELCOME BACK</div>
-                <div class="welcome-sub">Log in to access the city administration portal and manage reports.</div>
+    <div class="login-container">
+        <div class="modern-login-card" id="login-card">
+            <!-- Left Side: Form -->
+            <div class="login-form-side">
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-header">
+                        <h1>Welcome Back!</h1>
+                        <p>Sign in to your account</p>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <div class="icon-box">
+                                <i data-lucide="mail" width="20"></i>
+                            </div>
+                            <input type="text" class="custom-input" id="email" placeholder="Username or Email"
+                                value="admin@gmail.com">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <div class="icon-box">
+                                <i data-lucide="lock" width="20"></i>
+                            </div>
+                            <input type="password" class="custom-input" id="password" placeholder="Password"
+                                value="ej123">
+                        </div>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox">
+                            <span class="checkmark"></span>
+                            Remember me
+                        </label>
+                        <a href="#" onclick="toggleForgot(event)" class="forgot-link">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn-modern-login" id="login-btn">
+                        <span>SIGN IN</span>
+                    </button>
+
+                    <div class="signup-link">
+                        Don't have an account? <a href="#">Create</a>
+                    </div>
+                </form>
+
+                <!-- Forgot Password (Hidden) -->
+                <form id="forgot-form" onsubmit="handleForgot(event)" style="display: none;">
+                    <div class="form-header">
+                        <h1>Recovery</h1>
+                        <p>Enter email to reset password</p>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <div class="icon-box">
+                                <i data-lucide="mail" width="20"></i>
+                            </div>
+                            <input type="email" class="custom-input" id="reset-email" placeholder="Registered Email">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-modern-login">SEND LINK</button>
+
+                    <div class="signup-link" style="margin-top: 1.5rem;">
+                        <a href="#" onclick="toggleForgot(event)">Back to Login</a>
+                    </div>
+                </form>
             </div>
 
-            <form id="login-form" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <i data-lucide="user" class="input-icon" width="20"></i>
-                    <input type="text" class="form-input" id="email" placeholder="Username" value="admin@gmail.com">
+            <!-- Right Side: Decoration -->
+            <div class="login-decoration-side">
+                <div class="decoration-content">
+                    <h2 style="letter-spacing: 2px;">
+                        TAGUM <span style="color: #ef4444">U</span><span style="color: #22c55e">Y</span>NITE
+                    </h2>
                 </div>
-
-                <div class="form-group">
-                    <i data-lucide="lock" class="input-icon" width="20"></i>
-                    <input type="password" class="form-input" id="password" placeholder="Password" value="ej123">
+                <div class="credits">
+                    &copy; 2025 Tagum Uynite
                 </div>
-
-                <div style="text-align: right; margin-bottom: 1.5rem;">
-                    <a href="#" onclick="toggleForgot(event)"
-                        style="color: #6366f1; text-decoration: none; font-size: 0.875rem; font-weight: 500;">Forgot
-                        Password?</a>
-                </div>
-
-                <button type="submit" class="btn-login" id="login-btn">SIGN IN</button>
-            </form>
-
-            <!-- Forgot Password Form (Hidden by default) -->
-            <form id="forgot-form" onsubmit="handleForgot(event)" style="display: none;">
-                <div style="margin-bottom: 1.5rem;">
-                    <i data-lucide="mail-question" width="48" height="48" color="#6366f1"
-                        style="background: #e0e7ff; padding: 10px; border-radius: 50%;"></i>
-                    <h3 style="margin-top: 1rem; color: #1e293b;">Reset Password</h3>
-                    <p style="color: #64748b; font-size: 0.9rem;">Enter your registered email to receive reset
-                        instructions.</p>
-                </div>
-
-                <div class="form-group">
-                    <i data-lucide="mail" class="input-icon" width="20"></i>
-                    <input type="email" class="form-input" id="reset-email" placeholder="Registered Email Address"
-                        required>
-                </div>
-
-                <button type="submit" class="btn-login">SEND RESET LINK</button>
-
-                <div style="margin-top: 1.5rem;">
-                    <a href="#" onclick="toggleForgot(event)"
-                        style="color: #64748b; text-decoration: none; font-size: 0.875rem; font-weight: 500;">Back to
-                        Login</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Right Side - Image -->
-    <div class="image-section">
-        <div class="image-overlay">
-            <div class="overlay-logo">
-                <i data-lucide="shield-check" width="48" height="48" color="white"></i>
-                <span>TAGUM</span>&nbsp;<span style="color: #ef4444;">U</span><span
-                    style="color: #22c55e;">Y</span><span>!</span>
             </div>
-            <p class="overlay-text">
-                Secure access for city officials. manage reports, track issues, and ensure community safety efficiently.
-            </p>
         </div>
     </div>
 
@@ -286,23 +118,24 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const notify = document.getElementById('notify-error');
+            const card = document.getElementById('login-card');
 
             // Button Loading State
-            const originalText = btn.innerText;
-            btn.innerText = "Authenticating...";
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "<span>Authenticating...</span>";
             btn.style.opacity = "0.8";
 
             setTimeout(() => {
                 if (email === 'admin@gmail.com' && password === 'ej123') {
-                    btn.innerText = "Success!";
+                    btn.innerHTML = "<span>Success!</span>";
                     btn.style.background = "#10b981";
                     setTimeout(() => {
                         window.location.href = '../admin-portal/index.html';
                     }, 500);
                 } else {
-                    btn.innerText = originalText;
+                    btn.innerHTML = originalText;
                     btn.style.opacity = "1";
-                    btn.style.background = ""; // Reset gradient
+                    btn.style.background = "";
 
                     // Show Error Notification
                     notify.innerHTML = `
@@ -315,15 +148,19 @@
                     lucide.createIcons();
                     notify.classList.add('active');
 
-                    // Shake inputs
+                    // Add Shake Animation
+                    card.classList.add('shake');
+
+                    // Highlight inputs
                     document.getElementById('email').style.borderColor = "#ef4444";
                     document.getElementById('password').style.borderColor = "#ef4444";
 
                     setTimeout(() => {
                         notify.classList.remove('active');
-                        document.getElementById('email').style.borderColor = "#e2e8f0";
-                        document.getElementById('password').style.borderColor = "#e2e8f0";
-                    }, 3000);
+                        card.classList.remove('shake');
+                        document.getElementById('email').style.borderColor = "transparent";
+                        document.getElementById('password').style.borderColor = "transparent";
+                    }, 3000); // 3s for notification, shake ends sooner usually by CSS but removing class is safe
                 }
             }, 1000);
         }
@@ -332,21 +169,15 @@
             e.preventDefault();
             const loginForm = document.getElementById('login-form');
             const forgotForm = document.getElementById('forgot-form');
-            const welcomeText = document.getElementById('welcome-text');
-            const welcomeSub = document.querySelector('.welcome-sub');
 
             if (loginForm.style.display === 'none') {
                 // Show Login
                 loginForm.style.display = 'block';
                 forgotForm.style.display = 'none';
-                welcomeText.innerText = "WELCOME BACK";
-                welcomeSub.innerText = "Log in to access the city administration portal and manage reports.";
             } else {
                 // Show Forgot
                 loginForm.style.display = 'none';
                 forgotForm.style.display = 'block';
-                welcomeText.innerText = "ACCOUNT RECOVERY";
-                welcomeSub.innerText = "Don't worry, it happens to the best of us.";
             }
         }
 
@@ -355,13 +186,12 @@
             const email = document.getElementById('reset-email').value;
             const notify = document.getElementById('notify-error');
 
-            // Validate email format basic
             if (email && email.includes('@')) {
                 notify.innerHTML = `
                     <i data-lucide="check-circle" color="#10b981"></i>
                     <div>
                         <div style="font-weight: 600; color: #1e293b;">Email Sent</div>
-                        <div style="font-size: 0.875rem; color: #64748b;">Reset instructions sent to ${email}</div>
+                        <div style="font-size: 0.875rem; color: #64748b;">Reset link sent to ${email}</div>
                     </div>
                 `;
                 notify.style.borderLeftColor = "#10b981";
@@ -369,9 +199,9 @@
                 notify.classList.add('active');
 
                 setTimeout(() => {
-                    toggleForgot(e); // Switch back to login
+                    toggleForgot(e);
                     notify.classList.remove('active');
-                    notify.style.borderLeftColor = "#ef4444"; // Reset border color for next error
+                    notify.style.borderLeftColor = "#ef4444";
                 }, 3000);
             }
         }
