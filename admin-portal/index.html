@@ -16,6 +16,8 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <script src="js/mobile-nav.js" defer></script>
 </head>
 
 <body>
@@ -56,6 +58,26 @@
             </a>
         </nav>
     </aside>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-navbar" id="mobile-navbar">
+        <a href="#" class="mobile-nav-item active" data-page="dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-page="issues">
+            <i data-lucide="alert-circle"></i>
+            <span>Issues</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-page="schedules">
+            <i data-lucide="calendar"></i>
+            <span>Schedules</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-page="manage">
+            <i data-lucide="settings"></i>
+            <span>Manage</span>
+        </a>
+    </nav>
 
     <!-- Main Content -->
     <main class="main-content">
