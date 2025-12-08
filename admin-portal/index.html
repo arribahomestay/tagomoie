@@ -18,6 +18,21 @@
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/mobile.css">
     <script src="js/mobile-nav.js" defer></script>
+    <style>
+        /* Appearance Modal Styles */
+        .theme-mode-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-mode-option.active {
+            border-color: #6366f1 !important;
+            background-color: rgba(99, 102, 241, 0.05);
+            /* Slight tint for light mode active */
+        }
+
+        /* Dark mode active specific override handled in JS or specific classes */
+    </style>
 </head>
 
 <body>
@@ -135,6 +150,10 @@
                 <div class="dropdown-menu" id="profile-dropdown">
                     <div class="dropdown-item">
                         <i data-lucide="user-cog" width="16"></i> Profile Settings
+                    </div>
+                    <div class="dropdown-item"
+                        onclick="openAppearanceModal(); document.getElementById('profile-dropdown').classList.remove('active');">
+                        <i data-lucide="palette" width="16"></i> Appearance
                     </div>
                     <div class="dropdown-item"
                         onclick="openSecurityModal(); document.getElementById('profile-dropdown').classList.remove('active');">
@@ -351,6 +370,37 @@
         </div>
     </div>
 
+    <!-- Appearance Modal -->
+    <div class="modal-overlay" id="appearanceModal" style="z-index: 2200;">
+        <div class="modal-card" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Appearance Settings</h2>
+                <button class="modal-close" onclick="closeAppearanceModal()">&times;</button>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1rem; color: #1e293b; margin-bottom: 1rem;">Interface Theme</h3>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="theme-mode-option active" id="mode-light" onclick="setThemeMode('light')"
+                        style="padding: 1.5rem; border: 2px solid #e2e8f0; border-radius: 12px; width: 100%; text-align: center; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="sun" width="24" color="#64748b"></i>
+                        <span style="font-weight: 500; color: #1e293b;">Light Mode</span>
+                    </div>
+
+                    <div class="theme-mode-option" id="mode-dark" onclick="setThemeMode('dark')"
+                        style="padding: 1.5rem; border: 2px solid #e2e8f0; border-radius: 12px; width: 100%; text-align: center; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; background: #0f172a;">
+                        <i data-lucide="moon" width="24" color="#94a3b8"></i>
+                        <span style="font-weight: 500; color: #f8fafc;">Dark Mode</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: right;">
+                <button class="btn-primary" onclick="saveAppearance()">Apply Changes</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Chat Widget -->
     <div class="chat-fab" onclick="toggleChat()">
         <i data-lucide="message-square" width="28"></i>
@@ -430,6 +480,11 @@
 
         avatarBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            // Close notifications if open
+            if (notifDropdown.classList.contains('active')) {
+                notifDropdown.classList.remove('active');
+                if (notifBtn) notifBtn.classList.remove('active');
+            }
             profileDropdown.classList.toggle('active');
         });
 
@@ -680,9 +735,6 @@
             }
         });
 
-        // --- SECURITY MODAL LOGIC ---
-        const securityModal = document.getElementById('securityModal');
-
         window.openSecurityModal = function () {
             securityModal.classList.add('active');
             lucide.createIcons(); // Refresh icons inside modal
@@ -710,6 +762,87 @@
         securityModal.addEventListener('click', (e) => {
             if (e.target === securityModal) closeSecurityModal();
         });
+
+        // --- APPEARANCE MODAL LOGIC ---
+        const appearanceModal = document.getElementById('appearanceModal');
+        let selectedThemeMode = 'light'; // Default
+
+        window.openAppearanceModal = function () {
+            // Load saved mode
+            const savedMode = localStorage.getItem('adminThemeMode') || 'light';
+            setThemeMode(savedMode);
+            appearanceModal.classList.add('active');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        window.closeAppearanceModal = function () {
+            appearanceModal.classList.remove('active');
+        }
+
+        appearanceModal.addEventListener('click', (e) => {
+            if (e.target === appearanceModal) closeAppearanceModal();
+        });
+
+        window.setThemeMode = function (mode) {
+            selectedThemeMode = mode;
+            // UI Update
+            document.querySelectorAll('.theme-mode-option').forEach(opt => opt.classList.remove('active'));
+            if (mode === 'light') {
+                const lightBtn = document.getElementById('mode-light');
+                if (lightBtn) {
+                    lightBtn.classList.add('active');
+                    lightBtn.style.borderColor = '#6366f1';
+                    lightBtn.style.backgroundColor = 'rgba(99, 102, 241, 0.05)';
+                }
+                const darkBtn = document.getElementById('mode-dark');
+                if (darkBtn) {
+                    darkBtn.style.borderColor = '#e2e8f0';
+                    darkBtn.style.backgroundColor = '#0f172a';
+                }
+            } else {
+                const darkBtn = document.getElementById('mode-dark');
+                if (darkBtn) {
+                    darkBtn.classList.add('active');
+                    darkBtn.style.borderColor = '#6366f1';
+                    darkBtn.style.backgroundColor = 'rgba(99, 102, 241, 0.1)';
+                }
+                const lightBtn = document.getElementById('mode-light');
+                if (lightBtn) {
+                    lightBtn.style.borderColor = '#e2e8f0';
+                    lightBtn.style.backgroundColor = 'transparent';
+                }
+            }
+        }
+
+        window.saveAppearance = function () {
+            localStorage.setItem('adminThemeMode', selectedThemeMode);
+
+            // Apply to Root
+            if (selectedThemeMode === 'dark') {
+                document.documentElement.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+            }
+
+            // Also apply to iframe if possible
+            const iframe = document.getElementById('content-frame');
+            if (iframe && iframe.contentDocument) {
+                if (selectedThemeMode === 'dark') {
+                    iframe.contentDocument.documentElement.classList.add('dark-mode');
+                } else {
+                    iframe.contentDocument.documentElement.classList.remove('dark-mode');
+                }
+            }
+
+            alert('Theme settings saved!');
+            closeAppearanceModal();
+        }
+
+        // Apply theme on load
+        const savedThemeMode = localStorage.getItem('adminThemeMode');
+        if (savedThemeMode === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
 
         window.handleNotifClick = function (id, title, reporter, status, date) {
             // Close dropdowns
@@ -984,6 +1117,15 @@
                 }
             }, 2000);
         }
+    </script>
+    <script>
+        // Ensure iframe gets the theme on load
+        document.getElementById('content-frame').addEventListener('load', function () {
+            const savedThemeMode = localStorage.getItem('adminThemeMode');
+            if (savedThemeMode === 'dark' && this.contentDocument) {
+                this.contentDocument.documentElement.classList.add('dark-mode');
+            }
+        });
     </script>
     <script src="js/sidebar.js"></script>
     <script src="js/router.js"></script>

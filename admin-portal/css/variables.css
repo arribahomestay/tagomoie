@@ -1,15 +1,29 @@
 :root {
     /* Color Palette - Graphite & Indigo Theme */
     --bg-body: #0f172a;
-    /* Slate 900 */
-    --bg-sidebar: #1e293b;
-    /* Slate 800 */
-    --bg-content: #f1f5f9;
-    /* Slate 100 */
+    /* Main body is dark by default in this design system, but content area differs */
 
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-dark: #1e293b;
+    /* Light Mode Defaults (for content area) */
+    --bg-content: #f1f5f9;
+    /* Light Slate Background */
+    --bg-card: #ffffff;
+    --bg-modal: #ffffff;
+    --bg-dropdown: #ffffff;
+    --bg-panel: #f8fafc;
+    --bg-input: #ffffff;
+
+    --border-color: #e2e8f0;
+
+    --text-primary: #1e293b;
+    /* Slate 800 */
+    --text-secondary: #64748b;
+    /* Slate 500 */
+    --text-muted: #cbd5e1;
+    --text-inverted: #f8fafc;
+    /* For dark sidebar */
+
+    --bg-sidebar: #1e293b;
+    /* Sidebar is always dark initially unless changed */
 
     --accent-color: #6366f1;
     /* Indigo 500 */
@@ -28,4 +42,33 @@
 
     /* Fonts */
     --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.dark-mode {
+    /* Dark Mode Overrides */
+    --bg-body: #020617;
+    /* Deepest Slate */
+    --bg-content: #0f172a;
+    /* Dark Slate Background */
+    --bg-card: #1e293b;
+    /* Card Background */
+    --bg-modal: #1e293b;
+    --bg-dropdown: #1e293b;
+    --bg-panel: #0f172a;
+    --bg-input: #0f172a;
+
+    --border-color: #334155;
+
+    --text-primary: #f8fafc;
+    /* White */
+    --text-secondary: #cbd5e1;
+    /* Light Gray */
+    --text-muted: #64748b;
+    --text-inverted: #1e293b;
+    /* Rarely used in dark mode unless partial flip */
+
+    --bg-sidebar: #020617;
+    /* Even darker sidebar for contrast or same */
+
+    --accent-light: rgba(99, 102, 241, 0.2);
 }

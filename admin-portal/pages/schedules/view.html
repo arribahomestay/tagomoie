@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="../../css/content.css">
     <title>Schedules</title>
     <style>
-        .calendar-container {
-            background: white;
+        <style>.calendar-container {
+            background: var(--bg-card);
             border-radius: 12px;
             padding: 1.5rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -24,37 +24,37 @@
         .calendar-title {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #1e293b;
+            color: var(--text-primary);
         }
 
         .calendar-nav button {
             background: transparent;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 0.5rem;
             cursor: pointer;
-            color: #64748b;
+            color: var(--text-secondary);
             transition: all 0.2s;
         }
 
         .calendar-nav button:hover {
-            background: #f1f5f9;
-            color: #1e293b;
+            background: var(--bg-panel);
+            color: var(--text-primary);
         }
 
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 1px;
-            background: #e2e8f0;
-            border: 1px solid #e2e8f0;
+            background: var(--border-color);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             overflow: hidden;
         }
 
         .day-header,
         .day-cell {
-            background: white;
+            background: var(--bg-card);
             padding: 1rem;
             min-height: 120px;
         }
@@ -63,10 +63,10 @@
             min-height: auto;
             text-align: center;
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-secondary);
             padding: 1rem 0;
             font-size: 0.875rem;
-            background: #f8fafc;
+            background: var(--bg-panel);
         }
 
         .day-cell {
@@ -75,24 +75,24 @@
         }
 
         .day-cell:hover {
-            background: #f8fafc;
+            background: var(--bg-panel);
         }
 
         .day-number {
             font-weight: 600;
-            color: #1e293b;
+            color: var(--text-primary);
             margin-bottom: 0.5rem;
             display: block;
         }
 
         .day-cell.other-month {
-            background: #f8fafc;
-            color: #ccc;
+            background: var(--bg-panel);
+            color: var(--text-muted);
             pointer-events: none;
         }
 
         .day-cell.other-month .day-number {
-            color: #cbd5e1;
+            color: var(--text-muted);
         }
 
         .event-pill {

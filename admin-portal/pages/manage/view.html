@@ -15,63 +15,68 @@
         }
 
         .summary-card {
-            background: white;
+            background: var(--bg-card);
             padding: 1.5rem;
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
+            border: 1px solid var(--border-color);
         }
 
         .summary-label {
-            color: #64748b;
+            color: var(--text-secondary);
             font-size: 0.875rem;
             font-weight: 500;
             margin-bottom: 0.5rem;
         }
 
         .summary-count {
-            color: #1e293b;
+            color: var(--text-primary);
             font-size: 2rem;
             font-weight: 700;
         }
 
         .filter-bar {
-            background: white;
+            background: var(--bg-card);
             padding: 1rem;
             border-radius: 12px;
             margin-bottom: 1.5rem;
             display: flex;
             gap: 1rem;
             align-items: center;
+            border: 1px solid var(--border-color);
         }
 
         .filter-btn {
             background: transparent;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             padding: 0.5rem 1rem;
             border-radius: 6px;
-            color: #64748b;
+            color: var(--text-secondary);
             cursor: pointer;
             font-weight: 500;
             transition: all 0.2s;
         }
 
         .filter-btn.active {
-            background: #6366f1;
+            background: var(--accent-color);
             color: white;
-            border-color: #6366f1;
+            /* Accent buttons stay white text */
+            border-color: var(--accent-color);
         }
 
         .filter-btn:hover:not(.active) {
-            background: #f8fafc;
+            background: var(--bg-panel);
+            color: var(--text-primary);
         }
 
         .reports-list {
-            background: white;
+            background: var(--bg-card);
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            border: 1px solid var(--border-color);
         }
     </style>
 </head>
@@ -99,7 +104,7 @@
     </div>
 
     <div class="filter-bar">
-        <span style="font-weight: 600; color: #1e293b; margin-right: 0.5rem;">Filter By:</span>
+        <span style="font-weight: 600; color: var(--text-primary); margin-right: 0.5rem;">Filter By:</span>
         <button class="filter-btn active" onclick="filterReports('All')">All</button>
         <button class="filter-btn" onclick="filterReports('Pending')">Pending</button>
         <button class="filter-btn" onclick="filterReports('Ongoing')">Ongoing</button>

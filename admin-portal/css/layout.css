@@ -94,7 +94,7 @@ body {
     display: flex;
     align-items: center;
     padding: 0.85rem 1rem;
-    color: var(--text-secondary);
+    color: #cbd5e1;
     text-decoration: none;
     border-radius: var(--border-radius);
     margin-bottom: 0.5rem;
@@ -106,7 +106,7 @@ body {
 
 .nav-item:hover {
     background-color: rgba(255, 255, 255, 0.05);
-    color: var(--text-primary);
+    color: white;
 }
 
 .nav-item.active {
@@ -227,13 +227,13 @@ body {
     top: 100%;
     right: 0;
     margin-top: 0.75rem;
-    background: white;
+    background: var(--bg-dropdown);
     border-radius: 12px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     width: 200px;
     padding: 0.5rem;
     display: none;
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--border-color);
 }
 
 .dropdown-menu.active {
@@ -246,7 +246,7 @@ body {
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem 1rem;
-    color: #1e293b;
+    color: var(--text-primary);
     text-decoration: none;
     font-size: 0.9rem;
     border-radius: 8px;
@@ -255,7 +255,7 @@ body {
 }
 
 .dropdown-item:hover {
-    background: #f8fafc;
+    background: var(--bg-panel);
 }
 
 .dropdown-item.logout {
@@ -302,7 +302,7 @@ body {
 }
 
 .modal-card {
-    background: white;
+    background: var(--bg-modal);
     width: 100%;
     max-width: 500px;
     border-radius: 12px;
@@ -328,14 +328,14 @@ body {
 .modal-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .modal-close {
     background: transparent;
     border: none;
     cursor: pointer;
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 1.5rem;
     line-height: 1;
 }
@@ -346,13 +346,13 @@ body {
 
 .label {
     display: block;
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 0.85rem;
     margin-bottom: 0.25rem;
 }
 
 .value {
-    color: #1e293b;
+    color: var(--text-primary);
     font-weight: 500;
     font-size: 1rem;
 }
@@ -364,8 +364,8 @@ body {
 }
 
 .btn-close {
-    background: #f1f5f9;
-    color: #475569;
+    background: var(--bg-panel);
+    color: var(--text-secondary);
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
     border: none;
@@ -397,6 +397,199 @@ body {
     z-index: 2000;
 }
 
+.avatar-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e0e7ff;
+    color: #4f46e5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.avatar-btn:hover {
+    transform: scale(1.05);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.75rem;
+    background: var(--bg-dropdown);
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    width: 200px;
+    padding: 0.5rem;
+    display: none;
+    border: 1px solid var(--border-color);
+}
+
+.dropdown-menu.active {
+    display: block;
+    animation: fadeIn 0.15s ease-out;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: var(--bg-panel);
+}
+
+.dropdown-item.logout {
+    color: #ef4444;
+}
+
+.dropdown-item.logout:hover {
+    background: #fef2f2;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Global Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease-in-out;
+    z-index: 1010;
+    /* Higher than iframe */
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-card {
+    background: var(--bg-modal);
+    width: 100%;
+    max-width: 500px;
+    border-radius: 12px;
+    padding: 2rem;
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-overlay.active .modal-card {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 1rem;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.modal-detail-row {
+    margin-bottom: 1rem;
+}
+
+.label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.value {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.modal-footer {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-close {
+    background: var(--bg-panel);
+    color: var(--text-secondary);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btn-close:hover {
+    background: #e2e8f0;
+}
+
+/* Chat Widget Styles */
+.chat-fab {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 60px;
+    height: 60px;
+    background: var(--accent-color);
+    color: var(--text-on-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px var(--shadow-accent-strong);
+    transition: transform 0.2s, background 0.2s;
+    z-index: 2000;
+}
+
 .chat-fab:hover {
     transform: scale(1.05);
     background: var(--accent-hover);
@@ -424,7 +617,7 @@ body {
     right: 2rem;
     width: 350px;
     height: 500px;
-    background: white;
+    background: var(--bg-modal);
     border-radius: 16px;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -434,7 +627,7 @@ body {
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--border-color);
     overflow: hidden;
 }
 
@@ -465,8 +658,8 @@ body {
 
 .chat-filter-bar {
     padding: 0.75rem;
-    background: white;
-    border-bottom: 1px solid #e2e8f0;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     gap: 0.5rem;
 }
@@ -475,9 +668,9 @@ body {
     padding: 0.4rem 0.8rem;
     font-size: 0.8rem;
     border-radius: 20px;
-    border: 1px solid #e2e8f0;
-    background: white;
-    color: #64748b;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -498,19 +691,19 @@ body {
     display: flex;
     align-items: center;
     padding: 1rem;
-    background: white;
-    border-bottom: 1px solid #f1f5f9;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
     cursor: pointer;
     transition: background 0.2s;
     position: relative;
 }
 
 .chat-list-item:hover {
-    background: #f8fafc;
+    background: var(--bg-panel);
 }
 
 .chat-list-item.unread {
-    background: #fdfbff;
+    background: var(--bg-content);
 }
 
 .chat-list-item.unread::before {
@@ -548,7 +741,7 @@ body {
 .chat-name {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-primary);
     margin-bottom: 0.25rem;
     display: flex;
     justify-content: space-between;
@@ -556,20 +749,20 @@ body {
 
 .chat-time {
     font-size: 0.7rem;
-    color: #94a3b8;
+    color: var(--text-muted);
     font-weight: 400;
 }
 
 .chat-preview {
     font-size: 0.85rem;
-    color: #64748b;
+    color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .chat-list-item.unread .chat-preview {
-    color: #1e293b;
+    color: var(--text-primary);
     font-weight: 500;
 }
 
@@ -593,11 +786,11 @@ body {
     position: absolute;
     right: 1rem;
     top: 2.5rem;
-    background: white;
+    background: var(--bg-dropdown);
     border-radius: 8px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     z-index: 10;
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--border-color);
     display: none;
     min-width: 140px;
     overflow: hidden;
@@ -613,14 +806,14 @@ body {
     gap: 0.5rem;
     padding: 0.6rem 0.8rem;
     font-size: 0.85rem;
-    color: #475569;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: background 0.2s;
 }
 
 .action-option:hover {
-    background: #f8fafc;
-    color: #1e293b;
+    background: var(--bg-panel);
+    color: var(--text-primary);
 }
 
 .action-option.delete {
@@ -636,7 +829,7 @@ body {
     flex: 1;
     padding: 1rem;
     overflow-y: auto;
-    background: #f8fafc;
+    background: var(--bg-panel);
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -644,8 +837,8 @@ body {
 
 .chat-footer {
     padding: 1rem;
-    background: white;
-    border-top: 1px solid #e2e8f0;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-color);
     display: flex;
     gap: 0.5rem;
     flex-shrink: 0;
@@ -654,11 +847,13 @@ body {
 .chat-input {
     flex: 1;
     padding: 0.75rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     border-radius: 20px;
     outline: none;
     font-size: 0.9rem;
     font-family: inherit;
+    background: var(--bg-input);
+    color: var(--text-primary);
 }
 
 .chat-input:focus {
@@ -675,9 +870,9 @@ body {
 }
 
 .msg-in {
-    background: white;
-    color: #1e293b;
-    border: 1px solid #e2e8f0;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
     align-self: flex-start;
     border-bottom-left-radius: 4px;
 }
@@ -721,7 +916,7 @@ body {
 }
 
 .day-modal {
-    background: white;
+    background: var(--bg-modal);
     width: 100%;
     max-width: 450px;
     border-radius: 12px;
@@ -740,14 +935,14 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 0.75rem;
 }
 
 .day-modal-title {
     font-weight: 700;
     font-size: 1.1rem;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .day-modal-close {
@@ -767,9 +962,9 @@ body {
 .time-filter-btn {
     padding: 0.4rem 0.8rem;
     border-radius: 6px;
-    border: 1px solid #e2e8f0;
-    background: white;
-    color: #64748b;
+    border: 1px solid var(--border-color);
+    background: var(--bg-input);
+    color: var(--text-secondary);
     font-size: 0.85rem;
     cursor: pointer;
 }
@@ -791,7 +986,7 @@ body {
 
 .day-event-item {
     padding: 0.75rem;
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -800,7 +995,7 @@ body {
 
 .event-time {
     font-size: 0.8rem;
-    color: #64748b;
+    color: var(--text-secondary);
     font-weight: 500;
     min-width: 60px;
 }
@@ -811,13 +1006,13 @@ body {
 
 .event-name {
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-primary);
     font-size: 0.9rem;
 }
 
 .event-status {
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--text-secondary);
 }
 
 /* Security Modal Styles */
@@ -831,18 +1026,19 @@ body {
 
 .sec-sidebar {
     width: 200px;
-    background: #f8fafc;
-    border-right: 1px solid #e2e8f0;
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border-color);
     padding: 1rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
+
 .sec-nav-item {
     padding: 0.75rem 1rem;
     border-radius: 8px;
-    color: #64748b;
+    color: var(--text-secondary);
     cursor: pointer;
     font-size: 0.9rem;
     font-weight: 500;
@@ -850,8 +1046,8 @@ body {
 }
 
 .sec-nav-item:hover {
-    background: #e2e8f0;
-    color: #1e293b;
+    background: var(--bg-content);
+    color: var(--text-primary);
 }
 
 .sec-nav-item.active {
@@ -882,18 +1078,19 @@ body {
     display: block;
     font-size: 0.875rem;
     font-weight: 500;
-    color: #475569;
+    color: var(--text-secondary);
     margin-bottom: 0.5rem;
 }
 
 .form-input {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-family: inherit;
     font-size: 0.95rem;
-    color: #1e293b;
+    color: var(--text-primary);
+    background: var(--bg-input);
     outline: none;
     transition: border-color 0.2s;
 }
@@ -922,21 +1119,21 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: white;
-    color: #64748b;
+    background: var(--bg-card);
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     transition: all 0.2s;
     position: relative;
     margin-right: 0.5rem;
 }
 
 .notif-btn:hover {
-    background: #f8fafc;
-    color: #1e293b;
+    background: var(--bg-panel);
+    color: var(--text-primary);
 }
 
 .notif-btn.active {
@@ -962,13 +1159,13 @@ body {
     right: 60px;
     /* Offset from profile avatar */
     margin-top: 0.75rem;
-    background: white;
+    background: var(--bg-dropdown);
     border-radius: 12px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     width: 320px;
     padding: 0;
     display: none;
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--border-color);
     overflow: hidden;
     z-index: 101;
 }
@@ -979,14 +1176,14 @@ body {
 }
 
 .notif-header {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #f1f5f9;
-    font-weight: 600;
-    color: #1e293b;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    background: #f8fafc;
+    justify-content: space-between;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--bg-panel);
 }
 
 .notif-list {
@@ -995,8 +1192,8 @@ body {
 }
 
 .notif-item {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #f1f5f9;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
     cursor: pointer;
     transition: background 0.2s;
     display: flex;
@@ -1005,11 +1202,11 @@ body {
 }
 
 .notif-item:hover {
-    background: #f8fafc;
+    background: var(--bg-panel);
 }
 
 .notif-item.unread {
-    background: #fdfbff;
+    background: var(--bg-content);
 }
 
 .notif-item:last-child {
@@ -1029,12 +1226,12 @@ body {
 
 .notif-text {
     font-size: 0.85rem;
-    color: #334155;
+    color: var(--text-primary);
     margin-bottom: 0.25rem;
     line-height: 1.4;
 }
 
 .notif-time {
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
