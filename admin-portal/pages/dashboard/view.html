@@ -306,32 +306,44 @@
         <!-- Right: Notifications/Activity -->
         <div class="card">
             <div class="section-title">
-                <i data-lucide="bell" style="width: 18px; color: #6366f1;"></i>
-                System Notifications
+                <i data-lucide="alert-octagon" style="width: 18px; color: #ef4444;"></i>
+                Critical Issues Watchlist
             </div>
 
-            <div class="timeline-item">
-                <span class="timeline-dot urgent"></span>
-                <div class="timeline-content">High volume of reports detected in District 4 (Power Outage).</div>
-                <span class="timeline-time">15 mins ago</span>
+            <!-- Critical Item 1 -->
+            <div class="report-item" style="border-left: 3px solid #ef4444; padding-left: 1rem;">
+                <div class="report-info">
+                    <div class="report-title" style="color: #ef4444;">Walay Kuryente - Purok 4</div>
+                    <div class="report-meta">
+                        <span>#1027</span> • 12 mins ago
+                    </div>
+                </div>
+                <button class="btn-action btn-view"
+                    onclick="openDetails('#1027', 'Walay Kuryente', 'Whiskey Itable', 'Today', 'Critical', 'Walay kuryente sa among area sukad pa ganihang hapon.')"
+                    style="background: #fee2e2; color: #ef4444; border: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
+                    Resolve
+                </button>
             </div>
 
-            <div class="timeline-item">
-                <span class="timeline-dot success"></span>
-                <div class="timeline-content">Maintenance Crew B has resolved "Main St. Pothole" ticket.</div>
-                <span class="timeline-time">2 hours ago</span>
+            <!-- Critical Item 2 -->
+            <div class="report-item" style="border-left: 3px solid #ef4444; padding-left: 1rem;">
+                <div class="report-info">
+                    <div class="report-title" style="color: #ef4444;">Saba nga Karaoke</div>
+                    <div class="report-meta">
+                        <span>#1024</span> • 1 hour ago
+                    </div>
+                </div>
+                <button class="btn-action btn-view"
+                    onclick="openDetails('#1024', 'Saba nga Karaoke', 'James Paul Silayan', 'Today', 'Critical', 'Saba kaayo ang karaoke sa silingan bisag lawom na ang gabii. Dili na mi katulog.')"
+                    style="background: #fee2e2; color: #ef4444; border: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
+                    Resolve
+                </button>
             </div>
 
-            <div class="timeline-item">
-                <span class="timeline-dot info"></span>
-                <div class="timeline-content">System backup completed successfully.</div>
-                <span class="timeline-time">5 hours ago</span>
-            </div>
-
-            <div class="timeline-item">
-                <span class="timeline-dot"></span>
-                <div class="timeline-content">New user "Officer K." added to the admin team.</div>
-                <span class="timeline-time">Yesterday</span>
+            <div style="text-align: center; margin-top: 1rem;">
+                <span
+                    style="font-size: 0.8rem; color: var(--text-secondary); cursor: pointer; text-decoration: underline;">View
+                    All Critical Issues</span>
             </div>
         </div>
     </div>
