@@ -11,6 +11,7 @@
     --bg-dropdown: #ffffff;
     --bg-panel: #f8fafc;
     --bg-input: #ffffff;
+    --bg-active: #e0e7ff;
 
     --border-color: #e2e8f0;
 
@@ -23,22 +24,14 @@
     /* For dark sidebar */
 
     --bg-sidebar: #1e293b;
-    /* Sidebar is always dark initially unless changed */
+    --border-radius: 12px;
+    --transition-speed: 0.3s;
 
     --accent-color: #6366f1;
     /* Indigo 500 */
     --accent-hover: #4f46e5;
     /* Indigo 600 */
     --accent-light: rgba(99, 102, 241, 0.1);
-
-    /* Sidebar Dimensions */
-    --sidebar-width: 260px;
-    --sidebar-collapsed-width: 80px;
-
-    /* Spacing & Sizing */
-    --header-height: 70px;
-    --border-radius: 12px;
-    --transition-speed: 0.3s;
 
     /* Fonts */
     --font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -56,6 +49,7 @@
     --bg-dropdown: #1e293b;
     --bg-panel: #0f172a;
     --bg-input: #0f172a;
+    --bg-active: rgba(99, 102, 241, 0.2);
 
     --border-color: #334155;
 

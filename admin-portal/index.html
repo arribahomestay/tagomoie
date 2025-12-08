@@ -401,6 +401,97 @@
         </div>
     </div>
 
+    <!-- Critical Issues Modal -->
+    <div class="modal-overlay" id="criticalIssuesModal" style="z-index: 2300;">
+        <div class="modal-card" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title" style="color: #ef4444; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="alert-octagon" width="24"></i>
+                    All Critical Issues
+                </h2>
+                <button class="modal-close" onclick="closeCriticalIssuesModal()">&times;</button>
+            </div>
+
+            <div class="modal-body" style="max-height: 500px; overflow-y: auto; padding-right: 0.5rem;">
+                <!-- Issue 1 -->
+                <div
+                    style="border-left: 3px solid #ef4444; padding: 1rem; background: var(--bg-panel); margin-bottom: 1rem; border-radius: 0 8px 8px 0; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 600; color: #ef4444; margin-bottom: 0.25rem;">Walay Kuryente - Purok 4
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            <span>#1027</span> • Whiskey Itable • 12 mins ago
+                        </div>
+                    </div>
+                    <button class="btn-primary"
+                        style="background: #fee2e2; color: #ef4444; padding: 0.5rem 1rem; font-size: 0.85rem;"
+                        onclick="resolveAndRedirect('#1027', 'Walay Kuryente', 'Whiskey Itable', 'Today', 'Critical', 'Walay kuryente sa among area sukad pa ganihang hapon.')">Resolve</button>
+                </div>
+
+                <!-- Issue 2 -->
+                <div
+                    style="border-left: 3px solid #ef4444; padding: 1rem; background: var(--bg-panel); margin-bottom: 1rem; border-radius: 0 8px 8px 0; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 600; color: #ef4444; margin-bottom: 0.25rem;">Saba nga Karaoke</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            <span>#1024</span> • James Paul Silayan • 1 hour ago
+                        </div>
+                    </div>
+                    <button class="btn-primary"
+                        style="background: #fee2e2; color: #ef4444; padding: 0.5rem 1rem; font-size: 0.85rem;"
+                        onclick="resolveAndRedirect('#1024', 'Saba nga Karaoke', 'James Paul Silayan', 'Today', 'Critical', 'Saba kaayo ang karaoke sa silingan bisag lawom na ang gabii. Dili na mi katulog.')">Resolve</button>
+                </div>
+
+                <!-- Issue 3 -->
+                <div
+                    style="border-left: 3px solid #ef4444; padding: 1rem; background: var(--bg-panel); margin-bottom: 1rem; border-radius: 0 8px 8px 0; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 600; color: #ef4444; margin-bottom: 0.25rem;">Water Leakage - Main St.
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            <span>#1030</span> • Maria Clara • 2 hours ago
+                        </div>
+                    </div>
+                    <button class="btn-primary"
+                        style="background: #fee2e2; color: #ef4444; padding: 0.5rem 1rem; font-size: 0.85rem;"
+                        onclick="resolveAndRedirect('#1030', 'Water Leakage', 'Maria Clara', 'Today', 'Critical', 'Major water pipe burst affecting 5 households.')">Resolve</button>
+                </div>
+
+                <!-- Issue 4 -->
+                <div
+                    style="border-left: 3px solid #ef4444; padding: 1rem; background: var(--bg-panel); margin-bottom: 1rem; border-radius: 0 8px 8px 0; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 600; color: #ef4444; margin-bottom: 0.25rem;">Blocked Drainage</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            <span>#1019</span> • Pedro Penduko • Yesterday
+                        </div>
+                    </div>
+                    <button class="btn-primary"
+                        style="background: #fee2e2; color: #ef4444; padding: 0.5rem 1rem; font-size: 0.85rem;"
+                        onclick="resolveAndRedirect('#1019', 'Blocked Drainage', 'Pedro Penduko', 'Yesterday', 'Critical', 'Drainage overflow causing street flooding.')">Resolve</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Critical Issues Modal Logic
+        const criticalIssuesModal = document.getElementById('criticalIssuesModal');
+
+        window.openCriticalIssuesModal = function () {
+            criticalIssuesModal.classList.add('active');
+            lucide.createIcons();
+        }
+
+        window.closeCriticalIssuesModal = function () {
+            criticalIssuesModal.classList.remove('active');
+        }
+
+        criticalIssuesModal.addEventListener('click', (e) => {
+            if (e.target === criticalIssuesModal) closeCriticalIssuesModal();
+        });
+    </script>
+
     <!-- Chat Widget -->
     <div class="chat-fab" onclick="toggleChat()">
         <i data-lucide="message-square" width="28"></i>
@@ -636,9 +727,43 @@
             }
         }
 
+        window.resolveAndRedirect = function (id, title, reporter, date, status, desc) {
+            closeCriticalIssuesModal();
+
+            // Redirect to Issues Page
+            const iframe = document.getElementById('content-frame');
+            iframe.src = 'pages/issues/view.html';
+
+            // Wait for iframe to load then highlight
+            iframe.onload = function () {
+                if (iframe.contentWindow && iframe.contentWindow.highlightRow) {
+                    iframe.contentWindow.highlightRow(id);
+                }
+                // Also open the modal
+                openGlobalModal(id, title, reporter, date, status, desc);
+
+                // Remove listener to avoid duplicate triggers
+                iframe.onload = null;
+            };
+
+            // Update Sidebar Active State
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => {
+                if (el.getAttribute('onclick') && el.getAttribute('onclick').includes('issues')) {
+                    el.classList.add('active');
+                }
+            });
+        }
+
         window.closeGlobalModal = function () {
             globalModal.classList.remove('active');
             currentIssueId = null;
+
+            // Clear highlight in iframe if it exists
+            const iframe = document.getElementById('content-frame');
+            if (iframe && iframe.contentWindow && iframe.contentWindow.clearHighlight) {
+                iframe.contentWindow.clearHighlight();
+            }
         }
 
         globalModal.addEventListener('click', (e) => {

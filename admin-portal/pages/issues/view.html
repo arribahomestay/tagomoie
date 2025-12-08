@@ -6,6 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/content.css">
     <title>Issues</title>
+    <style>
+        .row-active {
+            background-color: rgba(99, 102, 241, 0.1) !important;
+            border-left: 3px solid #6366f1;
+        }
+
+        /* Ensure border-left works */
+        tr {
+            border-left: 3px solid transparent;
+            transition: background-color 0.2s, border-left 0.2s;
+        }
+    </style>
 </head>
 
 <body>
@@ -89,6 +101,10 @@
         function openDetails(btn) {
             const row = btn.closest('tr');
 
+            // Highlight logic
+            document.querySelectorAll('tr').forEach(r => r.classList.remove('row-active'));
+            row.classList.add('row-active');
+
             const id = row.querySelector('.row-id').innerText;
             const name = row.querySelector('.row-name').innerText;
             const reporter = row.querySelector('.row-reporter').innerText;
@@ -142,6 +158,21 @@
                     else if (newStatus === 'Ongoing' || newStatus === 'In Review') badge.classList.add('status-pending');
                 }
             }
+        }
+        // Allow parent to highlight a row (e.g. from Critical Issues modal)
+        window.highlightRow = function (id) {
+            document.querySelectorAll('tr').forEach(r => {
+                r.classList.remove('row-active');
+                const idCell = r.querySelector('.row-id');
+                if (idCell && idCell.innerText === id) {
+                    r.classList.add('row-active');
+                    r.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
+        // Allow parent to clear highlights
+        window.clearHighlight = function () {
+            document.querySelectorAll('tr').forEach(r => r.classList.remove('row-active'));
         }
     </script>
 </body>

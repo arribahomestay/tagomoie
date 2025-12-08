@@ -1026,7 +1026,7 @@ body {
 
 .sec-sidebar {
     width: 200px;
-    background: var(--bg-panel);
+    background: var(--bg-card);
     border-right: 1px solid var(--border-color);
     padding: 1rem;
     display: flex;
@@ -1051,8 +1051,8 @@ body {
 }
 
 .sec-nav-item.active {
-    background: #e0e7ff;
-    color: #4f46e5;
+    background: var(--bg-active);
+    color: var(--accent-color);
 }
 
 .sec-content {

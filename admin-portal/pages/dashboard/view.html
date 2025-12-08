@@ -340,10 +340,14 @@
                 </button>
             </div>
 
-            <div style="text-align: center; margin-top: 1rem;">
-                <span
-                    style="font-size: 0.8rem; color: var(--text-secondary); cursor: pointer; text-decoration: underline;">View
-                    All Critical Issues</span>
+            <div style="margin-top: 1.5rem;">
+                <button onclick="window.parent.openCriticalIssuesModal()"
+                    style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--bg-panel); border: 1px solid var(--border-color); color: var(--text-primary); padding: 0.75rem; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s;"
+                    onmouseover="this.style.background='var(--bg-content)'"
+                    onmouseout="this.style.background='var(--bg-panel)'">
+                    View All Critical Issues
+                    <i data-lucide="arrow-right" width="16"></i>
+                </button>
             </div>
         </div>
     </div>
