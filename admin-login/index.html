@@ -261,7 +261,14 @@
                 <div class="group-icon">
                     <i data-lucide="lock"></i>
                 </div>
-                <input type="password" class="custom-pill-input" id="password" value="ej123" placeholder="Password">
+                <div style="position: relative; flex: 1;">
+                    <input type="password" class="custom-pill-input" id="password" value="ej123" placeholder="Password"
+                        style="width: 100%; padding-right: 3rem;">
+                    <button type="button" id="toggle-password-btn" onclick="togglePassword()"
+                        style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.8; padding: 0;">
+                        <i data-lucide="eye" width="20"></i>
+                    </button>
+                </div>
             </div>
 
             <div class="form-options-row">
@@ -310,6 +317,20 @@
 
     <script>
         lucide.createIcons();
+
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const btn = document.getElementById('toggle-password-btn');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = '<i data-lucide="eye-off" width="20"></i>';
+            } else {
+                input.type = 'password';
+                btn.innerHTML = '<i data-lucide="eye" width="20"></i>';
+            }
+            lucide.createIcons();
+        }
 
         function handleLogin(e) {
             e.preventDefault();
