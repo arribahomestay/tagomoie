@@ -172,18 +172,15 @@ body {
     flex: 1;
     background-color: var(--bg-content);
     height: 100vh;
-    overflow-y: auto;
-    position: relative;
-    background-color: var(--bg-content);
-    height: 100vh;
-    overflow-y: auto;
+    overflow-y: hidden;
+    /* Hide main scroll, let iframe scroll or fit */
     position: relative;
     border-radius: 0;
-    /* Square edges */
     margin-left: 0;
     padding: 2rem;
+    padding-top: 5rem;
+    /* Ensure content starts below top-nav */
     padding-left: calc(2rem + 40px);
-    /* Compensate overlap */
     transition: all var(--transition-speed);
 }
 

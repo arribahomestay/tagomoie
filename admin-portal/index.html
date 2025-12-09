@@ -354,8 +354,7 @@
                         <h3 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 1.5rem;">Update Email Address</h3>
                         <div class="form-group">
                             <label class="form-label">Current Email</label>
-                            <input type="email" class="form-input" value="admin@antigrav.com" readonly
-                                style="background: #f1f5f9;">
+                            <input type="email" class="form-input" value="admin@antigrav.com" readonly>
                         </div>
                         <div class="form-group">
                             <label class="form-label">New Email Address</label>
@@ -598,9 +597,6 @@
             }
         });
 
-        logoutBtn.addEventListener('click', () => {
-            window.location.href = '../admin-login/index.html';
-        });
 
         // Profile Modal Logic
         const profileModal = document.getElementById('profileModal');
@@ -1397,6 +1393,65 @@
                 });
             }
         }
+    </script>
+    <!-- Logout Confirmation Modal -->
+    <div class="modal-overlay" id="logoutModal" style="z-index: 9999;">
+        <div class="modal-card"
+            style="width: 320px; max-width: 90%; text-align: center; padding: 1.5rem; border-radius: 12px; margin: auto; background: var(--bg-modal);">
+            <div style="margin-bottom: 1rem;">
+                <div
+                    style="width: 48px; height: 48px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; border: 1px solid rgba(239, 68, 68, 0.2);">
+                    <i data-lucide="log-out" width="24"></i>
+                </div>
+            </div>
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem; color: var(--text-primary); font-weight: 600;">Sign Out
+            </h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.4;">Are you
+                sure you want to log out?</p>
+            <div style="display: flex; gap: 0.75rem; justify-content: center;">
+                <button onclick="closeLogoutModal()"
+                    style="flex: 1; padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: transparent; color: var(--text-primary); cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: background 0.2s;"
+                    onmouseover="this.style.background='var(--bg-panel)'"
+                    onmouseout="this.style.background='transparent'">
+                    Cancel
+                </button>
+                <button onclick="performLogout()"
+                    style="flex: 1; padding: 0.6rem; border-radius: 6px; border: none; background: #ef4444; color: white; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: background 0.2s;"
+                    onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            (function () {
+                // Logout Logic
+                const logoutBtn = document.getElementById('logout-btn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', function () {
+                        // Close dropdown if open
+                        const dropdown = document.getElementById('profile-dropdown');
+                        if (dropdown) dropdown.classList.remove('active');
+
+                        // Open Modal
+                        document.getElementById('logoutModal').classList.add('active');
+                        if (window.lucide) lucide.createIcons();
+                    });
+                }
+
+                window.closeLogoutModal = function () {
+                    document.getElementById('logoutModal').classList.remove('active');
+                }
+
+                window.performLogout = function () {
+                    // Clear any session data if needed
+                    // localStorage.removeItem('adminThemeMode'); // Optional: keep theme?
+
+                    // Redirect
+                    window.location.href = '../admin-login/index.html';
+                }
+            })();
     </script>
 </body>
 
