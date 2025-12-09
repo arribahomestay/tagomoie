@@ -223,6 +223,19 @@
             box-shadow: 0 4px 12px rgba(255, 255, 255, 0.25);
         }
 
+        .mobile-credits {
+            position: fixed;
+            bottom: 2rem;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+            display: block;
+            /* Show on all devices */
+            z-index: 20;
+        }
+
         /* Mobile */
         @media (max-width: 768px) {
             body {
@@ -234,11 +247,13 @@
                 width: 100%;
             }
 
-            /* Center texts on mobile? */
-
             /* Hide branding on mobile */
             div[style*="position: fixed; right: 10%"] {
                 display: none !important;
+            }
+
+            .mobile-credits {
+                display: block;
             }
         }
     </style>
@@ -313,6 +328,11 @@
         <img src="images/DARK.png" alt="Tagum UYnite"
             style="max-width: 400px; width: 100%; height: auto; display: block; user-select: none; -webkit-user-drag: none;"
             oncontextmenu="return false;" draggable="false">
+    </div>
+
+    <!-- Mobile Credits -->
+    <div class="mobile-credits">
+        &copy; 2025 Tagum Uynite
     </div>
 
     <script>
