@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const page = item.getAttribute('data-page');
             const pageUrl = `pages/${page}/view.html`;
 
+            // Set active page attribute for CSS hooks
+            document.querySelector('.main-content').setAttribute('data-active-page', page);
+
             // Show loader
             contentFrame.classList.remove('loaded');
             // Timeout to simulate transition/allow CSS opacity to fade out
@@ -25,6 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 300);
         });
     });
+
+    // Initial Active Page Set
+    const activeNav = document.querySelector('.nav-item.active');
+    if (activeNav) {
+        document.querySelector('.main-content').setAttribute('data-active-page', activeNav.getAttribute('data-page'));
+    }
+
 
     // Content Frame Load Event
     contentFrame.addEventListener('load', () => {

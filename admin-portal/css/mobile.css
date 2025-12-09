@@ -81,6 +81,14 @@
         border-radius: 0;
     }
 
+    .main-content[data-active-page="messages"] {
+        padding-left: 0;
+        padding-right: 0;
+        padding-bottom: 70px;
+        /* Reduced from 90px to fit better with bottom nav */
+        overflow: hidden;
+    }
+
     /* Adjust Top Nav for Mobile */
     .top-nav {
         position: fixed;
@@ -105,17 +113,17 @@
         transform: translateY(-50%);
     }
 
+    .dark-mode .mobile-logo lottie-player {
+        filter: brightness(0) invert(1);
+    }
+
     .mobile-navbar {
         display: flex;
     }
 
     /* Chat widget adjustment for mobile */
     .chat-fab {
-        bottom: 5.5rem;
-        /* Above nav bar */
-        right: 1rem;
-        width: 50px;
-        height: 50px;
+        display: none !important;
     }
 
     .chat-window {
@@ -149,6 +157,107 @@
         border-radius: 12px;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         z-index: 2000;
+
         /* Above everything */
+    }
+
+    /* Security Modal Mobile Fix */
+    #securityModal .modal-card {
+        height: auto !important;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sec-body {
+        flex-direction: column;
+        overflow-y: auto;
+        /* Allow full modal scroll if needed */
+        height: auto;
+    }
+
+    /* Security Modal Mobile Fix - 2x2 Grid Layout */
+    .sec-sidebar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        padding: 1rem;
+        width: 100%;
+        height: auto;
+        background: var(--bg-panel);
+        border-bottom: 1px solid var(--border-color);
+        overflow: visible;
+        position: relative;
+    }
+
+    .sec-sidebar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .sec-nav-item {
+        display: flex;
+        flex-direction: row;
+        /* Keep icon left for better readability in small boxes, or column? User said "clean" */
+        /* Let's go with centered column for "easy to click" big buttons */
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--bg-content);
+        /* Slightly distinct from panel */
+        white-space: normal;
+        margin: 0;
+        text-align: center;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+    }
+
+    /* Override inline styles for icons */
+    .sec-nav-item i {
+        display: block !important;
+        margin-right: 0 !important;
+        margin-bottom: 0.5rem;
+        width: 20px;
+        height: 20px;
+    }
+
+    .sec-nav-item.active {
+        background: rgba(99, 102, 241, 0.08);
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+        font-weight: 600;
+        box-shadow: 0 0 0 1px var(--accent-color);
+    }
+
+    .sec-content {
+        padding: 1rem;
+        height: auto;
+        overflow: visible;
+    }
+
+    /* Modal Footer Mobile Fix */
+    .modal-footer {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 1rem !important;
+        margin-top: 1.5rem !important;
+    }
+
+    #modal-actions {
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 0.75rem !important;
+    }
+
+    #modal-actions input,
+    #modal-actions button {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 0.85rem !important;
+        margin: 0 !important;
+        height: 48px;
+        /* Fixed height for consistency */
     }
 }

@@ -95,6 +95,10 @@
             <i data-lucide="settings"></i>
             <span>Manage</span>
         </a>
+        <a href="#" class="mobile-nav-item" data-page="messages">
+            <i data-lucide="message-square"></i>
+            <span>Messages</span>
+        </a>
     </nav>
 
     <!-- Main Content -->
@@ -219,6 +223,13 @@
                 </div>
             </div>
 
+            <div class="modal-detail-row">
+                <span class="label">Attached Media</span>
+                <div class="modal-media-gallery" id="g-media">
+                    <!-- Media items injected here -->
+                </div>
+            </div>
+
             <div class="modal-footer" style="display: flex; justify-content: flex-end; align-items: center; gap: 1rem;">
                 <div id="modal-actions" style="display: flex; align-items: center; gap: 0.5rem;">
                     <input type="date" id="response-date"
@@ -335,6 +346,14 @@
                         <i data-lucide="mail" width="16"
                             style="display: inline-block; vertical-align: middle; margin-right: 8px;"></i> Email
                     </div>
+                    <div class="sec-nav-item" onclick="switchSecTab('2fa', this)">
+                        <i data-lucide="shield-check" width="16"
+                            style="display: inline-block; vertical-align: middle; margin-right: 8px;"></i> 2FA
+                    </div>
+                    <div class="sec-nav-item" onclick="switchSecTab('alerts', this)">
+                        <i data-lucide="bell" width="16"
+                            style="display: inline-block; vertical-align: middle; margin-right: 8px;"></i> Login Alerts
+                    </div>
                 </div>
                 <div class="sec-content">
                     <!-- Password Tab -->
@@ -373,6 +392,174 @@
                             <button class="btn-primary" onclick="searchSecSave('Email verification sent!')">Update
                                 Email</button>
                         </div>
+                    </div>
+
+                    <!-- 2FA Tab -->
+                    <div id="sec-view-2fa" class="sec-view">
+                        <h3 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 1.5rem;">Two-Factor Authentication
+                        </h3>
+                        <div
+                            style="background: var(--bg-panel); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+                            <div
+                                style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">
+                                        Authenticator App</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Use an app like
+                                        Google Authenticator</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="chk-2fa-app">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">
+                                        SMS Authentication</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Receive codes via SMS
+                                    </div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="chk-2fa-sms">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div style="text-align: right; margin-top: 2rem;">
+                            <button class="btn-primary" onclick="searchSecSave('2FA settings updated!')">Save
+                                Settings</button>
+                        </div>
+                    </div>
+
+                    <!-- Login Alerts Tab -->
+                    <div id="sec-view-alerts" class="sec-view">
+                        <h3 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 1.5rem;">Recent Login Activity</h3>
+                        <div class="table-responsive"
+                            style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead style="background: var(--bg-panel);">
+                                    <tr>
+                                        <th
+                                            style="text-align: left; padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.85rem;">
+                                            Device</th>
+                                        <th
+                                            style="text-align: left; padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.85rem;">
+                                            Location</th>
+                                        <th
+                                            style="text-align: left; padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.85rem;">
+                                            Date & Time</th>
+                                        <th
+                                            style="text-align: right; padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.85rem;">
+                                            Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Current Session -->
+                                    <tr style="background: rgba(16, 185, 129, 0.05);">
+                                        <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <i data-lucide="monitor" width="16" style="color: #6366f1;"></i>
+                                                <span style="font-weight: 500; color: var(--text-primary);">Windows PC
+                                                    (Current)</span>
+                                            </div>
+                                        </td>
+                                        <td
+                                            style="padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary);">
+                                            Davao City, PH</td>
+                                        <td
+                                            style="padding: 1rem; border-bottom: 1px solid var(--border-color); color: #10b981; font-weight: 500;">
+                                            Active Now</td>
+                                        <td
+                                            style="padding: 1rem; border-bottom: 1px solid var(--border-color); text-align: right;">
+                                            <span style="font-size: 0.8rem; color: #94a3b8;">Current</span>
+                                        </td>
+                                    </tr>
+                                    <!-- Past Sessions -->
+                                    <tr id="device-row-1">
+                                        <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <i data-lucide="smartphone" width="16"
+                                                    style="color: var(--text-secondary);"></i>
+                                                <span style="color: var(--text-primary);">iPhone 13</span>
+                                            </div>
+                                        </td>
+                                        <td
+                                            style="padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary);">
+                                            Tagum City, PH</td>
+                                        <td
+                                            style="padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary);">
+                                            Oct 24, 10:30 AM</td>
+                                        <td
+                                            style="padding: 1rem; border-bottom: 1px solid var(--border-color); text-align: right;">
+                                            <button onclick="logoutDevice('device-row-1')"
+                                                style="background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;"
+                                                onmouseover="this.style.background='#ef4444'; this.style.color='white'"
+                                                onmouseout="this.style.background='transparent'; this.style.color='#ef4444'">
+                                                Log Out
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr id="device-row-2">
+                                        <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <i data-lucide="monitor" width="16"
+                                                    style="color: var(--text-secondary);"></i>
+                                                <span style="color: var(--text-primary);">MacBook Pro</span>
+                                            </div>
+                                        </td>
+                                        <td
+                                            style="padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary);">
+                                            Cebu City, PH</td>
+                                        <td
+                                            style="padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary);">
+                                            Oct 20, 08:15 PM</td>
+                                        <td
+                                            style="padding: 1rem; border-bottom: 1px solid var(--border-color); text-align: right;">
+                                            <button onclick="logoutDevice('device-row-2')"
+                                                style="background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;"
+                                                onmouseover="this.style.background='#ef4444'; this.style.color='white'"
+                                                onmouseout="this.style.background='transparent'; this.style.color='#ef4444'">
+                                                Log Out
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div
+                            style="margin-top: 1.5rem; display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.2);">
+                            <i data-lucide="alert-triangle" width="18" style="color: #f59e0b;"></i>
+                            <span style="font-size: 0.9rem; color: #b45309;">Don't recognize a device? <a href="#"
+                                    onclick="logoutAllDevices()"
+                                    style="color: #b45309; font-weight: 600; text-decoration: underline;">Log out all
+                                    other sessions</a></span>
+                        </div>
+                        <script>
+                            function logoutDevice(rowId) {
+                                if (confirm('Are you sure you want to log out this device?')) {
+                                    const row = document.getElementById(rowId);
+                                    if (row) {
+                                        row.style.opacity = '0.5';
+                                        row.style.pointerEvents = 'none';
+                                        setTimeout(() => {
+                                            row.remove();
+                                            alert('Device logged out successfully.');
+                                        }, 500);
+                                    }
+                                }
+                            }
+
+                            function logoutAllDevices() {
+                                if (confirm('Are you sure you want to log out of ALL other sessions? This action cannot be undone.')) {
+                                    const row1 = document.getElementById('device-row-1');
+                                    const row2 = document.getElementById('device-row-2');
+                                    if (row1) row1.remove();
+                                    if (row2) row2.remove();
+                                    alert('All other sessions have been logged out.');
+                                }
+                            }
+                        </script>
                     </div>
                 </div>
             </div>
@@ -483,7 +670,29 @@
         </div>
     </div>
 
+    <!-- Image Lightbox Modal -->
+    <div class="lightbox-overlay" id="lightboxModal" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-img" id="lightboxImage" src="" alt="Preview">
+    </div>
+
     <script>
+        // Lightbox Logic
+        const lightboxModal = document.getElementById('lightboxModal');
+        const lightboxImage = document.getElementById('lightboxImage');
+
+        window.openLightbox = function (src) {
+            lightboxImage.src = src;
+            lightboxModal.classList.add('active');
+        }
+
+        window.closeLightbox = function () {
+            lightboxModal.classList.remove('active');
+            setTimeout(() => {
+                lightboxImage.src = '';
+            }, 300); // Clear after fade out
+        }
+
         // Critical Issues Modal Logic
         const criticalIssuesModal = document.getElementById('criticalIssuesModal');
 
@@ -659,6 +868,21 @@
         let currentIssueId = null;
         let currentIssueName = null;
 
+        // Mock Attachments Data
+        const mockAttachments = {
+            '#1024': [
+                { type: 'image', src: 'https://placehold.co/600x400/png?text=Karaoke+Proof+1' },
+                { type: 'video', src: 'https://www.w3schools.com/html/mov_bbb.mp4' }
+            ],
+            '#1025': [
+                { type: 'image', src: 'https://placehold.co/600x400/png?text=Broken+Road' },
+                { type: 'image', src: 'https://placehold.co/600x400/png?text=Accident+Scene' }
+            ],
+            '#1027': [
+                { type: 'image', src: 'https://placehold.co/600x400/png?text=Dark+Street' }
+            ]
+        };
+
         window.openGlobalModal = function (id, name, reporter, date, status, desc) {
             currentIssueId = id;
             currentIssueName = name;
@@ -673,6 +897,36 @@
 
             applyStatusColor(statusEl, status);
             document.getElementById('g-desc').innerText = desc;
+
+            // Render Media
+            const mediaContainer = document.getElementById('g-media');
+            if (mediaContainer) {
+                mediaContainer.innerHTML = '';
+                const attachments = mockAttachments[id] || [];
+
+                if (attachments.length > 0) {
+                    attachments.forEach(media => {
+                        const item = document.createElement('div');
+                        item.className = 'media-item';
+
+                        if (media.type === 'image') {
+                            const img = document.createElement('img');
+                            img.src = media.src;
+                            img.onclick = () => openLightbox(media.src);
+                            item.appendChild(img);
+                        } else if (media.type === 'video') {
+                            const vid = document.createElement('video');
+                            vid.src = media.src;
+                            vid.controls = true;
+                            item.appendChild(vid);
+                        }
+                        mediaContainer.appendChild(item);
+                    });
+                } else {
+                    mediaContainer.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.9rem;">No media attached.</span>';
+                }
+            }
+
             document.getElementById('response-date').valueAsDate = new Date();
             document.getElementById('response-time').value = '08:00'; // Default
             updateModalButtons(status);

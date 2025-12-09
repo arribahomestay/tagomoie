@@ -29,87 +29,283 @@
         </div>
     </div>
 
-    <div class="login-container">
-        <div class="modern-login-card" id="login-card">
-            <!-- Left Side: Form -->
-            <div class="login-form-side">
-                <form id="login-form" onsubmit="handleLogin(event)">
-                    <div class="form-header">
-                        <h1>Welcome Back!</h1>
-                        <p>Sign in to your account</p>
-                    </div>
+    <style>
+        /* New Layout Overrides */
+        body {
+            background: url('images/tagom.png') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            /* Left align */
+            padding-left: 10%;
+            /* Spacing from left */
+        }
 
-                    <div class="input-group">
-                        <div class="input-wrapper">
-                            <div class="icon-box">
-                                <i data-lucide="mail" width="20"></i>
-                            </div>
-                            <input type="text" class="custom-input" id="email" placeholder="Username or Email"
-                                value="admin@gmail.com">
-                        </div>
-                    </div>
+        /* Dark overlay for readability if needed, but design shows clear image */
+        body::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
 
-                    <div class="input-group">
-                        <div class="input-wrapper">
-                            <div class="icon-box">
-                                <i data-lucide="lock" width="20"></i>
-                            </div>
-                            <input type="password" class="custom-input" id="password" placeholder="Password"
-                                value="ej123">
-                        </div>
-                    </div>
+        .login-card-new {
+            width: 100%;
+            max-width: 450px;
+            color: white;
+        }
 
-                    <div class="form-options">
-                        <label class="checkbox-container">
-                            <input type="checkbox">
-                            <span class="checkmark"></span>
-                            Remember me
-                        </label>
-                        <a href="#" onclick="toggleForgot(event)" class="forgot-link">Forgot password?</a>
-                    </div>
+        .login-header h1 {
+            font-size: 2.5rem;
+            font-weight: 500;
+            /* Regular weight like image */
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.5px;
+        }
 
-                    <button type="submit" class="btn-modern-login" id="login-btn">
-                        <span>SIGN IN</span>
-                    </button>
+        .login-header p {
+            font-size: 1.25rem;
+            font-weight: 400;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+        }
 
-                </form>
+        .custom-input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
 
-                <!-- Forgot Password (Hidden) -->
-                <form id="forgot-form" onsubmit="handleForgot(event)" style="display: none;">
-                    <div class="form-header">
-                        <h1>Recovery</h1>
-                        <p>Enter email to reset password</p>
-                    </div>
+        .group-icon {
+            font-size: 2rem;
+            margin-right: 1.5rem;
+            width: 32px;
+            display: flex;
+            justify-content: center;
+        }
 
-                    <div class="input-group">
-                        <div class="input-wrapper">
-                            <div class="icon-box">
-                                <i data-lucide="mail" width="20"></i>
-                            </div>
-                            <input type="email" class="custom-input" id="reset-email" placeholder="Registered Email">
-                        </div>
-                    </div>
+        .group-icon i {
+            width: 32px;
+            height: 32px;
+            stroke-width: 1.5px;
+        }
 
-                    <button type="submit" class="btn-modern-login">SEND LINK</button>
+        .custom-pill-input {
+            flex: 1;
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 999px;
+            padding: 0.75rem 1.5rem;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
 
-                    <div class="signup-link" style="margin-top: 1.5rem;">
-                        <a href="#" onclick="toggleForgot(event)">Back to Login</a>
-                    </div>
-                </form>
+        .custom-pill-input::placeholder {
+            color: transparent;
+            /* Image shows no placeholder or it's empty */
+        }
+
+        .custom-pill-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Form Options Row: Remember Me & Forgot PW */
+        .form-options-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: -0.5rem;
+            margin-bottom: 2rem;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        /* Modern Checkbox */
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            gap: 0.5rem;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+
+        .custom-checkbox:hover {
+            opacity: 1;
+        }
+
+        .custom-checkbox input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            height: 18px;
+            width: 18px;
+            background-color: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .custom-checkbox input:checked~.checkmark {
+            background-color: white;
+            border-color: white;
+        }
+
+        .checkmark:after {
+            content: "";
+            display: none;
+            width: 4px;
+            height: 8px;
+            border: solid black;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            margin-top: -2px;
+        }
+
+        .custom-checkbox input:checked~.checkmark:after {
+            display: block;
+        }
+
+        .forgot-link-new {
+            color: white;
+            opacity: 0.8;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .forgot-link-new:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        /* Hidden login button to allow 'Enter' key submission, or visible heavily styled? 
+           The reference image doesn't explicitly show a button, but users need one. 
+           I'll add a subtly styled one or keep the pill theme. */
+        .btn-hidden-submit {
+            background: white;
+            color: #0f172a;
+            /* Dark text */
+            border: none;
+            padding: 1rem;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            width: 100%;
+            display: block;
+            transition: all 0.2s;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .btn-hidden-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.25);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 2rem;
+                justify-content: center;
+            }
+
+            .login-card-new {
+                width: 100%;
+            }
+
+            /* Center texts on mobile? */
+
+            /* Hide branding on mobile */
+            div[style*="position: fixed; right: 10%"] {
+                display: none !important;
+            }
+        }
+    </style>
+
+    <div class="login-card-new">
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <div class="login-header">
+                <h1>Welcome Back!</h1>
+                <p>Sign in to your account</p>
             </div>
 
-            <!-- Right Side: Decoration -->
-            <div class="login-decoration-side">
-                <div class="decoration-content">
-                    <h2 style="letter-spacing: 2px;">
-                        TAGUM <span style="color: #ef4444">U</span><span style="color: #22c55e">Y</span>NITE
-                    </h2>
+            <div class="custom-input-group">
+                <div class="group-icon">
+                    <i data-lucide="user"></i>
                 </div>
-                <div class="credits">
-                    &copy; 2025 Tagum Uynite
-                </div>
+                <input type="text" class="custom-pill-input" id="email" value="admin@gmail.com" placeholder="Email">
             </div>
-        </div>
+
+            <div class="custom-input-group">
+                <div class="group-icon">
+                    <i data-lucide="lock"></i>
+                </div>
+                <input type="password" class="custom-pill-input" id="password" value="ej123" placeholder="Password">
+            </div>
+
+            <div class="form-options-row">
+                <label class="custom-checkbox">
+                    <input type="checkbox">
+                    <span class="checkmark"></span>
+                    Remember me
+                </label>
+                <a href="#" onclick="toggleForgot(event)" class="forgot-link-new">Forgot password?</a>
+            </div>
+
+            <!-- Visible Submit for UX -->
+            <button type="submit" class="btn-hidden-submit" id="login-btn">
+                Sign In
+            </button>
+        </form>
+
+        <!-- Forgot Password Form (Hidden) -->
+        <form id="forgot-form" onsubmit="handleForgot(event)" style="display: none;">
+            <div class="login-header">
+                <h1>Recovery</h1>
+                <p>Enter email to reset password</p>
+            </div>
+
+            <div class="custom-input-group">
+                <div class="group-icon">
+                    <i data-lucide="mail"></i>
+                </div>
+                <input type="email" class="custom-pill-input" id="reset-email" placeholder="Registered Email">
+            </div>
+
+            <button type="submit" class="btn-hidden-submit">Send Link</button>
+
+            <div style="margin-top: 1.5rem;">
+                <a href="#" onclick="toggleForgot(event)" class="forgot-link-new">Back to Login</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Right Side Branding -->
+    <div style="position: fixed; right: 10%; top: 50%; transform: translateY(-50%); z-index: 10;">
+        <img src="images/DARK.png" alt="Tagum UYnite"
+            style="max-width: 400px; width: 100%; height: auto; display: block; user-select: none; -webkit-user-drag: none;"
+            oncontextmenu="return false;" draggable="false">
     </div>
 
     <script>
@@ -121,24 +317,26 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const notify = document.getElementById('notify-error');
-            const card = document.getElementById('login-card');
+            const card = document.querySelector('.login-card-new'); // Changed selector
 
             // Button Loading State
             const originalText = btn.innerHTML;
-            btn.innerHTML = "<span>Authenticating...</span>";
+            btn.innerHTML = "Authenticating...";
             btn.style.opacity = "0.8";
 
             setTimeout(() => {
                 if (email === 'admin@gmail.com' && password === 'ej123') {
-                    btn.innerHTML = "<span>Success!</span>";
+                    btn.innerHTML = "Success!";
                     btn.style.background = "#10b981";
+                    btn.style.color = "white";
                     setTimeout(() => {
                         window.location.href = '../admin-portal/index.html';
                     }, 500);
                 } else {
                     btn.innerHTML = originalText;
                     btn.style.opacity = "1";
-                    btn.style.background = "";
+                    btn.style.background = ""; // Reset
+                    btn.style.color = "";
 
                     // Show Error Notification
                     notify.innerHTML = `
@@ -151,7 +349,7 @@
                     lucide.createIcons();
                     notify.classList.add('active');
 
-                    // Add Shake Animation
+                    // Add Shake Animation to card
                     card.classList.add('shake');
 
                     // Highlight inputs
@@ -161,9 +359,9 @@
                     setTimeout(() => {
                         notify.classList.remove('active');
                         card.classList.remove('shake');
-                        document.getElementById('email').style.borderColor = "transparent";
-                        document.getElementById('password').style.borderColor = "transparent";
-                    }, 3000); // 3s for notification, shake ends sooner usually by CSS but removing class is safe
+                        document.getElementById('email').style.borderColor = "rgba(255, 255, 255, 0.8)";
+                        document.getElementById('password').style.borderColor = "rgba(255, 255, 255, 0.8)";
+                    }, 3000);
                 }
             }, 1000);
         }
@@ -174,11 +372,9 @@
             const forgotForm = document.getElementById('forgot-form');
 
             if (loginForm.style.display === 'none') {
-                // Show Login
                 loginForm.style.display = 'block';
                 forgotForm.style.display = 'none';
             } else {
-                // Show Forgot
                 loginForm.style.display = 'none';
                 forgotForm.style.display = 'block';
             }

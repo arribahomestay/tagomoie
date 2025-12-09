@@ -88,8 +88,120 @@
         }
 
         /* Active Row Highlight */
+        /* Active Row Highlight */
         .row-active {
             background-color: rgba(99, 102, 241, 0.08) !important;
+        }
+
+        /* Mobile View Styles */
+        .mobile-issues-view {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                display: none;
+                /* Hide Desktop Table */
+            }
+
+            .mobile-issues-view {
+                display: block;
+            }
+
+            .tabs-header {
+                justify-content: space-between;
+                gap: 0;
+            }
+
+            .tab-btn {
+                flex: 1;
+                /* text-align: center; */
+                font-size: 0.9rem;
+                padding: 0.75rem 0;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+        }
+
+        .m-issue-item {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .m-issue-item:active {
+            transform: scale(0.98);
+            background: var(--bg-panel);
+        }
+
+        .m-issue-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: var(--bg-panel);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .m-issue-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .m-issue-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .m-issue-meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .m-issue-status {
+            font-size: 0.75rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .status-critical {
+            color: #ef4444;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+
+        .status-pending {
+            color: #f59e0b;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+        }
+
+        .status-success {
+            color: #10b981;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
         }
 
         /* Dark Mode Tweaks handled by vars, but specific overrides */
@@ -119,161 +231,147 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- CRITICAL -->
-                <tr class="priority-critical" data-id="#1024" data-status="Critical"
-                    data-desc="Saba kaayo ang karaoke sa silingan bisag lawom na ang gabii. Dili na mi katulog.">
-                    <td>
-                        <div class="cat-icon"><i data-lucide="volume-2" width="18"></i></div>
-                    </td>
-                    <td class="row-id">#1024</td>
-                    <td class="row-name">Saba nga Karaoke</td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">JS</div>
-                            <span class="row-reporter">James Paul Silayan</span>
-                        </div>
-                    </td>
-                    <td class="row-date">Oct 24, 2023</td>
-                    <td><span class="status-badge status-error row-status">Critical</span></td>
-                    <td>
-                        <button class="btn-action btn-view" onclick="openDetails(this)">View</button>
-                        <button class="btn-action btn-delete" onclick="deleteRow(this)">Delete</button>
-                    </td>
-                </tr>
-
-                <!-- REVIEW -->
-                <tr class="priority-warning" data-id="#1025" data-status="In Review"
-                    data-desc="Naay dako nga bangag sa dalan dapit sa Purok 3. Daghan na na-disgrasya nga motor.">
-                    <td>
-                        <div class="cat-icon"><i data-lucide="alert-triangle" width="18"></i></div>
-                    </td>
-                    <td class="row-id">#1025</td>
-                    <td class="row-name">Guba ang Dalan</td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar" style="background: #fef3c7; color: #b45309;">JV</div>
-                            <span class="row-reporter">John Vitor Vetvet</span>
-                        </div>
-                    </td>
-                    <td class="row-date">Oct 25, 2023</td>
-                    <td><span class="status-badge status-pending row-status">In Review</span></td>
-                    <td>
-                        <button class="btn-action btn-view" onclick="openDetails(this)">View</button>
-                        <button class="btn-action btn-delete" onclick="deleteRow(this)">Delete</button>
-                    </td>
-                </tr>
-
-                <!-- ONGOING -->
-                <tr class="priority-warning" data-id="#1026" data-status="Ongoing"
-                    data-desc="Bangga sa may crossing ganihang buntag involving van ug motor.">
-                    <td>
-                        <div class="cat-icon"><i data-lucide="car" width="18"></i></div>
-                    </td>
-                    <td class="row-id">#1026</td>
-                    <td class="row-name">Vehicular Accident</td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar" style="background: #dcfce7; color: #15803d;">KD</div>
-                            <span class="row-reporter">Khristian Dove</span>
-                        </div>
-                    </td>
-                    <td class="row-date">Oct 26, 2023</td>
-                    <td><span class="status-badge status-pending row-status">Ongoing</span></td>
-                    <td>
-                        <button class="btn-action btn-view" onclick="openDetails(this)">View</button>
-                        <button class="btn-action btn-delete" onclick="deleteRow(this)">Delete</button>
-                    </td>
-                </tr>
-
-                <!-- CRITICAL -->
-                <tr class="priority-critical" data-id="#1027" data-status="Critical"
-                    data-desc="Walay kuryente sa among area sukad pa ganihang hapon.">
-                    <td>
-                        <div class="cat-icon"><i data-lucide="zap" width="18"></i></div>
-                    </td>
-                    <td class="row-id">#1027</td>
-                    <td class="row-name">Walay Kuryente</td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">WI</div>
-                            <span class="row-reporter">Whiskey Itable</span>
-                        </div>
-                    </td>
-                    <td class="row-date">Oct 27, 2023</td>
-                    <td><span class="status-badge status-error row-status">Critical</span></td>
-                    <td>
-                        <button class="btn-action btn-view" onclick="openDetails(this)">View</button>
-                        <button class="btn-action btn-delete" onclick="deleteRow(this)">Delete</button>
-                    </td>
-                </tr>
-
-                <!-- RESOLVED -->
-                <tr class="priority-normal" data-id="#1028" data-status="Resolved"
-                    data-desc="Naay nireklamo sa mga istambay nga sabaan sa kanto.">
-                    <td>
-                        <div class="cat-icon"><i data-lucide="users" width="18"></i></div>
-                    </td>
-                    <td class="row-id">#1028</td>
-                    <td class="row-name">Mga Istambay</td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar" style="background: #e2e8f0; color: #475569;">ES</div>
-                            <span class="row-reporter">Elmer Solayao</span>
-                        </div>
-                    </td>
-                    <td class="row-date">Oct 28, 2023</td>
-                    <td><span class="status-badge status-active row-status">Resolved</span></td>
-                    <td>
-                        <button class="btn-action btn-view" onclick="openDetails(this)">View</button>
-                        <button class="btn-action btn-delete" onclick="deleteRow(this)">Delete</button>
-                    </td>
-                </tr>
+            <tbody id="desktop-table-body">
+                <!-- Rows moved to JS data source for shared rendering -->
             </tbody>
         </table>
     </div>
 
+    <!-- Mobile Issues List -->
+    <div class="mobile-issues-view" id="mobile-issues-list">
+        <!-- Injected via JS -->
+    </div>
+
     <script>
+        // Data Source
+        const issuesData = [
+            { id: '#1024', status: 'Critical', desc: 'Saba kaayo ang karaoke sa silingan bisag lawom na ang gabii. Dili na mi katulog.', icon: 'volume-2', name: 'Saba nga Karaoke', reporter: 'James Paul Silayan', avatar: 'JS', date: 'Oct 24, 2023' },
+            { id: '#1025', status: 'In Review', desc: 'Naay dako nga bangag sa dalan dapit sa Purok 3. Daghan na na-disgrasya nga motor.', icon: 'alert-triangle', name: 'Guba ang Dalan', reporter: 'John Vitor Vetvet', avatar: 'JV', date: 'Oct 25, 2023', avStyle: 'background: #fef3c7; color: #b45309;' },
+            { id: '#1026', status: 'Ongoing', desc: 'Bangga sa may crossing ganihang buntag involving van ug motor.', icon: 'car', name: 'Vehicular Accident', reporter: 'Khristian Dove', avatar: 'KD', date: 'Oct 26, 2023', avStyle: 'background: #dcfce7; color: #15803d;' },
+            { id: '#1027', status: 'Critical', desc: 'Walay kuryente sa among area sukad pa ganihang hapon.', icon: 'zap', name: 'Walay Kuryente', reporter: 'Whiskey Itable', avatar: 'WI', date: 'Oct 27, 2023' },
+            { id: '#1028', status: 'Resolved', desc: 'Naay nireklamo sa mga istambay nga sabaan sa kanto.', icon: 'users', name: 'Mga Istambay', reporter: 'Elmer Solayao', avatar: 'ES', date: 'Oct 28, 2023', avStyle: 'background: #e2e8f0; color: #475569;' }
+        ];
+
+        let currentTab = 'Active';
+
         // Initialize Icons
-        lucide.createIcons();
+        // lucide.createIcons() called after render
 
-        function switchTab(tabName, btn) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        function renderAll() {
+            renderDesktopTable();
+            renderMobileList();
+            if (window.lucide) window.lucide.createIcons();
+        }
 
-            const rows = document.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const status = row.getAttribute('data-status');
-                let show = false;
-
-                if (tabName === 'Active') {
-                    if (['Critical', 'In Review', 'Pending', 'Error'].includes(status)) show = true;
-                } else if (tabName === 'Scheduled') {
-                    if (['Ongoing'].includes(status)) show = true;
-                } else if (tabName === 'History') {
-                    if (['Resolved', 'Completed', 'Archived'].includes(status)) show = true;
-                }
-
-                row.style.display = show ? '' : 'none';
+        function filterIssues(tab) {
+            return issuesData.filter(item => {
+                if (tab === 'Active') return ['Critical', 'In Review', 'Pending', 'Error'].includes(item.status);
+                if (tab === 'Scheduled') return ['Ongoing'].includes(item.status);
+                if (tab === 'History') return ['Resolved', 'Completed', 'Archived'].includes(item.status);
+                return false;
             });
         }
 
-        function openDetails(btn) {
-            const row = btn.closest('tr');
+        function renderDesktopTable() {
+            const tbody = document.getElementById('desktop-table-body');
+            tbody.innerHTML = '';
 
-            // Highlight logic
-            document.querySelectorAll('tr').forEach(r => r.classList.remove('row-active'));
-            row.classList.add('row-active');
+            const filtered = filterIssues(currentTab);
 
-            const id = row.querySelector('.row-id').innerText;
-            const name = row.querySelector('.row-name').innerText;
-            const reporter = row.querySelector('.row-reporter').innerText;
-            const date = row.querySelector('.row-date').innerText;
-            const status = row.querySelector('.row-status').innerText;
-            const desc = row.getAttribute('data-desc');
+            filtered.forEach(item => {
+                const tr = document.createElement('tr');
+                // Determine priority class
+                let prioClass = 'priority-normal';
+                let badgeClass = 'status-badge row-status';
+
+                if (['Critical', 'Error'].includes(item.status)) { prioClass = 'priority-critical'; badgeClass += ' status-error'; }
+                else if (['In Review', 'Ongoing'].includes(item.status)) { prioClass = 'priority-warning'; badgeClass += ' status-pending'; }
+                else { badgeClass += ' status-active'; }
+
+                tr.className = prioClass;
+                tr.setAttribute('data-id', item.id);
+                tr.setAttribute('data-status', item.status);
+                tr.setAttribute('data-desc', item.desc);
+
+                tr.innerHTML = `
+                    <td><div class="cat-icon"><i data-lucide="${item.icon}" width="18"></i></div></td>
+                    <td class="row-id">${item.id}</td>
+                    <td class="row-name">${item.name}</td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar" style="${item.avStyle || ''}">${item.avatar}</div>
+                            <span class="row-reporter">${item.reporter}</span>
+                        </div>
+                    </td>
+                    <td class="row-date">${item.date}</td>
+                    <td><span class="${badgeClass}">${item.status}</span></td>
+                    <td>
+                        <button class="btn-action btn-view" onclick="openDetails('${item.id}')">View</button>
+                        <button class="btn-action btn-delete" onclick="deleteRow(this)">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderMobileList() {
+            const listContainer = document.getElementById('mobile-issues-list');
+            listContainer.innerHTML = '';
+
+            const filtered = filterIssues(currentTab);
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">No issues found in this tab.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                let statusClass = 'status-success';
+                if (['Critical', 'Error'].includes(item.status)) statusClass = 'status-critical';
+                else if (['In Review', 'Ongoing'].includes(item.status)) statusClass = 'status-pending';
+
+                const card = document.createElement('div');
+                card.className = 'm-issue-item';
+                card.onclick = () => openDetails(item.id);
+
+                card.innerHTML = `
+                    <div class="m-issue-icon-box">
+                        <i data-lucide="${item.icon}" width="24"></i>
+                    </div>
+                    <div class="m-issue-info">
+                        <div class="m-issue-title">${item.name}</div>
+                        <div class="m-issue-meta">
+                            <span class="m-issue-status ${statusClass}">${item.status}</span>
+                            <span>• ${item.date}</span>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" style="color: var(--text-secondary); width: 20px;"></i>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function switchTab(tabName, btn) {
+            currentTab = tabName;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderAll();
+        }
+
+        function openDetails(idOrBtn) {
+            let id = idOrBtn;
+            if (typeof idOrBtn !== 'string') {
+                // If called from button click (desktop)
+                const row = idOrBtn.closest('tr'); // this logic was for direct click, but now we pass ID in desktop too
+                // Fallback if needed, but we changed onclick in renderDesktopTable
+                return;
+            }
+
+            const item = issuesData.find(i => i.id === id);
+            if (!item) return;
 
             if (window.parent && window.parent.openGlobalModal) {
-                window.parent.openGlobalModal(id, name, reporter, date, status, desc);
+                window.parent.openGlobalModal(item.id, item.name, item.reporter, item.date, item.status, item.desc);
             } else {
                 console.error('Global modal function not found on parent window.');
             }
@@ -281,56 +379,17 @@
 
         function deleteRow(btn) {
             if (confirm('Are you sure you want to delete this issue?')) {
+                // Visual only for demo
                 const row = btn.closest('tr');
-                row.style.background = '#fee2e2';
-                row.style.transition = 'opacity 0.5s';
-                row.style.opacity = '0';
-                setTimeout(() => {
-                    row.remove();
-                }, 500);
+                if (row) row.remove();
+
+                // For mobile we'd need to re-render, but this is a mock delete
+                alert("Deleted (Mock)");
             }
         }
 
-        window.updateRowStatus = function (id, newStatus) {
-            const rows = document.querySelectorAll('tr');
-            rows.forEach(r => {
-                const idCell = r.querySelector('.row-id');
-                if (idCell && idCell.innerText === id) {
-                    const badge = r.querySelector('.status-badge');
-                    if (badge) {
-                        badge.innerText = newStatus;
-                        badge.className = 'status-badge row-status';
-                        if (newStatus === 'Critical' || newStatus === 'Error') badge.classList.add('status-error');
-                        else if (newStatus === 'Resolved' || newStatus === 'Completed') badge.classList.add('status-active');
-                        else if (newStatus === 'Ongoing' || newStatus === 'In Review') badge.classList.add('status-pending');
-
-                        // Update data-status for filtering
-                        r.setAttribute('data-status', newStatus);
-                    }
-                }
-            });
-        }
-
-        window.highlightRow = function (id) {
-            switchTab('Active', document.querySelector('.tab-btn')); // Default to active tab to find it
-            // Logic to switch tab if needed? For now just try to find it.
-
-            document.querySelectorAll('tr').forEach(r => {
-                r.classList.remove('row-active');
-                const idCell = r.querySelector('.row-id');
-                if (idCell && idCell.innerText === id) {
-                    r.classList.add('row-active');
-                    r.style.display = ''; // Ensure visible
-                    r.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            });
-        }
-
-        window.clearHighlight = function () {
-            document.querySelectorAll('tr').forEach(r => r.classList.remove('row-active'));
-        }
-
-        // Run initial tab
+        // Initial load
+        renderAll();
         switchTab('Active', document.querySelector('.tab-btn.active'));
     </script>
 </body>

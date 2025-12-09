@@ -56,6 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Update Active State
             updateActiveState(page);
+
+            // Set active page attribute for CSS hooks (Mobile specific fix)
+            document.querySelector('.main-content').setAttribute('data-active-page', page);
         });
     });
 

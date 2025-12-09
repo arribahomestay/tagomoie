@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages</title>
+    <link rel="stylesheet" href="../../css/layout.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            background-color: transparent !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 100vh;
+            overflow: hidden;
+            display: block;
+        }
+
+        .chat-app-container {
+            width: 100%;
+            height: 100vh;
+            /* Use 100vh to ensure full viewport height */
+            background: var(--bg-card);
+            display: flex;
+            flex-direction: column;
+            padding: 0 !important;
+            margin: 0 !important;
+            border-radius: 0;
+        }
+
+        .chat-view {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-card);
+        }
+
+        .chat-header i[data-lucide="x"] {
+            display: none;
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Adjust footer input for page view */
+        .chat-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-card);
+        }
+
+        /* Fix bubble alignment if not in layout */
+        .msg-bubble {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .msg-in {
+            background: var(--bg-panel);
+            color: var(--text-primary);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .msg-out {
+            background: var(--accent-color);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .msg-meta {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+
+        .chat-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-app-container">
+        <!-- Chat List View -->
+        <div id="chat-view-list" class="chat-view">
+            <div class="chat-header">
+                <span>Messages</span>
+            </div>
+            <div class="chat-filter-bar">
+                <div class="filter-btn active" onclick="filterChats('all', this)">All</div>
+                <div class="filter-btn" onclick="filterChats('unread', this)">Unread</div>
+                <div class="filter-btn" onclick="filterChats('archived', this)">Archived</div>
+            </div>
+            <div class="chat-list" id="chat-list-container">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- Conversation View -->
+        <div id="chat-view-convo" class="chat-view" style="display: none;">
+            <div class="chat-header">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <i data-lucide="arrow-left" width="20" style="cursor: pointer;" onclick="showChatList()"></i>
+                    <span id="active-chat-name">User Name</span>
+                </div>
+            </div>
+
+            <div class="chat-body" id="chat-msgs">
+                <!-- Messages -->
+            </div>
+
+            <div class="chat-footer">
+                <input type="text" class="chat-input" id="chat-txt" placeholder="Type a reply..."
+                    style="flex: 1; padding: 0.75rem; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-panel); color: var(--text-primary); outline: none;"
+                    onkeypress="handleChat(event)">
+                <button
+                    style="background: var(--accent-color); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer;"
+                    onclick="sendChat()">
+                    <i data-lucide="send" width="18"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        let conversations = [
+            {
+                id: 1,
+                name: "James Paul Silayan",
+                avatar: "JS",
+                lastMsg: "hoyyyy",
+                time: "2m",
+                unread: true,
+                archived: false,
+                messages: [
+                    { text: "hoyyyy", sender: "them", time: "2 mins ago" }
+                ]
+            },
+            {
+                id: 2,
+                name: "John Vitor Vetvet",
+                avatar: "JV",
+                lastMsg: "na flat akong motor naay bangag ang kalsada",
+                time: "15m",
+                unread: true,
+                archived: false,
+                messages: [
+                    { text: "na flat akong motor naay bangag ang kalsada", sender: "them", time: "15 mins ago" }
+                ]
+            },
+            {
+                id: 3,
+                name: "Khristian Dove",
+                avatar: "KD",
+                lastMsg: "nabangaan ko ug van",
+                time: "1h",
+                unread: true,
+                archived: false,
+                messages: [
+                    { text: "nabangaan ko ug van", sender: "them", time: "1 hour ago" }
+                ]
+            },
+            {
+                id: 4,
+                name: "Paolo Malavar",
+                avatar: "PM",
+                lastMsg: "natagak akoang panty sa may kanto",
+                time: "3h",
+                unread: false,
+                archived: false,
+                messages: [
+                    { text: "natagak akoang panty sa may kanto", sender: "them", time: "3 hours ago" }
+                ]
+            },
+            {
+                id: 5,
+                name: "Whiskey Itable",
+                avatar: "WI",
+                lastMsg: "walay kurenti diri dol",
+                time: "5h",
+                unread: false,
+                archived: false,
+                messages: [
+                    { text: "walay kurenti diri dol", sender: "them", time: "5 hours ago" }
+                ]
+            },
+            {
+                id: 6,
+                name: "Elmer Solayao",
+                avatar: "ES",
+                lastMsg: "tamvike nanamn",
+                time: "1d",
+                unread: false,
+                archived: true,
+                messages: [
+                    { text: "tamvike nanamn", sender: "them", time: "Yesterday" }
+                ]
+            }
+        ];
+
+        let activeChatId = null;
+        let currentFilter = 'all';
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            renderChatList();
+            lucide.createIcons();
+
+            // Sync theme
+            const savedThemeMode = localStorage.getItem('adminThemeMode');
+            if (window.parent && window.parent.localStorage) {
+                const parentTheme = window.parent.localStorage.getItem('adminThemeMode');
+                if (parentTheme === 'dark') document.documentElement.classList.add('dark-mode');
+            }
+        });
+
+        function renderChatList() {
+            const listContainer = document.getElementById('chat-list-container');
+            listContainer.innerHTML = '';
+
+            let filtered = conversations.filter(c => {
+                if (currentFilter === 'unread') return c.unread && !c.archived;
+                if (currentFilter === 'archived') return c.archived;
+                return !c.archived;
+            });
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<div style="padding: 2rem; text-align: center; color: #94a3b8; font-size: 0.9rem;">No messages found.</div>`;
+                return;
+            }
+
+            filtered.forEach(chat => {
+                const item = document.createElement('div');
+                item.className = `chat-list-item ${chat.unread ? 'unread' : ''}`;
+                item.onclick = (e) => {
+                    if (!e.target.closest('.chat-actions-btn') && !e.target.closest('.action-popup')) {
+                        openConversation(chat.id);
+                    }
+                };
+
+                item.innerHTML = `
+                    <div class="user-avatar">${chat.avatar}</div>
+                    <div class="chat-info">
+                        <div class="chat-name">
+                            ${chat.name}
+                            <span class="chat-time">${chat.time}</span>
+                        </div>
+                        <div class="chat-preview">${chat.lastMsg}</div>
+                    </div>
+                `;
+                // Note: removed 3-dot menu for mobile simplicity or keep it? Keeping it simple for page view.
+
+                listContainer.appendChild(item);
+            });
+            lucide.createIcons();
+        }
+
+        function filterChats(filter, btn) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderChatList();
+        }
+
+        function openConversation(id) {
+            const chat = conversations.find(c => c.id === id);
+            if (!chat) return;
+
+            activeChatId = id;
+            if (chat.unread) {
+                chat.unread = false;
+                renderChatList();
+                // We should update parent badge ideally, but isolated for now
+            }
+
+            document.getElementById('chat-view-list').style.display = 'none';
+            document.getElementById('chat-view-convo').style.display = 'flex';
+            document.getElementById('active-chat-name').innerText = chat.name;
+
+            const msgsBody = document.getElementById('chat-msgs');
+            msgsBody.innerHTML = '';
+
+            chat.messages.forEach(msg => {
+                const bubble = document.createElement('div');
+                bubble.className = `msg-bubble msg-${msg.sender === 'me' ? 'out' : 'in'}`;
+                bubble.innerHTML = `${msg.text}<div class="msg-meta">${msg.sender === 'me' ? 'You' : chat.name} • ${msg.time}</div>`;
+                msgsBody.appendChild(bubble);
+            });
+            msgsBody.scrollTop = msgsBody.scrollHeight;
+        }
+
+        function showChatList() {
+            document.getElementById('chat-view-convo').style.display = 'none';
+            document.getElementById('chat-view-list').style.display = 'flex';
+            activeChatId = null;
+            renderChatList();
+        }
+
+        function handleChat(e) {
+            if (e.key === 'Enter') sendChat();
+        }
+
+        function sendChat() {
+            const input = document.getElementById('chat-txt');
+            constMxText = input.value.trim();
+            if (!input.value.trim() || !activeChatId) return;
+
+            const msgText = input.value.trim();
+            const chat = conversations.find(c => c.id === activeChatId);
+
+            chat.messages.push({ text: msgText, sender: 'me', time: 'Just now' });
+            chat.lastMsg = "You: " + msgText;
+            chat.time = "Now";
+
+            const body = document.getElementById('chat-msgs');
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble msg-out';
+            bubble.innerHTML = `${msgText}<div class="msg-meta">You • Just now</div>`;
+            body.appendChild(bubble);
+            input.value = '';
+            body.scrollTop = body.scrollHeight;
+
+            setTimeout(() => {
+                if (activeChatId === chat.id) {
+                    const replyText = "Im in the mobile page!";
+                    chat.messages.push({ text: replyText, sender: 'them', time: 'Just now' });
+                    chat.lastMsg = replyText;
+
+                    const reply = document.createElement('div');
+                    reply.className = 'msg-bubble msg-in';
+                    reply.innerHTML = `${replyText}<div class="msg-meta">${chat.name} • Just now</div>`;
+                    body.appendChild(reply);
+                    body.scrollTop = body.scrollHeight;
+                }
+            }, 2000);
+        }
+    </script>
+</body>
+
+</html>

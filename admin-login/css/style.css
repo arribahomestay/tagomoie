@@ -382,6 +382,19 @@ body::before {
     animation: fadeIn 0.4s ease-out;
 }
 
+
+.mobile-credits {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.875rem;
+    display: none;
+    pointer-events: none;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 900px) {
     .login-form-side {
@@ -399,5 +412,9 @@ body::before {
 
     .wave-overlay {
         display: none;
+    }
+
+    .mobile-credits {
+        display: block;
     }
 }

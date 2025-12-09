@@ -108,6 +108,138 @@
             display: block;
             border-left: 3px solid #4338ca;
         }
+
+        /* Mobile Schedule View */
+        .mobile-schedule-view {
+            display: none;
+        }
+
+        .mobile-filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .mobile-filters::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-chip {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-chip.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .schedule-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .schedule-card:active {
+            transform: scale(0.98);
+            background: var(--bg-panel);
+        }
+
+        .date-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-panel);
+            border-radius: 8px;
+            width: 60px;
+            height: 60px;
+            flex-shrink: 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .date-box .month {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #ef4444;
+        }
+
+        .date-box .day {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .schedule-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .schedule-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .schedule-meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            /* Default success/done */
+        }
+
+        .status-dot.pending {
+            background: #f59e0b;
+        }
+
+        .status-dot.upcoming {
+            background: #3b82f6;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-container {
+                display: none;
+            }
+
+            .mobile-schedule-view {
+                display: block;
+            }
+        }
     </style>
 </head>
 
@@ -149,6 +281,20 @@
             <div class="day-header">Sat</div>
 
             <!-- Days will be injected here -->
+        </div>
+    </div>
+
+    <!-- Mobile List View -->
+    <div class="mobile-schedule-view">
+        <div class="mobile-filters">
+            <div class="filter-chip active" onclick="filterMobileSchedules('all', this)">All</div>
+            <div class="filter-chip" onclick="filterMobileSchedules('upcoming', this)">Upcoming</div>
+            <div class="filter-chip" onclick="filterMobileSchedules('today', this)">Today</div>
+            <div class="filter-chip" onclick="filterMobileSchedules('past', this)">Past</div>
+        </div>
+
+        <div id="mobile-list">
+            <!-- List Items Injected Here -->
         </div>
     </div>
 
@@ -244,10 +390,92 @@
 
         // Initialize
         renderCalendar();
+        renderMobileList();
 
         window.addEventListener('storage', () => {
             renderCalendar();
+            renderMobileList(currentMobileFilter);
         });
+
+        // Mobile List Logic
+        let currentMobileFilter = 'all';
+
+        function filterMobileSchedules(filter, btn) {
+            currentMobileFilter = filter;
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            renderMobileList(filter);
+        }
+
+        function renderMobileList(filter = 'all') {
+            const listEl = document.getElementById('mobile-list');
+            listEl.innerHTML = '';
+
+            let schedules = loadSchedules();
+            // Sort by date desc
+            schedules.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let filtered = schedules.filter(s => {
+                const sDate = new Date(s.date);
+                sDate.setHours(0, 0, 0, 0);
+
+                if (filter === 'upcoming') return sDate > today;
+                if (filter === 'today') return sDate.getTime() === today.getTime();
+                if (filter === 'past') return sDate < today;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `
+                    <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+                        <i data-lucide="calendar-off" style="width: 48px; height: 48px; opacity: 0.5; margin-bottom: 1rem;"></i>
+                        <p>No schedules found for this filter.</p>
+                    </div>
+                `;
+                if (window.lucide) window.lucide.createIcons();
+                return;
+            }
+
+            filtered.forEach(item => {
+                const dateObj = new Date(item.date);
+                const month = dateObj.toLocaleString('default', { month: 'short' });
+                const day = dateObj.getDate();
+
+                // Determine status logic (simple version)
+                let statusClass = 'upcoming';
+                let statusText = 'Upcoming';
+                const sDate = new Date(item.date);
+                sDate.setHours(0, 0, 0, 0);
+
+                if (sDate < today) { statusClass = 'pending'; statusText = 'Past'; } // Or completed
+                if (sDate.getTime() === today.getTime()) { statusClass = 'upcoming'; statusText = 'Today'; }
+
+                const card = document.createElement('div');
+                card.className = 'schedule-card';
+                card.onclick = () => openDayModal(item.date);
+
+                card.innerHTML = `
+                    <div class="date-box">
+                        <span class="month">${month}</span>
+                        <span class="day">${day}</span>
+                    </div>
+                    <div class="schedule-info">
+                        <div class="schedule-title">${item.name}</div>
+                        <div class="schedule-meta">
+                            <span class="status-dot ${statusClass}"></span>
+                            ${statusText} • ${item.startTime || 'All Day'}
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" style="color: var(--text-secondary); width: 20px;"></i>
+                `;
+                listEl.appendChild(card);
+            });
+
+            if (window.lucide) window.lucide.createIcons();
+        }
     </script>
 </body>
 

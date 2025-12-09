@@ -157,6 +157,100 @@
             justify-content: center;
             margin-bottom: 1rem;
         }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.75rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+                min-height: 120px;
+                height: auto;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .stat-icon-wrapper {
+                width: 36px;
+                height: 36px;
+                margin-bottom: 0.5rem;
+            }
+
+            .stat-icon-wrapper i {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        /* Stacked Thumbnail */
+        .stacked-thumbnail {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .stack-img {
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid var(--bg-card);
+            /* Border creates separation */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: #cbd5e1;
+        }
+
+        .stack-img:nth-child(1) {
+            top: 0;
+            left: 0;
+            z-index: 10;
+            background: transparent;
+        }
+
+        .stack-img:nth-child(2) {
+            top: 4px;
+            left: 4px;
+            z-index: 5;
+            transform: scale(0.92);
+            background: #64748b;
+        }
+
+        .stack-img:nth-child(3) {
+            top: 8px;
+            left: 8px;
+            z-index: 1;
+            transform: scale(0.85);
+            background: #94a3b8;
+        }
+
+        /* Next Arrow Button */
+        .btn-next-arrow {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 0.5rem;
+        }
+
+        .btn-next-arrow:hover {
+            background: var(--bg-panel);
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
+        }
     </style>
 </head>
 
@@ -165,24 +259,23 @@
 
     <!-- Key Metrics -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" onclick="navigateTo('issues')" style="cursor: pointer;">
             <div style="display: flex; justify-content: space-between; align-items: start;">
                 <div>
-                    <div class="stat-title">New Reports Today</div>
+                    <div class="stat-title">New Reports</div>
                     <div class="stat-value">12</div>
                 </div>
                 <div class="stat-icon-wrapper" style="background: #eff6ff; color: #3b82f6;">
                     <i data-lucide="file-plus"></i>
                 </div>
             </div>
-            <div style="font-size: 0.8rem; color: #10b981; font-weight: 500;">
+            <div style="font-size: 0.75rem; color: #10b981; font-weight: 500;">
                 <i data-lucide="trending-up"
-                    style="width: 14px; height: 14px; display: inline; vertical-align: text-bottom;"></i> +8% from
-                yesterday
+                    style="width: 14px; height: 14px; display: inline; vertical-align: text-bottom;"></i> +8% today
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" onclick="navigateTo('issues')" style="cursor: pointer;">
             <div style="display: flex; justify-content: space-between; align-items: start;">
                 <div>
                     <div class="stat-title">Active Issues</div>
@@ -192,40 +285,38 @@
                     <i data-lucide="alert-triangle"></i>
                 </div>
             </div>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 500;">
-                Urgent attention needed
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 500;">
+                Urgent attention
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" onclick="navigateTo('manage')" style="cursor: pointer;">
             <div style="display: flex; justify-content: space-between; align-items: start;">
                 <div>
-                    <div class="stat-title">Resolved (Week)</div>
+                    <div class="stat-title">Resolved</div>
                     <div class="stat-value">89</div>
                 </div>
                 <div class="stat-icon-wrapper" style="background: #f0fdf4; color: #10b981;">
                     <i data-lucide="check-circle-2"></i>
                 </div>
             </div>
-            <div style="font-size: 0.8rem; color: #10b981; font-weight: 500;">
-                <i data-lucide="trending-up"
-                    style="width: 14px; height: 14px; display: inline; vertical-align: text-bottom;"></i> +12%
-                efficiency
+            <div style="font-size: 0.75rem; color: #10b981; font-weight: 500;">
+                +12% efficiency
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" onclick="navigateTo('manage')" style="cursor: pointer;">
             <div style="display: flex; justify-content: space-between; align-items: start;">
                 <div>
-                    <div class="stat-title">Avg Response Time</div>
+                    <div class="stat-title">Avg Time</div>
                     <div class="stat-value">2.4h</div>
                 </div>
                 <div class="stat-icon-wrapper" style="background: #f5f3ff; color: #8b5cf6;">
                     <i data-lucide="clock"></i>
                 </div>
             </div>
-            <div style="font-size: 0.8rem; color: #10b981; font-weight: 500;">
-                -15m faster than avg
+            <div style="font-size: 0.75rem; color: #10b981; font-weight: 500;">
+                -15m faster
             </div>
         </div>
     </div>
@@ -235,71 +326,88 @@
         <div class="card">
             <div class="section-title">
                 <i data-lucide="users" style="width: 18px; color: #6366f1;"></i>
-                Recent User Reports (News Feed)
+                Recent Reports
             </div>
 
             <div class="report-item">
-                <div class="report-icon" style="background: #fee2e2; color: #ef4444;">
-                    <i data-lucide="zap"></i>
+                <div class="stacked-thumbnail"
+                    onclick="openLightbox('https://placehold.co/600x400/ef4444/ffffff?text=Power+Outage')">
+                    <!-- Bottom items first in DOM if using z-index or use absolute with explicit z-index -->
+                    <img src="https://placehold.co/100x100/ef4444/ffffff?text=No+Power" class="stack-img"
+                        alt="Thumbnail">
+                    <div class="stack-img"></div>
+                    <div class="stack-img"></div>
                 </div>
                 <div class="report-info">
                     <div class="report-title">Walay Kuryente - Purok 4</div>
                     <div class="report-meta">
                         <span class="user-tag"><i data-lucide="user" width="12"></i> Whiskey Itable</span> • <span
-                            style="color: #ef4444; font-weight: 600;">Critical</span> • 12 mins ago
+                            style="color: #ef4444; font-weight: 600;">Critical</span> • 12m ago
                     </div>
                 </div>
-                <button class="btn-action btn-view"
-                    onclick="openDetails('#1027', 'Walay Kuryente', 'Whiskey Itable', 'Today', 'Critical', 'Walay kuryente sa among area sukad pa ganihang hapon.')"
-                    style="color: #475569; background: #f1f5f9;">View</button>
+                <button class="btn-next-arrow"
+                    onclick="openDetails('#1027', 'Walay Kuryente', 'Whiskey Itable', 'Today', 'Critical', 'Walay kuryente sa among area sukad pa ganihang hapon.')">
+                    <i data-lucide="chevron-right" width="20"></i>
+                </button>
             </div>
 
             <div class="report-item">
-                <div class="report-icon" style="background: #e0f2fe; color: #0284c7;">
-                    <i data-lucide="alert-triangle"></i>
+                <div class="stacked-thumbnail" onclick="openLightbox('../../assets/sample/pothole.jpg')">
+                    <img src="../../assets/sample/pothole.jpg" class="stack-img" alt="Thumbnail">
+                    <div class="stack-img"></div>
+                    <div class="stack-img"></div>
                 </div>
                 <div class="report-info">
                     <div class="report-title">Guba ang Dalan</div>
                     <div class="report-meta">
-                        <span class="user-tag"><i data-lucide="user" width="12"></i> John Vitor Vetvet</span> • <span
-                            style="color: #0284c7; font-weight: 600;">In Review</span> • 45 mins ago
+                        <span class="user-tag"><i data-lucide="user" width="12"></i> J. Vetvet</span> • <span
+                            style="color: #0284c7; font-weight: 600;">Review</span> • 45m ago
                     </div>
                 </div>
-                <button class="btn-action btn-view"
-                    onclick="openDetails('#1025', 'Guba ang Dalan', 'John Vitor Vetvet', 'Today', 'In Review', 'Naay dako nga bangag sa dalan dapit sa Purok 3. Daghan na na-disgrasya nga motor.')"
-                    style="color: #475569; background: #f1f5f9;">View</button>
+                <button class="btn-next-arrow"
+                    onclick="openDetails('#1025', 'Guba ang Dalan', 'John Vitor Vetvet', 'Today', 'In Review', 'Naay dako nga bangag sa dalan dapit sa Purok 3. Daghan na na-disgrasya nga motor.')">
+                    <i data-lucide="chevron-right" width="20"></i>
+                </button>
             </div>
 
             <div class="report-item">
-                <div class="report-icon" style="background: #fef3c7; color: #d97706;">
-                    <i data-lucide="volume-2"></i>
+                <div class="stacked-thumbnail"
+                    onclick="openLightbox('https://placehold.co/600x400/d97706/ffffff?text=Noise')">
+                    <img src="https://placehold.co/100x100/d97706/ffffff?text=Noise" class="stack-img" alt="Thumbnail">
+                    <div class="stack-img"></div>
+                    <div class="stack-img"></div>
                 </div>
                 <div class="report-info">
                     <div class="report-title">Saba nga Karaoke</div>
                     <div class="report-meta">
-                        <span class="user-tag"><i data-lucide="user" width="12"></i> James Paul Silayan</span> • <span
-                            style="color: #d97706; font-weight: 600;">Critical</span> • 1 hour ago
+                        <span class="user-tag"><i data-lucide="user" width="12"></i> J. Silayan</span> • <span
+                            style="color: #d97706; font-weight: 600;">Critical</span> • 1h ago
                     </div>
                 </div>
-                <button class="btn-action btn-view"
-                    onclick="openDetails('#1024', 'Saba nga Karaoke', 'James Paul Silayan', 'Today', 'Critical', 'Saba kaayo ang karaoke sa silingan bisag lawom na ang gabii. Dili na mi katulog.')"
-                    style="color: #475569; background: #f1f5f9;">View</button>
+                <button class="btn-next-arrow"
+                    onclick="openDetails('#1024', 'Saba nga Karaoke', 'James Paul Silayan', 'Today', 'Critical', 'Saba kaayo ang karaoke sa silingan bisag lawom na ang gabii. Dili na mi katulog.')">
+                    <i data-lucide="chevron-right" width="20"></i>
+                </button>
             </div>
 
             <div class="report-item">
-                <div class="report-icon">
-                    <i data-lucide="users"></i>
+                <div class="stacked-thumbnail"
+                    onclick="openLightbox('https://placehold.co/600x400/64748b/ffffff?text=Standby')">
+                    <img src="https://placehold.co/100x100/64748b/ffffff?text=Team" class="stack-img" alt="Thumbnail">
+                    <div class="stack-img"></div>
+                    <div class="stack-img"></div>
                 </div>
                 <div class="report-info">
                     <div class="report-title">Mga Istambay</div>
                     <div class="report-meta">
-                        <span class="user-tag"><i data-lucide="user" width="12"></i> Elmer Solayao</span> •
-                        <span>Resolved</span> • 2 hours ago
+                        <span class="user-tag"><i data-lucide="user" width="12"></i> E. Solayao</span> •
+                        <span>Resolved</span> • 2h ago
                     </div>
                 </div>
-                <button class="btn-action btn-view"
-                    onclick="openDetails('#1028', 'Mga Istambay', 'Elmer Solayao', 'Today', 'Resolved', 'Naay nireklamo sa mga istambay nga sabaan sa kanto.')"
-                    style="color: #475569; background: #f1f5f9;">View</button>
+                <button class="btn-next-arrow"
+                    onclick="openDetails('#1028', 'Mga Istambay', 'Elmer Solayao', 'Today', 'Resolved', 'Naay nireklamo sa mga istambay nga sabaan sa kanto.')">
+                    <i data-lucide="chevron-right" width="20"></i>
+                </button>
             </div>
         </div>
 
@@ -307,13 +415,13 @@
         <div class="card">
             <div class="section-title">
                 <i data-lucide="alert-octagon" style="width: 18px; color: #ef4444;"></i>
-                Critical Issues Watchlist
+                Critical Watchlist
             </div>
 
             <!-- Critical Item 1 -->
             <div class="report-item" style="border-left: 3px solid #ef4444; padding-left: 1rem;">
                 <div class="report-info">
-                    <div class="report-title" style="color: #ef4444;">Walay Kuryente - Purok 4</div>
+                    <div class="report-title" style="color: #ef4444;">Walay Kuryente</div>
                     <div class="report-meta">
                         <span>#1027</span> • 12 mins ago
                     </div>
@@ -341,11 +449,12 @@
             </div>
 
             <div style="margin-top: 1.5rem;">
-                <button onclick="window.parent.openCriticalIssuesModal()"
+                <button
+                    onclick="if(window.parent && window.parent.openCriticalIssuesModal) window.parent.openCriticalIssuesModal()"
                     style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--bg-panel); border: 1px solid var(--border-color); color: var(--text-primary); padding: 0.75rem; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s;"
                     onmouseover="this.style.background='var(--bg-content)'"
                     onmouseout="this.style.background='var(--bg-panel)'">
-                    View All Critical Issues
+                    View All
                     <i data-lucide="arrow-right" width="16"></i>
                 </button>
             </div>
@@ -361,6 +470,20 @@
                 window.parent.openGlobalModal(id, name, reporter, date, status, desc);
             } else {
                 console.error('Global modal function not found on parent window.');
+            }
+        }
+
+        function navigateTo(page) {
+            if (window.parent) {
+                // Try to find the mobile nav item first as it might be the visible one
+                const mobileNavItem = window.parent.document.querySelector(`.mobile-nav-item[data-page="${page}"]`);
+                const desktopNavItem = window.parent.document.querySelector(`.nav-item[data-page="${page}"]`);
+
+                if (mobileNavItem && getComputedStyle(mobileNavItem).display !== 'none') {
+                    mobileNavItem.click();
+                } else if (desktopNavItem) {
+                    desktopNavItem.click();
+                }
             }
         }
     </script>
