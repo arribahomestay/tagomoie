@@ -5,28 +5,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/content.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <title>Issues</title>
     <style>
-        .row-active {
-            background-color: rgba(99, 102, 241, 0.1) !important;
-            border-left: 3px solid #6366f1;
+        /* Tabs */
+        .tabs-header {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-left: 0.5rem;
         }
 
-        /* Ensure border-left works */
-        tr {
-            border-left: 3px solid transparent;
-            transition: background-color 0.2s, border-left 0.2s;
+        .tab-btn {
+            padding: 1rem 0;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
         }
+
+        .tab-btn.active {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        /* Enhanced Table Styles */
+        .cat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--bg-panel);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e0e7ff;
+            color: #4f46e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Priority Indicators */
+        tr {
+            transition: background-color 0.2s;
+        }
+
+        tr.priority-critical td:first-child {
+            box-shadow: inset 4px 0 0 -1px #ef4444;
+        }
+
+        tr.priority-warning td:first-child {
+            box-shadow: inset 4px 0 0 -1px #f59e0b;
+        }
+
+        tr.priority-normal td:first-child {
+            box-shadow: inset 4px 0 0 -1px #10b981;
+        }
+
+        /* Active Row Highlight */
+        .row-active {
+            background-color: rgba(99, 102, 241, 0.08) !important;
+        }
+
+        /* Dark Mode Tweaks handled by vars, but specific overrides */
     </style>
 </head>
 
 <body>
     <h1>Issue Tracker</h1>
 
-    <div class="card">
+    <!-- Tabs -->
+    <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTab('Active', this)">Active Issues</button>
+        <button class="tab-btn" onclick="switchTab('Scheduled', this)">Scheduled</button>
+        <button class="tab-btn" onclick="switchTab('History', this)">History</button>
+    </div>
+
+    <div class="card" style="margin-top: 1.5rem;">
         <table>
             <thead>
                 <tr>
+                    <th style="width: 50px;">Type</th>
                     <th>ID</th>
                     <th>Issue Name</th>
                     <th>Reported By</th>
@@ -36,11 +120,20 @@
                 </tr>
             </thead>
             <tbody>
-                <tr data-id="#1024"
+                <!-- CRITICAL -->
+                <tr class="priority-critical" data-id="#1024" data-status="Critical"
                     data-desc="Saba kaayo ang karaoke sa silingan bisag lawom na ang gabii. Dili na mi katulog.">
+                    <td>
+                        <div class="cat-icon"><i data-lucide="volume-2" width="18"></i></div>
+                    </td>
                     <td class="row-id">#1024</td>
                     <td class="row-name">Saba nga Karaoke</td>
-                    <td class="row-reporter">James Paul Silayan</td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">JS</div>
+                            <span class="row-reporter">James Paul Silayan</span>
+                        </div>
+                    </td>
                     <td class="row-date">Oct 24, 2023</td>
                     <td><span class="status-badge status-error row-status">Critical</span></td>
                     <td>
@@ -48,11 +141,21 @@
                         <button class="btn-action btn-delete" onclick="deleteRow(this)">Delete</button>
                     </td>
                 </tr>
-                <tr data-id="#1025"
+
+                <!-- REVIEW -->
+                <tr class="priority-warning" data-id="#1025" data-status="In Review"
                     data-desc="Naay dako nga bangag sa dalan dapit sa Purok 3. Daghan na na-disgrasya nga motor.">
+                    <td>
+                        <div class="cat-icon"><i data-lucide="alert-triangle" width="18"></i></div>
+                    </td>
                     <td class="row-id">#1025</td>
                     <td class="row-name">Guba ang Dalan</td>
-                    <td class="row-reporter">John Vitor Vetvet</td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar" style="background: #fef3c7; color: #b45309;">JV</div>
+                            <span class="row-reporter">John Vitor Vetvet</span>
+                        </div>
+                    </td>
                     <td class="row-date">Oct 25, 2023</td>
                     <td><span class="status-badge status-pending row-status">In Review</span></td>
                     <td>
@@ -60,10 +163,21 @@
                         <button class="btn-action btn-delete" onclick="deleteRow(this)">Delete</button>
                     </td>
                 </tr>
-                <tr data-id="#1026" data-desc="Bangga sa may crossing ganihang buntag involving van ug motor.">
+
+                <!-- ONGOING -->
+                <tr class="priority-warning" data-id="#1026" data-status="Ongoing"
+                    data-desc="Bangga sa may crossing ganihang buntag involving van ug motor.">
+                    <td>
+                        <div class="cat-icon"><i data-lucide="car" width="18"></i></div>
+                    </td>
                     <td class="row-id">#1026</td>
                     <td class="row-name">Vehicular Accident</td>
-                    <td class="row-reporter">Khristian Dove</td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar" style="background: #dcfce7; color: #15803d;">KD</div>
+                            <span class="row-reporter">Khristian Dove</span>
+                        </div>
+                    </td>
                     <td class="row-date">Oct 26, 2023</td>
                     <td><span class="status-badge status-pending row-status">Ongoing</span></td>
                     <td>
@@ -71,10 +185,21 @@
                         <button class="btn-action btn-delete" onclick="deleteRow(this)">Delete</button>
                     </td>
                 </tr>
-                <tr data-id="#1027" data-desc="Walay kuryente sa among area sukad pa ganihang hapon.">
+
+                <!-- CRITICAL -->
+                <tr class="priority-critical" data-id="#1027" data-status="Critical"
+                    data-desc="Walay kuryente sa among area sukad pa ganihang hapon.">
+                    <td>
+                        <div class="cat-icon"><i data-lucide="zap" width="18"></i></div>
+                    </td>
                     <td class="row-id">#1027</td>
                     <td class="row-name">Walay Kuryente</td>
-                    <td class="row-reporter">Whiskey Itable</td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">WI</div>
+                            <span class="row-reporter">Whiskey Itable</span>
+                        </div>
+                    </td>
                     <td class="row-date">Oct 27, 2023</td>
                     <td><span class="status-badge status-error row-status">Critical</span></td>
                     <td>
@@ -82,10 +207,21 @@
                         <button class="btn-action btn-delete" onclick="deleteRow(this)">Delete</button>
                     </td>
                 </tr>
-                <tr data-id="#1028" data-desc="Naay nireklamo sa mga istambay nga sabaan sa kanto.">
+
+                <!-- RESOLVED -->
+                <tr class="priority-normal" data-id="#1028" data-status="Resolved"
+                    data-desc="Naay nireklamo sa mga istambay nga sabaan sa kanto.">
+                    <td>
+                        <div class="cat-icon"><i data-lucide="users" width="18"></i></div>
+                    </td>
                     <td class="row-id">#1028</td>
                     <td class="row-name">Mga Istambay</td>
-                    <td class="row-reporter">Elmer Solayao</td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar" style="background: #e2e8f0; color: #475569;">ES</div>
+                            <span class="row-reporter">Elmer Solayao</span>
+                        </div>
+                    </td>
                     <td class="row-date">Oct 28, 2023</td>
                     <td><span class="status-badge status-active row-status">Resolved</span></td>
                     <td>
@@ -98,6 +234,30 @@
     </div>
 
     <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        function switchTab(tabName, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const status = row.getAttribute('data-status');
+                let show = false;
+
+                if (tabName === 'Active') {
+                    if (['Critical', 'In Review', 'Pending', 'Error'].includes(status)) show = true;
+                } else if (tabName === 'Scheduled') {
+                    if (['Ongoing'].includes(status)) show = true;
+                } else if (tabName === 'History') {
+                    if (['Resolved', 'Completed', 'Archived'].includes(status)) show = true;
+                }
+
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
         function openDetails(btn) {
             const row = btn.closest('tr');
 
@@ -112,7 +272,6 @@
             const status = row.querySelector('.row-status').innerText;
             const desc = row.getAttribute('data-desc');
 
-            // Call the global function on the parent window
             if (window.parent && window.parent.openGlobalModal) {
                 window.parent.openGlobalModal(id, name, reporter, date, status, desc);
             } else {
@@ -132,48 +291,47 @@
             }
         }
 
-        // Global status updater called by parent
         window.updateRowStatus = function (id, newStatus) {
-            // Find row by ID cell content since data-id might be brittle if format changes, 
-            // but here we used data-id so it's fine.
             const rows = document.querySelectorAll('tr');
-            let targetRow = null;
-
             rows.forEach(r => {
                 const idCell = r.querySelector('.row-id');
-                if (idCell && idCell.innerText === id) targetRow = r;
-            });
+                if (idCell && idCell.innerText === id) {
+                    const badge = r.querySelector('.status-badge');
+                    if (badge) {
+                        badge.innerText = newStatus;
+                        badge.className = 'status-badge row-status';
+                        if (newStatus === 'Critical' || newStatus === 'Error') badge.classList.add('status-error');
+                        else if (newStatus === 'Resolved' || newStatus === 'Completed') badge.classList.add('status-active');
+                        else if (newStatus === 'Ongoing' || newStatus === 'In Review') badge.classList.add('status-pending');
 
-            if (targetRow) {
-                const badge = targetRow.querySelector('.status-badge');
-                if (badge) {
-                    badge.innerText = newStatus;
-
-                    // Reset classes
-                    badge.className = 'status-badge row-status';
-
-                    // Apply new classes
-                    if (newStatus === 'Critical' || newStatus === 'Error') badge.classList.add('status-error');
-                    else if (newStatus === 'Resolved' || newStatus === 'Completed') badge.classList.add('status-active');
-                    else if (newStatus === 'Ongoing' || newStatus === 'In Review') badge.classList.add('status-pending');
+                        // Update data-status for filtering
+                        r.setAttribute('data-status', newStatus);
+                    }
                 }
-            }
+            });
         }
-        // Allow parent to highlight a row (e.g. from Critical Issues modal)
+
         window.highlightRow = function (id) {
+            switchTab('Active', document.querySelector('.tab-btn')); // Default to active tab to find it
+            // Logic to switch tab if needed? For now just try to find it.
+
             document.querySelectorAll('tr').forEach(r => {
                 r.classList.remove('row-active');
                 const idCell = r.querySelector('.row-id');
                 if (idCell && idCell.innerText === id) {
                     r.classList.add('row-active');
+                    r.style.display = ''; // Ensure visible
                     r.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             });
         }
-        // Allow parent to clear highlights
+
         window.clearHighlight = function () {
             document.querySelectorAll('tr').forEach(r => r.classList.remove('row-active'));
         }
+
+        // Run initial tab
+        switchTab('Active', document.querySelector('.tab-btn.active'));
     </script>
 </body>
 
