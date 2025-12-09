@@ -13,6 +13,7 @@
 
     <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/layout.css">
@@ -46,9 +47,11 @@
 
         <div class="sidebar-header">
             <div class="nav-icon">
-                <i data-lucide="shield-check" color="#6366f1"></i>
+                <lottie-player class="logo-lottie" src="assets/animations/SAS.json" background="transparent" speed="1"
+                    loop autoplay></lottie-player>
             </div>
-            <span class="logo-text">AdminPortal</span>
+            <span class="logo-text">TAGUM <span style="color: #ef4444;">U</span><span
+                    style="color: #22c55e;">Y</span>NITE</span>
         </div>
 
         <nav class="nav-menu">
@@ -101,7 +104,8 @@
             <!-- Notification Bell -->
             <div class="profile-menu-container" style="margin-right: 0;">
                 <div class="notif-btn" id="notif-btn">
-                    <i data-lucide="bell" width="20" height="20"></i>
+                    <lottie-player src="assets/animations/notification.json" background="transparent" speed="1"
+                        style="width: 28px; height: 28px;" hover></lottie-player>
                     <div class="notif-badge"></div>
                 </div>
                 <!-- Notif Dropdown -->

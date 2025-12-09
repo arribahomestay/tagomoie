@@ -9,10 +9,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
+    <!-- Animated Logo -->
+    <div style="position: fixed; top: 30px; left: 30px; z-index: 100;">
+        <lottie-player src="../admin-portal/assets/animations/SAS.json" background="transparent" speed="1"
+            style="width: 50px; height: 50px; filter: brightness(0) invert(1);" loop autoplay></lottie-player>
+    </div>
 
     <!-- Notification -->
     <div class="notification" id="notify-error">
