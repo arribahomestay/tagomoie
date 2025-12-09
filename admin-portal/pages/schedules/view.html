@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../../css/content.css">
     <title>Schedules</title>
     <style>
-        <style>.calendar-container {
+        .calendar-container {
             background: var(--bg-card);
             border-radius: 12px;
             padding: 1.5rem;
@@ -112,7 +112,22 @@
 </head>
 
 <body>
-    <h1>Schedules & Calendar</h1>
+    <div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 1.5rem; gap: 1.5rem;">
+        <h1 style="margin: 0;">Schedules & Calendar</h1>
+        <button onclick="if(window.parent.openAllSchedulesModal) window.parent.openAllSchedulesModal()"
+            style="background: #6366f1; color: white; border: none; padding: 0.6rem 1rem; border-radius: 8px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; transition: background 0.2s;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6" />
+                <line x1="8" y1="12" x2="21" y2="12" />
+                <line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" />
+                <line x1="3" y1="12" x2="3.01" y2="12" />
+                <line x1="3" y1="18" x2="3.01" y2="18" />
+            </svg>
+            Monitor Ongoing
+        </button>
+    </div>
 
     <div class="calendar-container">
         <div class="calendar-header">

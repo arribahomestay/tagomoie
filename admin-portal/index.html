@@ -210,17 +210,18 @@
                 </div>
             </div>
 
-            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-                <div id="modal-actions" style="margin-right: auto; display: flex; align-items: center;">
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; align-items: center; gap: 1rem;">
+                <div id="modal-actions" style="display: flex; align-items: center; gap: 0.5rem;">
                     <input type="date" id="response-date"
-                        style="display: none; margin-right: 0.5rem; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; color: #475569; font-family: inherit;">
+                        style="display: none; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; color: #475569; font-family: inherit;">
+                    <input type="time" id="response-time"
+                        style="display: none; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; color: #475569; font-family: inherit;">
                     <button class="btn-action btn-respond" onclick="handleRespond()"
-                        style="background: #6366f1; color: white; margin-right: 0.5rem; padding: 0.75rem 1rem; border-radius: 8px;">Respond</button>
+                        style="background: #6366f1; color: white; padding: 0.75rem 1rem; border-radius: 8px;">Respond</button>
                     <button class="btn-action btn-complete" onclick="updateIssueStatus('Resolved')"
                         style="background: #10b981; color: white; padding: 0.75rem 1rem; border-radius: 8px;">Mark
                         Completed</button>
                 </div>
-                <button class="btn-close" onclick="closeGlobalModal()">Close</button>
             </div>
         </div>
     </div>
@@ -668,6 +669,7 @@
             applyStatusColor(statusEl, status);
             document.getElementById('g-desc').innerText = desc;
             document.getElementById('response-date').valueAsDate = new Date();
+            document.getElementById('response-time').value = '08:00'; // Default
             updateModalButtons(status);
             globalModal.classList.add('active');
         }
@@ -684,14 +686,17 @@
             const btnRespond = actions.querySelector('.btn-respond');
             const btnComplete = actions.querySelector('.btn-complete');
             const dateInput = document.getElementById('response-date');
+            const timeInput = document.getElementById('response-time');
 
             btnRespond.style.display = 'none';
             btnComplete.style.display = 'none';
             dateInput.style.display = 'none';
+            timeInput.style.display = 'none';
 
             if (status === 'Pending' || status === 'In Review' || status === 'Critical') {
                 btnRespond.style.display = 'inline-block';
                 dateInput.style.display = 'inline-block';
+                timeInput.style.display = 'inline-block';
             } else if (status === 'Ongoing') {
                 btnComplete.style.display = 'inline-block';
             }
@@ -699,16 +704,20 @@
 
         window.handleRespond = function () {
             const dateInput = document.getElementById('response-date');
+            const timeInput = document.getElementById('response-time');
             if (!dateInput.value) {
                 alert("Please select a date to schedule this response.");
                 return;
             }
-            saveSchedule(currentIssueId, currentIssueName, dateInput.value, 'Ongoing');
+            // Optional: check for time, or just let it be empty if allowed. But user asked to "add a time... so admin can set time".
+            // Let's assume it defaults or user sets it.
+
+            saveSchedule(currentIssueId, currentIssueName, dateInput.value, timeInput.value, 'Ongoing');
             updateIssueStatus('Ongoing');
         }
 
-        function saveSchedule(id, name, date, status) {
-            const newIssue = { id, name, date, status };
+        function saveSchedule(id, name, date, time, status) {
+            const newIssue = { id, name, date, time: time || '08:00', status };
             let schedules = JSON.parse(localStorage.getItem('adminSchedules') || '[]');
             schedules = schedules.filter(s => s.id !== id);
             schedules.push(newIssue);
@@ -827,13 +836,25 @@
 
             events.forEach(ev => {
                 // Simulate time (since data lacks it)
-                const idNum = parseInt(ev.id.replace('#', '')) || 0;
-                const hour = (idNum % 12) + 8; // Random hour 8am-8pm
-                const isAm = hour < 12;
-                const amPm = isAm ? 'AM' : 'PM';
-                const displayHour = hour > 12 ? hour - 12 : hour;
-                const timeOfDay = isAm ? 'Morning' : 'Afternoon';
-                const timeStr = `${displayHour}:00 ${amPm}`;
+                let timeStr, timeOfDay;
+
+                if (ev.time) {
+                    const [h, m] = ev.time.split(':').map(Number);
+                    const isAm = h < 12;
+                    const amPm = isAm ? 'AM' : 'PM';
+                    const displayHour = h % 12 || 12; // 0 becomes 12
+                    timeStr = `${displayHour}:${m.toString().padStart(2, '0')} ${amPm}`;
+                    timeOfDay = h < 12 ? 'Morning' : 'Afternoon';
+                } else {
+                    // Fallback for old data
+                    const idNum = parseInt(ev.id.replace('#', '')) || 0;
+                    const hour = (idNum % 12) + 8; // Random hour 8am-8pm
+                    const isAm = hour < 12;
+                    const amPm = isAm ? 'AM' : 'PM';
+                    const displayHour = hour > 12 ? hour - 12 : hour;
+                    timeOfDay = isAm ? 'Morning' : 'Afternoon';
+                    timeStr = `${displayHour}:00 ${amPm}`;
+                }
 
                 if (activeFilter === 'All' || activeFilter === timeOfDay) {
                     const item = document.createElement('div');
@@ -929,7 +950,7 @@
                 if (darkBtn) {
                     darkBtn.classList.add('active');
                     darkBtn.style.borderColor = '#6366f1';
-                    darkBtn.style.backgroundColor = 'rgba(99, 102, 241, 0.1)';
+                    darkBtn.style.backgroundColor = '#1e293b';
                 }
                 const lightBtn = document.getElementById('mode-light');
                 if (lightBtn) {
@@ -1254,6 +1275,129 @@
     </script>
     <script src="js/sidebar.js"></script>
     <script src="js/router.js"></script>
+    <!-- Ongoing Schedules Modal -->
+    <div class="modal-overlay" id="allSchedulesModal" style="z-index: 2400;">
+        <div class="modal-card" style="max-width: 800px; height: 80vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <h2 class="modal-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="activity" width="24" style="color: #6366f1;"></i>
+                    Ongoing Schedules Monitor
+                </h2>
+                <button class="modal-close" onclick="closeAllSchedulesModal()">&times;</button>
+            </div>
+
+            <div class="modal-body"
+                style="flex: 1; overflow: hidden; display: flex; flex-direction: column; padding: 0;">
+                <!-- Filter Bar -->
+                <div
+                    style="padding: 1rem; border-bottom: 1px solid var(--border-color); background: var(--bg-panel); display: flex; gap: 1rem;">
+                    <input type="text" id="sched-search" placeholder="Search by name or ID..."
+                        onkeyup="renderAllSchedules()"
+                        style="flex: 1; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-family: inherit;">
+                    <select id="sched-filter-status" onchange="renderAllSchedules()"
+                        style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-family: inherit;">
+                        <option value="Ongoing">Ongoing</option>
+                        <option value="All">All Statuses</option>
+                    </select>
+                </div>
+
+                <!-- List/Table -->
+                <div style="flex: 1; overflow-y: auto; padding: 0;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="background: var(--bg-panel); position: sticky; top: 0; z-index: 10;">
+                            <tr style="text-align: left; color: var(--text-secondary); font-size: 0.85rem;">
+                                <th style="padding: 1rem; border-bottom: 1px solid var(--border-color);">ID</th>
+                                <th style="padding: 1rem; border-bottom: 1px solid var(--border-color);">Issue Name</th>
+                                <th style="padding: 1rem; border-bottom: 1px solid var(--border-color);">Date</th>
+                                <th style="padding: 1rem; border-bottom: 1px solid var(--border-color);">Time</th>
+                                <th style="padding: 1rem; border-bottom: 1px solid var(--border-color);">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-schedules-list">
+                            <!-- Items -->
+                        </tbody>
+                    </table>
+                    <div id="no-schedules-msg"
+                        style="text-align: center; padding: 2rem; color: var(--text-secondary); display: none;">No
+                        schedules found.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.openAllSchedulesModal = function () {
+            renderAllSchedules();
+            document.getElementById('allSchedulesModal').classList.add('active');
+            lucide.createIcons();
+        }
+
+        window.closeAllSchedulesModal = function () {
+            document.getElementById('allSchedulesModal').classList.remove('active');
+        }
+
+        window.renderAllSchedules = function () {
+            const list = document.getElementById('all-schedules-list');
+            const noMsg = document.getElementById('no-schedules-msg');
+            const search = document.getElementById('sched-search').value.toLowerCase();
+            const statusFilter = document.getElementById('sched-filter-status').value;
+
+            list.innerHTML = '';
+            let schedules = JSON.parse(localStorage.getItem('adminSchedules') || '[]');
+
+            // Filter
+            const filtered = schedules.filter(s => {
+                const matchesStatus = statusFilter === 'All' || s.status === statusFilter;
+                const matchesSearch = s.name.toLowerCase().includes(search) || s.id.toLowerCase().includes(search);
+                return matchesStatus && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                noMsg.style.display = 'block';
+            } else {
+                noMsg.style.display = 'none';
+                filtered.forEach(s => {
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid var(--border-color)';
+                    tr.style.transition = 'background 0.2s';
+                    tr.onmouseover = function () { this.style.background = 'var(--bg-panel)'; };
+                    tr.onmouseout = function () { this.style.background = 'transparent'; };
+
+                    // Parse Time (reuse logic)
+                    let timeStr = 'N/A';
+                    if (s.time) {
+                        const [h, m] = s.time.split(':');
+                        const hh = parseInt(h);
+                        const amPm = hh < 12 ? 'AM' : 'PM';
+                        const displayH = hh % 12 || 12;
+                        timeStr = `${displayH}:${m} ${amPm}`;
+                    }
+
+                    // Format Date
+                    let dateStr = s.date;
+                    try {
+                        const d = new Date(s.date);
+                        dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    } catch (e) { }
+
+                    // Status Color
+                    let statusColor = '#94a3b8';
+                    if (s.status === 'Ongoing') statusColor = '#f59e0b';
+                    if (s.status === 'Resolved' || s.status === 'Completed') statusColor = '#10b981';
+                    if (s.status === 'Critical') statusColor = '#ef4444';
+
+                    tr.innerHTML = `
+                        <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;">${s.id}</td>
+                        <td style="padding: 1rem; color: var(--text-primary);">${s.name}</td>
+                        <td style="padding: 1rem; color: var(--text-secondary);">${dateStr}</td>
+                        <td style="padding: 1rem; color: var(--text-secondary);">${timeStr}</td>
+                        <td style="padding: 1rem;"><span style="color: ${statusColor}; font-weight: 500; background: ${statusColor}20; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${s.status}</span></td>
+                    `;
+                    list.appendChild(tr);
+                });
+            }
+        }
+    </script>
 </body>
 
 </html>
