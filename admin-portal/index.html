@@ -70,11 +70,14 @@
                 <span class="nav-label">Schedules</span>
             </a>
 
-            <a href="#" class="nav-item" data-page="manage">
-                <div class="nav-icon"><i data-lucide="settings"></i></div>
-                <span class="nav-label">Manage</span>
+            <a href="#" class="nav-item" data-page="messages">
+                <div class="nav-icon"><i data-lucide="message-square"></i></div>
+                <span class="nav-label">Messages</span>
             </a>
         </nav>
+
+        <!-- Sidebar Footer for Messages Page -->
+        <div class="sidebar-footer" id="sidebar-footer"></div>
     </aside>
 
     <!-- Mobile Bottom Navigation -->
@@ -91,10 +94,6 @@
             <i data-lucide="calendar"></i>
             <span>Schedules</span>
         </a>
-        <a href="#" class="mobile-nav-item" data-page="manage">
-            <i data-lucide="settings"></i>
-            <span>Manage</span>
-        </a>
         <a href="#" class="mobile-nav-item" data-page="messages">
             <i data-lucide="message-square"></i>
             <span>Messages</span>
@@ -102,7 +101,24 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content" id="main-content">
+        <!-- Messages Header (Dynamic Placement) -->
+        <div id="messages-header" style="
+            display: none; 
+            height: 70px; 
+            background: transparent; 
+            align-items: center; 
+            justify-content: flex-end; 
+            padding: 1rem 2rem;
+            gap: 1rem;
+            flex-shrink: 0;
+            position: absolute; 
+            top: 0;
+            right: 0;
+            z-index: 100;
+        ">
+        </div>
+
         <!-- Profile Top Nav -->
         <div class="top-nav">
             <!-- Mobile Logo -->
@@ -111,12 +127,14 @@
                     style="width: 32px; height: 32px;" loop autoplay></lottie-player>
             </div>
             <!-- Notification Bell -->
-            <div class="profile-menu-container" style="margin-right: 0;">
+            <div class="profile-menu-container" style="margin-right: 0;" id="top-nav-wrap-1">
                 <div class="notif-btn" id="notif-btn">
                     <lottie-player src="assets/animations/notification.json" background="transparent" speed="1"
                         style="width: 28px; height: 28px;" hover></lottie-player>
                     <div class="notif-badge"></div>
                 </div>
+                <span class="nav-label footer-label" style="display: none; cursor: pointer;"
+                    onclick="event.stopPropagation(); document.getElementById('notif-btn').click();">Notifications</span>
                 <!-- Notif Dropdown -->
                 <div class="notif-dropdown" id="notif-dropdown">
                     <div class="notif-header">
@@ -155,10 +173,12 @@
                 </div>
             </div>
 
-            <div class="profile-menu-container">
+            <div class="profile-menu-container" id="top-nav-wrap-2">
                 <div class="avatar-btn" id="avatar-btn">
                     <i data-lucide="user" width="20" height="20"></i>
                 </div>
+                <span class="nav-label footer-label" style="display: none; cursor: pointer;"
+                    onclick="event.stopPropagation(); document.getElementById('avatar-btn').click();">Profile</span>
                 <!-- Dropdown -->
                 <div class="dropdown-menu" id="profile-dropdown">
                     <div class="dropdown-item">
@@ -241,6 +261,8 @@
                     <button class="btn-action btn-complete" onclick="updateIssueStatus('Resolved')"
                         style="background: #10b981; color: white; padding: 0.75rem 1rem; border-radius: 8px;">Mark
                         Completed</button>
+                    <button class="btn-action btn-delete" onclick="deleteIssue()"
+                        style="background: #fee2e2; color: #ef4444; padding: 0.75rem 1rem; border-radius: 8px;">Delete</button>
                 </div>
             </div>
         </div>
@@ -289,11 +311,11 @@
                         style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 0.95rem; color: #1e293b;">
                 </div>
 
-                <!-- Birthdate -->
+                <!-- Email -->
                 <div>
                     <label
-                        style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 0.5rem;">Birthdate</label>
-                    <input type="date" id="p-dob"
+                        style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 0.5rem;">Email</label>
+                    <input type="email" id="p-email" placeholder="user@example.com"
                         style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 0.95rem; color: #1e293b;">
                 </div>
 
@@ -711,53 +733,7 @@
     </script>
 
     <!-- Chat Widget -->
-    <div class="chat-fab" onclick="toggleChat()">
-        <i data-lucide="message-square" width="28"></i>
-        <div class="chat-badge" id="chat-count">3</div>
-    </div>
-
-    <div class="chat-window" id="chat-box">
-        <!-- List View -->
-        <div id="chat-view-list" class="chat-view">
-            <div class="chat-header">
-                <span>Messages</span>
-                <i data-lucide="x" width="20" style="cursor: pointer;" onclick="toggleChat()"></i>
-            </div>
-
-            <div class="chat-filter-bar">
-                <div class="filter-btn active" onclick="filterChats('all', this)">All</div>
-                <div class="filter-btn" onclick="filterChats('unread', this)">Unread</div>
-                <div class="filter-btn" onclick="filterChats('archived', this)">Archived</div>
-            </div>
-
-            <div class="chat-list" id="chat-list-container">
-                <!-- Chat Items Injected Here -->
-            </div>
-        </div>
-
-        <!-- Conversation View -->
-        <div id="chat-view-convo" class="chat-view" style="display: none;">
-            <div class="chat-header">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <i data-lucide="arrow-left" width="20" style="cursor: pointer;" onclick="showChatList()"></i>
-                    <span id="active-chat-name">User Name</span>
-                </div>
-            </div>
-
-            <div class="chat-body" id="chat-msgs">
-            </div>
-
-            <div class="chat-footer">
-                <input type="text" class="chat-input" id="chat-txt" placeholder="Type a reply..."
-                    onkeypress="handleChat(event)">
-                <button
-                    style="background: var(--accent-color); border: none; width: 36px; height: 36px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer;"
-                    onclick="sendChat()">
-                    <i data-lucide="send" width="16"></i>
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- Chat Widget Removed -->
 
     <script>
         // Initialize Lucide Icons
@@ -788,14 +764,70 @@
         const logoutBtn = document.getElementById('logout-btn');
 
         avatarBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            // Close notifications if open
-            if (notifDropdown.classList.contains('active')) {
-                notifDropdown.classList.remove('active');
-                if (notifBtn) notifBtn.classList.remove('active');
-            }
             profileDropdown.classList.toggle('active');
         });
+
+        // Sidebar Navigation Logic for Full Page Apps
+        const navLinks = document.querySelectorAll('.nav-item');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Update Active State
+                navLinks.forEach(n => n.classList.remove('active'));
+                link.classList.add('active');
+
+                // Load Page
+                const page = link.getAttribute('data-page');
+                const contentFrame = document.getElementById('content-frame');
+                contentFrame.src = `pages/${page}/view.html`;
+
+                // Handle Full Screen Pages (Messages)
+                const mainContent = document.querySelector('.main-content');
+                if (page === 'messages') {
+                    mainContent.classList.add('no-padding');
+                    moveNavIcons('header'); // Move to messages header
+                } else {
+                    mainContent.classList.remove('no-padding');
+                    moveNavIcons('top-nav'); // Move back to top nav
+                }
+            });
+        });
+
+        // Dynamic Nav Icon Mover
+        const topNav = document.querySelector('.top-nav');
+        const sidebarFooter = document.getElementById('sidebar-footer');
+        const messagesHeader = document.getElementById('messages-header'); // New target
+
+        function moveNavIcons(destination) {
+            const wrap1 = document.getElementById('top-nav-wrap-1'); // Notifications
+            const wrap2 = document.getElementById('top-nav-wrap-2'); // Profile
+
+            // Reset classes
+            wrap1.classList.remove('in-sidebar', 'in-header');
+            wrap2.classList.remove('in-sidebar', 'in-header');
+
+            if (destination === 'sidebar') {
+                wrap1.classList.add('in-sidebar');
+                wrap2.classList.add('in-sidebar');
+                sidebarFooter.appendChild(wrap1);
+                sidebarFooter.appendChild(wrap2);
+                topNav.style.pointerEvents = 'none';
+                messagesHeader.style.display = 'none';
+            } else if (destination === 'header') {
+                wrap1.classList.add('in-header'); // We might need styling for this
+                wrap2.classList.add('in-header');
+                messagesHeader.appendChild(wrap1);
+                messagesHeader.appendChild(wrap2);
+                messagesHeader.style.display = 'flex';
+                topNav.style.pointerEvents = 'none';
+            } else {
+                // Back to Top Nav
+                topNav.appendChild(wrap1);
+                topNav.appendChild(wrap2);
+                topNav.style.pointerEvents = 'auto';
+                messagesHeader.style.display = 'none';
+            }
+        }
 
         // Open Profile Settings from Dropdown
         document.querySelector('.dropdown-item:first-child').addEventListener('click', () => {
@@ -823,7 +855,7 @@
             const savedProfile = JSON.parse(localStorage.getItem('adminProfile') || '{}');
             if (savedProfile.name) document.getElementById('p-name').value = savedProfile.name;
             if (savedProfile.username) document.getElementById('p-username').value = savedProfile.username;
-            if (savedProfile.dob) document.getElementById('p-dob').value = savedProfile.dob;
+            if (savedProfile.email) document.getElementById('p-email').value = savedProfile.email;
             if (savedProfile.avatar) {
                 document.getElementById('preview-avatar').src = savedProfile.avatar;
                 document.getElementById('preview-avatar').style.display = 'block';
@@ -853,10 +885,10 @@
             e.preventDefault();
             const name = document.getElementById('p-name').value;
             const username = document.getElementById('p-username').value;
-            const dob = document.getElementById('p-dob').value;
+            const email = document.getElementById('p-email').value;
             const avatarSrc = document.getElementById('preview-avatar').src;
 
-            const profile = { name, username, dob, avatar: avatarSrc !== window.location.href ? avatarSrc : null };
+            const profile = { name, username, email, avatar: avatarSrc !== window.location.href ? avatarSrc : null };
             localStorage.setItem('adminProfile', JSON.stringify(profile));
 
             alert('Profile saved successfully!');
@@ -959,6 +991,10 @@
             } else if (status === 'Ongoing') {
                 btnComplete.style.display = 'inline-block';
             }
+
+            // Delete always available
+            const btnDelete = actions.querySelector('.btn-delete');
+            if (btnDelete) btnDelete.style.display = 'inline-block';
         }
 
         window.handleRespond = function () {
@@ -973,6 +1009,18 @@
 
             saveSchedule(currentIssueId, currentIssueName, dateInput.value, timeInput.value, 'Ongoing');
             updateIssueStatus('Ongoing');
+        }
+
+        window.deleteIssue = function () {
+            if (confirm('Are you sure you want to delete this issue? This action cannot be undone.')) {
+                // Here you would send a delete request to the backend
+                alert(`Issue ${currentIssueId} has been deleted.`);
+
+                // For demo: Remove the row if it exists in a visible table (dashboard/issues page)
+                // Since this is index.html, we might not have direct access to iframe content easily
+                // But we can try to notify the iframe if needed, or just close modal.
+                closeGlobalModal();
+            }
         }
 
         function saveSchedule(id, name, date, time, status) {

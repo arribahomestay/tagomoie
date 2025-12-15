@@ -59,6 +59,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Set active page attribute for CSS hooks (Mobile specific fix)
             document.querySelector('.main-content').setAttribute('data-active-page', page);
+
+            // Toggle Padding for Messages Page (Full Screen)
+            if (page === 'messages') {
+                mainContent.classList.add('no-padding');
+                if (window.moveNavIcons) window.moveNavIcons('header');
+            } else {
+                mainContent.classList.remove('no-padding');
+                if (window.moveNavIcons) window.moveNavIcons('top-nav');
+            }
         });
     });
 
