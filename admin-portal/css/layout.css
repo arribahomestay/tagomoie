@@ -135,23 +135,21 @@ body::-webkit-scrollbar {
     position: absolute;
     right: -12px;
     top: 24px;
-    background: var(--accent-color);
-    color: white;
+    background: transparent;
+    color: var(--text-primary);
     width: 24px;
-    /* Size for a small button */
     height: 24px;
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border: 2px solid var(--bg-sidebar);
-    transition: transform var(--transition-speed);
+    border: none;
     z-index: 20;
 }
 
 .sidebar.collapsed .toggle-btn {
-    transform: rotate(180deg);
+    /* No rotation for now, unless requested */
+    color: var(--accent-color);
 }
 
 /* Navigation */
