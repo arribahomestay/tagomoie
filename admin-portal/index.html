@@ -219,6 +219,14 @@
                 const iframe = document.getElementById('content-frame');
                 const sidebar = document.getElementById('sidebar');
 
+                // Load Profile Photo if exists
+                if (user.profile_photo) {
+                    const avatarBtn = document.getElementById('avatar-btn');
+                    if (avatarBtn) {
+                        avatarBtn.innerHTML = `<img src="${user.profile_photo}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                    }
+                }
+
                 if (user.role === 'technician') {
                     // Technician View
                     iframe.src = "pages/tech/view.html";
@@ -231,14 +239,30 @@
                             <span class="logo-text">TECH<span style="color: #6366f1;">NICIAN</span></span>
                         </div>
                         <nav class="nav-menu">
-                            <a href="#" class="nav-item active" style="pointer-events: none;">
+                            <a href="#" class="nav-item active" onclick="loadTechPage(this, 'pages/tech/view.html'); return false;">
                                 <div class="nav-icon"><i data-lucide="server"></i></div>
                                 <span class="nav-label">Admin Management</span>
+                            </a>
+                            <a href="#" class="nav-item" onclick="loadTechPage(this, 'pages/tech/users.html'); return false;">
+                                <div class="nav-icon"><i data-lucide="users"></i></div>
+                                <span class="nav-label">User Management</span>
                             </a>
                         </nav>
                         <div class="sidebar-footer"></div>
                     `;
                     lucide.createIcons();
+
+                    // Define page switcher logic
+                    window.loadTechPage = function (el, url) {
+                        const items = document.querySelectorAll('.nav-item');
+                        items.forEach(item => {
+                            item.classList.remove('active');
+                            item.style.pointerEvents = 'auto';
+                        });
+                        el.classList.add('active');
+                        el.style.pointerEvents = 'none';
+                        document.getElementById('content-frame').src = url;
+                    };
                 } else if (user.role === 'admin') {
                     // Default Admin View
                     iframe.src = "pages/dashboard/view.html";
@@ -2381,9 +2405,14 @@
                         const [firstName, ...lastNameParts] = fullName.split(' ');
                         const lastName = lastNameParts.join(' ');
 
-                        const API_BASE_URL = window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:'
-                            ? 'http://127.0.0.1:3000'
-                            : '';
+                        // Determine API URL dynamically based on current host
+                        // Use 127.0.0.1 fallback if file:// or empty
+                        const hostname = window.location.hostname || '127.0.0.1';
+                        // Keep http protocol unless https is used
+                        const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+
+                        const API_BASE_URL = `${protocol}//${hostname}:3000`;
+                        console.log('Using API Base URL:', API_BASE_URL);
 
                         // 1. Handle Image Upload if exists
                         let uploadedPhotoUrl = null;
@@ -2442,8 +2471,11 @@
                             if (uploadedPhotoUrl) {
                                 user.profile_photo = uploadedPhotoUrl;
                                 // Force update current avatar images in UI
-                                const mainAvatar = document.querySelector('#avatar-btn img') || document.querySelector('#avatar-btn i');
-                                if (mainAvatar.tagName === 'IMG') mainAvatar.src = uploadedPhotoUrl;
+                                // Force update current avatar images in UI header
+                                const avatarBtn = document.getElementById('avatar-btn');
+                                if (avatarBtn) {
+                                    avatarBtn.innerHTML = `<img src="${uploadedPhotoUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                                }
                             }
                             localStorage.setItem('user_token', JSON.stringify(user));
 
