@@ -263,7 +263,7 @@
             <div style="display: flex; justify-content: space-between; align-items: start;">
                 <div>
                     <div class="stat-title">New Reports</div>
-                    <div class="stat-value">12</div>
+                    <div class="stat-value" id="stats-new">--</div>
                 </div>
                 <div class="stat-icon-wrapper" style="background: #eff6ff; color: #3b82f6;">
                     <i data-lucide="file-plus"></i>
@@ -271,7 +271,7 @@
             </div>
             <div style="font-size: 0.75rem; color: #10b981; font-weight: 500;">
                 <i data-lucide="trending-up"
-                    style="width: 14px; height: 14px; display: inline; vertical-align: text-bottom;"></i> +8% today
+                    style="width: 14px; height: 14px; display: inline; vertical-align: text-bottom;"></i> Today
             </div>
         </div>
 
@@ -279,14 +279,14 @@
             <div style="display: flex; justify-content: space-between; align-items: start;">
                 <div>
                     <div class="stat-title">Active Issues</div>
-                    <div class="stat-value">45</div>
+                    <div class="stat-value" id="stats-active">--</div>
                 </div>
                 <div class="stat-icon-wrapper" style="background: #fff1f2; color: #f43f5e;">
                     <i data-lucide="alert-triangle"></i>
                 </div>
             </div>
             <div style="font-size: 0.75rem; color: #64748b; font-weight: 500;">
-                Urgent attention
+                Pending & Ongoing
             </div>
         </div>
 
@@ -294,29 +294,29 @@
             <div style="display: flex; justify-content: space-between; align-items: start;">
                 <div>
                     <div class="stat-title">Resolved</div>
-                    <div class="stat-value">89</div>
+                    <div class="stat-value" id="stats-resolved">--</div>
                 </div>
                 <div class="stat-icon-wrapper" style="background: #f0fdf4; color: #10b981;">
                     <i data-lucide="check-circle-2"></i>
                 </div>
             </div>
             <div style="font-size: 0.75rem; color: #10b981; font-weight: 500;">
-                +12% efficiency
+                Completed issues
             </div>
         </div>
 
-        <div class="stat-card" onclick="navigateTo('manage')" style="cursor: pointer;">
+        <div class="stat-card" style="cursor: pointer;">
             <div style="display: flex; justify-content: space-between; align-items: start;">
                 <div>
-                    <div class="stat-title">Avg Time</div>
-                    <div class="stat-value">2.4h</div>
+                    <div class="stat-title">Total Reports</div>
+                    <div class="stat-value" id="analytics-total">--</div>
                 </div>
                 <div class="stat-icon-wrapper" style="background: #f5f3ff; color: #8b5cf6;">
-                    <i data-lucide="clock"></i>
+                    <i data-lucide="bar-chart-2"></i>
                 </div>
             </div>
-            <div style="font-size: 0.75rem; color: #10b981; font-weight: 500;">
-                -15m faster
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 500;">
+                <span id="analytics-users">--</span> Registered Users
             </div>
         </div>
     </div>
@@ -329,85 +329,11 @@
                 Recent Reports
             </div>
 
-            <div class="report-item">
-                <div class="stacked-thumbnail"
-                    onclick="openLightbox('https://placehold.co/600x400/ef4444/ffffff?text=Power+Outage')">
-                    <!-- Bottom items first in DOM if using z-index or use absolute with explicit z-index -->
-                    <img src="https://placehold.co/100x100/ef4444/ffffff?text=No+Power" class="stack-img"
-                        alt="Thumbnail">
-                    <div class="stack-img"></div>
-                    <div class="stack-img"></div>
+            <div id="recent-reports-container">
+                <!-- Dynamically populated or empty -->
+                <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+                    No recent reports found in the database.
                 </div>
-                <div class="report-info">
-                    <div class="report-title">Walay Kuryente - Purok 4</div>
-                    <div class="report-meta">
-                        <span class="user-tag"><i data-lucide="user" width="12"></i> Whiskey Itable</span> • <span
-                            style="color: #ef4444; font-weight: 600;">Critical</span> • 12m ago
-                    </div>
-                </div>
-                <button class="btn-next-arrow"
-                    onclick="openDetails('#1027', 'Walay Kuryente', 'Whiskey Itable', 'Today', 'Critical', 'Walay kuryente sa among area sukad pa ganihang hapon.')">
-                    <i data-lucide="chevron-right" width="20"></i>
-                </button>
-            </div>
-
-            <div class="report-item">
-                <div class="stacked-thumbnail" onclick="openLightbox('../../assets/sample/pothole.jpg')">
-                    <img src="../../assets/sample/pothole.jpg" class="stack-img" alt="Thumbnail">
-                    <div class="stack-img"></div>
-                    <div class="stack-img"></div>
-                </div>
-                <div class="report-info">
-                    <div class="report-title">Guba ang Dalan</div>
-                    <div class="report-meta">
-                        <span class="user-tag"><i data-lucide="user" width="12"></i> J. Vetvet</span> • <span
-                            style="color: #0284c7; font-weight: 600;">Review</span> • 45m ago
-                    </div>
-                </div>
-                <button class="btn-next-arrow"
-                    onclick="openDetails('#1025', 'Guba ang Dalan', 'John Vitor Vetvet', 'Today', 'In Review', 'Naay dako nga bangag sa dalan dapit sa Purok 3. Daghan na na-disgrasya nga motor.')">
-                    <i data-lucide="chevron-right" width="20"></i>
-                </button>
-            </div>
-
-            <div class="report-item">
-                <div class="stacked-thumbnail"
-                    onclick="openLightbox('https://placehold.co/600x400/d97706/ffffff?text=Noise')">
-                    <img src="https://placehold.co/100x100/d97706/ffffff?text=Noise" class="stack-img" alt="Thumbnail">
-                    <div class="stack-img"></div>
-                    <div class="stack-img"></div>
-                </div>
-                <div class="report-info">
-                    <div class="report-title">Saba nga Karaoke</div>
-                    <div class="report-meta">
-                        <span class="user-tag"><i data-lucide="user" width="12"></i> J. Silayan</span> • <span
-                            style="color: #d97706; font-weight: 600;">Critical</span> • 1h ago
-                    </div>
-                </div>
-                <button class="btn-next-arrow"
-                    onclick="openDetails('#1024', 'Saba nga Karaoke', 'James Paul Silayan', 'Today', 'Critical', 'Saba kaayo ang karaoke sa silingan bisag lawom na ang gabii. Dili na mi katulog.')">
-                    <i data-lucide="chevron-right" width="20"></i>
-                </button>
-            </div>
-
-            <div class="report-item">
-                <div class="stacked-thumbnail"
-                    onclick="openLightbox('https://placehold.co/600x400/64748b/ffffff?text=Standby')">
-                    <img src="https://placehold.co/100x100/64748b/ffffff?text=Team" class="stack-img" alt="Thumbnail">
-                    <div class="stack-img"></div>
-                    <div class="stack-img"></div>
-                </div>
-                <div class="report-info">
-                    <div class="report-title">Mga Istambay</div>
-                    <div class="report-meta">
-                        <span class="user-tag"><i data-lucide="user" width="12"></i> E. Solayao</span> •
-                        <span>Resolved</span> • 2h ago
-                    </div>
-                </div>
-                <button class="btn-next-arrow"
-                    onclick="openDetails('#1028', 'Mga Istambay', 'Elmer Solayao', 'Today', 'Resolved', 'Naay nireklamo sa mga istambay nga sabaan sa kanto.')">
-                    <i data-lucide="chevron-right" width="20"></i>
-                </button>
             </div>
         </div>
 
@@ -419,33 +345,11 @@
             </div>
 
             <!-- Critical Item 1 -->
-            <div class="report-item" style="border-left: 3px solid #ef4444; padding-left: 1rem;">
-                <div class="report-info">
-                    <div class="report-title" style="color: #ef4444;">Walay Kuryente</div>
-                    <div class="report-meta">
-                        <span>#1027</span> • 12 mins ago
-                    </div>
+            <div id="critical-watchlist-container">
+                <!-- Dynamically populated or empty -->
+                <div style="text-align: center; padding: 2rem 1rem; color: var(--text-secondary); font-size: 0.85rem;">
+                    No urgent issues reported.
                 </div>
-                <button class="btn-action btn-view"
-                    onclick="openDetails('#1027', 'Walay Kuryente', 'Whiskey Itable', 'Today', 'Critical', 'Walay kuryente sa among area sukad pa ganihang hapon.')"
-                    style="background: #fee2e2; color: #ef4444; border: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
-                    Resolve
-                </button>
-            </div>
-
-            <!-- Critical Item 2 -->
-            <div class="report-item" style="border-left: 3px solid #ef4444; padding-left: 1rem;">
-                <div class="report-info">
-                    <div class="report-title" style="color: #ef4444;">Saba nga Karaoke</div>
-                    <div class="report-meta">
-                        <span>#1024</span> • 1 hour ago
-                    </div>
-                </div>
-                <button class="btn-action btn-view"
-                    onclick="openDetails('#1024', 'Saba nga Karaoke', 'James Paul Silayan', 'Today', 'Critical', 'Saba kaayo ang karaoke sa silingan bisag lawom na ang gabii. Dili na mi katulog.')"
-                    style="background: #fee2e2; color: #ef4444; border: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
-                    Resolve
-                </button>
             </div>
 
             <div style="margin-top: 1.5rem;">
@@ -461,13 +365,163 @@
         </div>
     </div>
 
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
-        lucide.createIcons();
+        const API_BASE_URL = (window.location.port === '5501' || window.location.port === '5500' || window.location.protocol === 'file:')
+            ? 'http://localhost:3000'
+            : '';
 
-        function openDetails(id, name, reporter, date, status, desc) {
-            // Call the global function on the parent window
+        // Initialize Socket.io
+        const socket = io(API_BASE_URL);
+
+        socket.on('connect', () => {
+            console.log('Connected to real-time updates');
+        });
+
+        socket.on('dashboard_update', (data) => {
+            console.log('Real-time update received:', data);
+            fetchDashboardData(); // Refresh everything
+        });
+
+        let dashboardReports = [];
+
+        async function fetchDashboardData() {
+            try {
+                // Get user info from local storage
+                let deptId = null;
+                try {
+                    const user = JSON.parse(localStorage.getItem('user_token'));
+                    if (user) deptId = user.department_id;
+                } catch (e) { }
+
+                // Build query string
+                const queryParam = deptId ? `?department_id=${deptId}` : '';
+
+                console.log(`[Dashboard] Fetching data for Dept: ${deptId || 'All'}`);
+
+                // Fetch Reports for list (already filtered by backend + safety filter below if needed)
+                const reportsRes = await fetch(`${API_BASE_URL}/api/reports${queryParam}`);
+                if (!reportsRes.ok) throw new Error('API failed');
+                const reports = await reportsRes.json();
+                dashboardReports = reports;
+
+                // Fetch Analytics for stats
+                const analyticsRes = await fetch(`${API_BASE_URL}/api/analytics${queryParam}`);
+                let analytics = {};
+                if (analyticsRes.ok) {
+                    analytics = await analyticsRes.json();
+                }
+
+                updateStats(analytics);
+                renderRecentReports(reports);
+                renderCriticalWatchlist(reports);
+
+                lucide.createIcons();
+            } catch (err) {
+                console.error('Error fetching dashboard data:', err);
+            }
+        }
+
+        function updateStats(analytics) {
+            // New Reports (Today)
+            document.getElementById('stats-new').textContent = analytics.newReportsToday || '0';
+
+            // Active Issues
+            document.getElementById('stats-active').textContent = analytics.activeReports || '0';
+
+            // Resolved
+            document.getElementById('stats-resolved').textContent = analytics.resolvedReports || '0';
+
+            // Total & Users
+            document.getElementById('analytics-total').textContent = analytics.totalReports || '0';
+            document.getElementById('analytics-users').textContent = analytics.totalUsers || '0';
+        }
+
+        function renderRecentReports(reports) {
+            const container = document.getElementById('recent-reports-container');
+            if (!reports || reports.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">No recent reports found in the database.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            reports.slice(0, 5).forEach(item => {
+                const reportItem = document.createElement('div');
+                reportItem.className = 'report-item';
+
+                let statusStyle = '';
+                if (item.status === 'Critical' || item.status === 'Error') statusStyle = 'color: #ef4444; font-weight: 600;';
+                else if (item.status === 'In Review' || item.status === 'Ongoing') statusStyle = 'color: #0284c7; font-weight: 600;';
+
+                // Determine Image Stack
+                let imageHtml = '<div class="stack-img"></div><div class="stack-img"></div>';
+                let firstImg = 'https://placehold.co/100x100/6366f1/ffffff?text=Report';
+
+                if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+                    firstImg = item.images[0].url || firstImg;
+                } else {
+                    // Fallback to Icon if no image
+                    imageHtml = `<div class="stack-img" style="display:flex; align-items:center; justify-content:center; background:#f1f5f9;"><i data-lucide="${item.icon}" width="20"></i></div>`;
+                }
+
+                reportItem.innerHTML = `
+                    <div class="stacked-thumbnail" style="cursor: pointer;" onclick="openDetails('${item.id}')">
+                        <img src="${firstImg}" class="stack-img" alt="Thumbnail">
+                        ${imageHtml}
+                    </div>
+                    <div class="report-info" style="cursor: pointer;" onclick="openDetails('${item.id}')">
+                        <div class="report-title">${item.name}</div>
+                        <div class="report-meta">
+                            <span class="user-tag"><i data-lucide="user" width="12"></i> ${item.reporter}</span> • <span style="${statusStyle}">${item.status}</span> • ${item.date}
+                        </div>
+                    </div>
+                    <button class="btn-next-arrow" onclick="openDetails('${item.id}')">
+                        <i data-lucide="chevron-right" width="20"></i>
+                    </button>
+                `;
+                container.appendChild(reportItem);
+            });
+        }
+
+        function renderCriticalWatchlist(reports) {
+            const container = document.getElementById('critical-watchlist-container');
+            const criticals = reports.filter(r => r.status === 'Critical' || r.status === 'Error');
+
+            if (criticals.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 2rem 1rem; color: var(--text-secondary); font-size: 0.85rem;">No urgent issues reported.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            criticals.slice(0, 3).forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'report-item';
+                div.style.borderLeft = '3px solid #ef4444';
+                div.style.paddingLeft = '1rem';
+
+                div.innerHTML = `
+                    <div class="report-info" style="cursor: pointer;" onclick="openDetails('${item.id}')">
+                        <div class="report-title" style="color: #ef4444;">${item.name}</div>
+                        <div class="report-meta">
+                            <span>${item.id}</span> • ${item.date}
+                        </div>
+                    </div>
+                    <button class="btn-action btn-view"
+                        onclick="openDetails('${item.id}')"
+                        style="background: #fee2e2; color: #ef4444; border: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
+                        Resolve
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function openDetails(id) {
+            const item = dashboardReports.find(r => r.id === id);
+            if (!item) return;
+
             if (window.parent && window.parent.openGlobalModal) {
-                window.parent.openGlobalModal(id, name, reporter, date, status, desc);
+                window.parent.openGlobalModal(item);
             } else {
                 console.error('Global modal function not found on parent window.');
             }
@@ -475,17 +529,16 @@
 
         function navigateTo(page) {
             if (window.parent) {
-                // Try to find the mobile nav item first as it might be the visible one
                 const mobileNavItem = window.parent.document.querySelector(`.mobile-nav-item[data-page="${page}"]`);
                 const desktopNavItem = window.parent.document.querySelector(`.nav-item[data-page="${page}"]`);
-
-                if (mobileNavItem && getComputedStyle(mobileNavItem).display !== 'none') {
-                    mobileNavItem.click();
-                } else if (desktopNavItem) {
-                    desktopNavItem.click();
-                }
+                if (mobileNavItem && getComputedStyle(mobileNavItem).display !== 'none') mobileNavItem.click();
+                else if (desktopNavItem) desktopNavItem.click();
             }
         }
+
+        // Initial load
+        fetchDashboardData();
+        lucide.createIcons();
     </script>
 </body>
 

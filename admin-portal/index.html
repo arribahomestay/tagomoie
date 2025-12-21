@@ -11,6 +11,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Mapbox GL JS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js"></script>
+
     <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
@@ -32,7 +36,30 @@
             /* Slight tint for light mode active */
         }
 
-        /* Dark mode active specific override handled in JS or specific classes */
+        /* Map Styles */
+        #minimap-container {
+            height: 150px;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            margin-top: 0.5rem;
+            cursor: pointer;
+        }
+
+        #g-map-full {
+            height: 500px;
+            width: 100%;
+            border-radius: 12px;
+        }
+
+        .map-modal-card {
+            max-width: 900px;
+            width: 95%;
+            border-radius: 16px;
+            overflow: hidden;
+            background: var(--bg-card);
+        }
     </style>
 </head>
 
@@ -68,9 +95,9 @@
                 <span class="nav-label">Issues</span>
             </a>
 
-            <a href="#" class="nav-item" data-page="schedules">
-                <div class="nav-icon"><i data-lucide="calendar"></i></div>
-                <span class="nav-label">Schedules</span>
+            <a href="#" class="nav-item" data-page="users">
+                <div class="nav-icon"><i data-lucide="users"></i></div>
+                <span class="nav-label">Users</span>
             </a>
 
             <a href="#" class="nav-item" data-page="messages">
@@ -92,10 +119,6 @@
         <a href="#" class="mobile-nav-item" data-page="issues">
             <i data-lucide="alert-circle"></i>
             <span>Issues</span>
-        </a>
-        <a href="#" class="mobile-nav-item" data-page="schedules">
-            <i data-lucide="calendar"></i>
-            <span>Schedules</span>
         </a>
         <a href="#" class="mobile-nav-item" data-page="messages">
             <i data-lucide="message-square"></i>
@@ -145,31 +168,11 @@
                         <span style="font-size: 0.75rem; color: #6366f1; cursor: pointer;">Mark all read</span>
                     </div>
                     <div class="notif-list">
-                        <div class="notif-item unread"
-                            onclick="handleNotifClick('#1025', 'Walay Kuryente', 'James Paul Silayan', 'Critical', '2023-12-08')">
-                            <div class="notif-icon"><i data-lucide="zap" width="16"></i></div>
-                            <div class="notif-content">
-                                <div class="notif-text"><strong>Walay Kuryente</strong> report from <strong>James Paul
-                                        Silayan</strong></div>
-                                <div class="notif-time">2 mins ago</div>
-                            </div>
-                        </div>
-                        <div class="notif-item unread"
-                            onclick="handleNotifClick('#1024', 'Guba ang Dalan', 'John Vitor Vetvet', 'Error', '2023-12-08')">
-                            <div class="notif-icon"><i data-lucide="alert-triangle" width="16"></i></div>
-                            <div class="notif-content">
-                                <div class="notif-text"><strong>Guba ang Dalan</strong> report from <strong>John Vitor
-                                        Vetvet</strong></div>
-                                <div class="notif-time">1 hour ago</div>
-                            </div>
-                        </div>
-                        <div class="notif-item"
-                            onclick="handleNotifClick('#1023', 'Saba nga Karaoke', 'Khristian Dove', 'Pending', '2023-12-08')">
-                            <div class="notif-icon"><i data-lucide="volume-2" width="16"></i></div>
-                            <div class="notif-content">
-                                <div class="notif-text"><strong>Saba nga Karaoke</strong> report from <strong>Khristian
-                                        Dove</strong></div>
-                                <div class="notif-time">3 hours ago</div>
+                        <div id="notif-list-container">
+                            <!-- Dynamically populated or empty -->
+                            <div
+                                style="text-align: center; padding: 2rem; color: var(--text-secondary); font-size: 0.85rem;">
+                                No new notifications
                             </div>
                         </div>
                     </div>
@@ -184,7 +187,8 @@
                     onclick="event.stopPropagation(); document.getElementById('avatar-btn').click();">Profile</span>
                 <!-- Dropdown -->
                 <div class="dropdown-menu" id="profile-dropdown">
-                    <div class="dropdown-item">
+                    <div class="dropdown-item"
+                        onclick="openProfileModal(); document.getElementById('profile-dropdown').classList.remove('active');">
                         <i data-lucide="user-cog" width="16"></i> Profile Settings
                     </div>
                     <div class="dropdown-item"
@@ -206,66 +210,237 @@
             <i data-lucide="loader-2" class="animate-spin" width="32" height="32" color="#6366f1"></i>
         </div>
         <!-- Iframe to load sub-pages content without full reload -->
-        <iframe id="content-frame" src="pages/dashboard/view.html"></iframe>
+        <iframe id="content-frame" src=""></iframe>
+
+        <script>
+            // Role Based Redirect on Load
+            document.addEventListener("DOMContentLoaded", () => {
+                const user = JSON.parse(localStorage.getItem('user_token') || '{}');
+                const iframe = document.getElementById('content-frame');
+                const sidebar = document.getElementById('sidebar');
+
+                if (user.role === 'technician') {
+                    // Technician View
+                    iframe.src = "pages/tech/view.html";
+                    // Modify Sidebar for Technician
+                    sidebar.innerHTML = `
+                        <div class="sidebar-header">
+                            <div class="nav-icon">
+                                <i data-lucide="cpu" color="#6366f1"></i>
+                            </div>
+                            <span class="logo-text">TECH<span style="color: #6366f1;">NICIAN</span></span>
+                        </div>
+                        <nav class="nav-menu">
+                            <a href="#" class="nav-item active" style="pointer-events: none;">
+                                <div class="nav-icon"><i data-lucide="server"></i></div>
+                                <span class="nav-label">Admin Management</span>
+                            </a>
+                        </nav>
+                        <div class="sidebar-footer"></div>
+                    `;
+                    lucide.createIcons();
+                } else if (user.role === 'admin') {
+                    // Default Admin View
+                    iframe.src = "pages/dashboard/view.html";
+                } else {
+                    // Not logged in or invalid
+                    // Optional: window.location.href = '../admin-login/index.html';
+                    iframe.src = "pages/dashboard/view.html"; // Fallback for dev
+                }
+            });
+        </script>
     </main>
 
     <!-- Global Details Modal -->
     <div class="modal-overlay" id="globalModal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h2 class="modal-title">Issue Details</h2>
-                <button class="modal-close" onclick="closeGlobalModal()">&times;</button>
+        <div class="modal-card" style="max-width: 650px; border-radius: 16px; overflow: hidden;">
+            <div class="modal-header"
+                style="background: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 1.25rem 1.5rem;">
+                <h2 class="modal-title" style="font-size: 1.25rem; font-weight: 700;">Issue Details</h2>
+                <button class="modal-close" onclick="closeGlobalModal()" style="font-size: 1.5rem;">&times;</button>
             </div>
 
-            <div class="modal-detail-row">
-                <span class="label">Issue ID</span>
-                <div class="value" id="g-id">#0000</div>
-            </div>
-            <div class="modal-detail-row">
-                <span class="label">Issue Name</span>
-                <div class="value" id="g-name">Issue Name</div>
-            </div>
-            <div style="display: flex; gap: 2rem;">
-                <div class="modal-detail-row">
-                    <span class="label">Reported By</span>
-                    <div class="value" id="g-reporter">Reporter</div>
+            <div class="modal-body"
+                style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; max-height: 70vh; overflow-y: auto; background: var(--bg-panel);">
+                <!-- Header Info Box -->
+                <div
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: var(--bg-card); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                    <div>
+                        <span class="label" style="font-size: 0.75rem; opacity: 0.7;">ISSUE ID</span>
+                        <div class="value" id="g-id" style="font-weight: 700; color: var(--text-primary);">#0000</div>
+                    </div>
+                    <div>
+                        <span class="label" style="font-size: 0.75rem; opacity: 0.7;">REPORTED BY</span>
+                        <div class="value" id="g-reporter" style="font-weight: 600;">Reporter</div>
+                    </div>
                 </div>
-                <div class="modal-detail-row">
-                    <span class="label">Date</span>
-                    <div class="value" id="g-date">Date</div>
+
+                <div>
+                    <span class="label">Issue Name</span>
+                    <div class="value" id="g-name"
+                        style="font-size: 1.25rem; font-weight: 700; color: #6366f1; margin-top: 0.25rem;">Issue Name
+                    </div>
                 </div>
-            </div>
-            <div class="modal-detail-row">
-                <span class="label">Status</span>
-                <div class="value" id="g-status">Status</div>
-            </div>
-            <div class="modal-detail-row">
-                <span class="label">Description</span>
-                <div class="value" id="g-desc" style="line-height: 1.5; color: #475569;">
-                    Description text...
+
+                <!-- Location & Address Section -->
+                <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.25rem;">
+                    <div>
+                        <span class="label">Report Address</span>
+                        <div id="g-full-address"
+                            style="line-height: 1.5; color: var(--text-primary); background: var(--bg-card); padding: 0.85rem; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 0.25rem; font-size: 0.9rem;">
+                            <div id="g-brgy" style="font-weight: 600;">Barangay Name</div>
+                            <div id="g-street">Street / Purok</div>
+                            <div id="g-landmarks"
+                                style="font-size: 0.8rem; color: var(--text-secondary); font-style: italic;">
+                                Landmarks...</div>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="label">Location Pin</span>
+                        <div id="minimap-container" onclick="openMapModal()">
+                            <div id="g-minimap" style="height: 100%; width: 100%; pointer-events: none;"></div>
+                        </div>
+                        <div
+                            style="font-size: 0.75rem; color: var(--text-secondary); text-align: center; margin-top: 0.25rem;">
+                            Click to enlarge map</div>
+                    </div>
+                </div>
+
+                <!-- Dual Column Info -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                    <div
+                        style="background: var(--bg-card); padding: 0.85rem; border-radius: 10px; border: 1px solid var(--border-color);">
+                        <span class="label" style="font-size: 0.75rem;">PRIORITY</span>
+                        <div id="g-priority" style="text-transform: capitalize; font-weight: 700; margin-top: 0.25rem;">
+                            Low</div>
+                    </div>
+                    <div
+                        style="background: var(--bg-card); padding: 0.85rem; border-radius: 10px; border: 1px solid var(--border-color);">
+                        <span class="label" style="font-size: 0.75rem;">POST STATUS</span>
+                        <div id="g-post-status"
+                            style="text-transform: capitalize; font-weight: 700; margin-top: 0.25rem;">Pending</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                    <div>
+                        <span class="label">Processing Status</span>
+                        <div class="value" id="g-status" style="font-weight: 600; margin-top: 0.25rem;">Status</div>
+                    </div>
+                    <div>
+                        <span class="label">Date Submitted</span>
+                        <div class="value" id="g-date" style="margin-top: 0.25rem;">Date</div>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="label">Description</span>
+                    <div class="value" id="g-desc"
+                        style="line-height: 1.6; color: var(--text-secondary); background: var(--bg-card); padding: 1rem; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 0.5rem;">
+                        Description text...
+                    </div>
+                </div>
+
+                <div>
+                    <span class="label">Attachments</span>
+                    <div class="modal-media-gallery" id="g-media"
+                        style="margin-top: 0.75rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.75rem;">
+                        <!-- Media items -->
+                    </div>
+                </div>
+
+                <div>
+                    <span class="label">Reactions</span>
+                    <div style="display: flex; gap: 1.5rem; margin-top: 0.5rem;">
+                        <div onclick="toggleReaction('like')"
+                            style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; background: rgba(16, 185, 129, 0.1); padding: 0.5rem 1rem; border-radius: 8px; color: #10b981; font-weight: 600; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <i data-lucide="thumbs-up" width="18"></i>
+                            <span id="g-likes">0</span> Likes
+                        </div>
+                        <div onclick="toggleReaction('dislike')"
+                            style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; background: rgba(239, 68, 68, 0.1); padding: 0.5rem 1rem; border-radius: 8px; color: #ef4444; font-weight: 600; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <i data-lucide="thumbs-down" width="18"></i>
+                            <span id="g-dislikes">0</span> Dislikes
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Moderation Panel -->
+                <div id="admin-moderation-card"
+                    style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05)); padding: 1.25rem; border-radius: 14px; border: 1px solid rgba(99, 102, 241, 0.2); display: none; margin-top: 0.5rem;">
+                    <span class="label"
+                        style="display: block; margin-bottom: 0.75rem; color: #6366f1; font-weight: 700;">Wait for
+                        Review</span>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button class="btn-action btn-approve" onclick="moderateIssue('approved')"
+                            style="flex:1; background: #10b981; color: white; padding: 0.85rem; border-radius: 10px; border:none; cursor:pointer; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: transform 0.2s;">
+                            Approve Post
+                        </button>
+                        <button class="btn-action btn-decline" onclick="moderateIssue('rejected')"
+                            style="flex:1; background: #fee2e2; color: #ef4444; padding: 0.85rem; border-radius: 10px; border:none; cursor:pointer; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: transform 0.2s;">
+                            Decline Post
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Comment Section -->
+                <div style="margin-top: 1rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color);">
+                    <span class="label" style="font-weight: 700;">Communication Log</span>
+                    <div id="g-comments-list"
+                        style="max-height: 180px; overflow-y: auto; margin-top: 1rem; display:flex; flex-direction:column; gap:0.75rem; scroll-behavior: smooth;">
+                        <!-- Comments -->
+                    </div>
+                    <div
+                        style="display: flex; gap: 0.5rem; background: var(--bg-card); padding: 0.5rem; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 1rem;">
+                        <input type="text" id="g-comment-input" placeholder="Type a message to the reporter..."
+                            onkeyup="if(event.key === 'Enter') postComment()"
+                            style="flex: 1; padding: 0.6rem 0.75rem; border: none; background: transparent; color: var(--text-primary); outline: none; font-size: 0.95rem;">
+                        <button class="btn-primary" onclick="postComment()"
+                            style="padding: 0.6rem 1.5rem; font-size: 0.95rem; border-radius: 10px; transition: all 0.2s;">Send</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="modal-detail-row">
-                <span class="label">Attached Media</span>
-                <div class="modal-media-gallery" id="g-media">
-                    <!-- Media items injected here -->
-                </div>
-            </div>
+            <!-- Modal Footer with Grouped Actions -->
+            <div class="modal-footer"
+                style="padding: 1.25rem 1.5rem; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 1rem; background: var(--bg-card);">
 
-            <div class="modal-footer" style="display: flex; justify-content: flex-end; align-items: center; gap: 1rem;">
-                <div id="modal-actions" style="display: flex; align-items: center; gap: 0.5rem;">
-                    <input type="date" id="response-date"
-                        style="display: none; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; color: #475569; font-family: inherit;">
-                    <input type="time" id="response-time"
-                        style="display: none; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; color: #475569; font-family: inherit;">
+                <!-- Respond Logic Row -->
+                <div id="respond-section"
+                    style="display: flex; gap: 0.5rem; align-items: center; width: 100%; display: none;">
+                    <div style="display: flex; gap: 0.5rem; flex: 1;">
+                        <input type="date" id="response-date"
+                            style="flex:1; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-panel); color: var(--text-primary);">
+                        <input type="time" id="response-time"
+                            style="flex:1; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-panel); color: var(--text-primary);">
+                    </div>
                     <button class="btn-action btn-respond" onclick="handleRespond()"
-                        style="background: #6366f1; color: white; padding: 0.75rem 1rem; border-radius: 8px;">Respond</button>
-                    <button class="btn-action btn-complete" onclick="updateIssueStatus('Resolved')"
-                        style="background: #10b981; color: white; padding: 0.75rem 1rem; border-radius: 8px;">Mark
-                        Completed</button>
+                        style="background: #6366f1; color: white; padding: 0.75rem 1.5rem; border-radius: 10px; border:none; cursor:pointer; font-weight: 700;">
+                        Assign/Respond
+                    </button>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <button class="btn-action btn-delete" onclick="deleteIssue()"
-                        style="background: #fee2e2; color: #ef4444; padding: 0.75rem 1rem; border-radius: 8px;">Delete</button>
+                        style="background: rgba(239, 68, 68, 0.05); color: #ef4444; padding: 0.75rem 1.25rem; border-radius: 10px; border: 1px solid rgba(239, 68, 68, 0.1); cursor:pointer; font-weight: 600;">
+                        Delete Report
+                    </button>
+
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button class="btn-action btn-complete" id="btn-mark-completed"
+                            onclick="updateIssueStatus('Resolved')"
+                            style="background: #10b981; color: white; padding: 0.75rem 1.5rem; border-radius: 10px; border:none; cursor:pointer; font-weight: 700; display: none;">
+                            Mark Completed
+                        </button>
+                        <button class="btn-action" onclick="closeGlobalModal()"
+                            style="background: var(--bg-panel); color: var(--text-secondary); padding: 0.75rem 1.5rem; border-radius: 10px; border: 1px solid var(--border-color); cursor:pointer; font-weight: 600;">
+                            Close
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -279,18 +454,15 @@
                 <button class="modal-close" onclick="closeProfileModal()">&times;</button>
             </div>
 
-            <form onsubmit="saveProfile(event)" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div id="profile-form-container" style="display: flex; flex-direction: column; gap: 1.25rem;">
                 <!-- Photo Upload -->
                 <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 0.5rem;">
                     <div style="width: 80px; height: 80px; border-radius: 50%; background: #e0e7ff; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; cursor: pointer; border: 2px solid #6366f1;"
-                        onclick="document.getElementById('profile-upload').click()">
-                        <img id="preview-avatar" src=""
+                        onclick="document.getElementById('profile-upload').click()" id="avatar-btn">
+                        <i data-lucide="user" id="default-avatar-icon"
+                            style="width: 40px; height: 40px; color: #6366f1;"></i>
+                        <img id="preview-avatar" src="" alt="Avatar"
                             style="width: 100%; height: 100%; object-fit: cover; display: none;">
-                        <i id="default-avatar-icon" data-lucide="user" width="40" height="40" color="#4f46e5"></i>
-                        <div
-                            style="position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.5); height: 24px; display: flex; align-items: center; justify-content: center;">
-                            <i data-lucide="camera" width="14" color="white"></i>
-                        </div>
                     </div>
                     <input type="file" id="profile-upload" accept="image/*" style="display: none;"
                         onchange="handleImageUpload(event)">
@@ -322,14 +494,24 @@
                         style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 0.95rem; color: #1e293b;">
                 </div>
 
+                <!-- Department (Read-only) -->
+                <div>
+                    <label
+                        style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 0.5rem;">Department</label>
+                    <input type="text" id="p-department" value="Not Assigned" readonly
+                        style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 0.95rem; color: #64748b; background: #f8fafc; cursor: not-allowed;">
+                    <span style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem; display: block;">Contact an
+                        administrator to change your department</span>
+                </div>
+
                 <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
                     <button type="button" onclick="closeProfileModal()"
                         style="padding: 0.75rem 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0; background: white; color: #64748b; cursor: pointer; font-weight: 500;">Cancel</button>
-                    <button type="submit"
+                    <button type="button" onclick="saveProfile(event)"
                         style="padding: 0.75rem 1.5rem; border-radius: 8px; border: none; background: #6366f1; color: white; cursor: pointer; font-weight: 500;">Save
                         Changes</button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -386,18 +568,24 @@
                         <h3 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 1.5rem;">Change Password</h3>
                         <div class="form-group">
                             <label class="form-label">Current Password</label>
-                            <input type="password" class="form-input" placeholder="Enter current password">
+                            <input type="password" id="sec-current-password" class="form-input"
+                                placeholder="Enter current password">
                         </div>
                         <div class="form-group">
                             <label class="form-label">New Password</label>
-                            <input type="password" class="form-input" placeholder="Enter new password">
+                            <input type="password" id="sec-new-password" class="form-input"
+                                placeholder="Enter new password">
+                            <span
+                                style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; display: block;">Minimum
+                                8 characters</span>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Confirm New Password</label>
-                            <input type="password" class="form-input" placeholder="Confirm new password">
+                            <input type="password" id="sec-confirm-password" class="form-input"
+                                placeholder="Confirm new password">
                         </div>
                         <div style="text-align: right; margin-top: 2rem;">
-                            <button class="btn-primary" onclick="searchSecSave('Password changed successfully!')">Update
+                            <button class="btn-primary" onclick="updatePassword()">Update
                                 Password</button>
                         </div>
                     </div>
@@ -407,14 +595,16 @@
                         <h3 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 1.5rem;">Update Email Address</h3>
                         <div class="form-group">
                             <label class="form-label">Current Email</label>
-                            <input type="email" class="form-input" value="admin@antigrav.com" readonly>
+                            <input type="email" id="sec-current-email" class="form-input" value="Loading..." readonly
+                                style="background: #f8fafc; cursor: not-allowed;">
                         </div>
                         <div class="form-group">
                             <label class="form-label">New Email Address</label>
-                            <input type="email" class="form-input" placeholder="Enter new email address">
+                            <input type="email" id="sec-new-email" class="form-input"
+                                placeholder="Enter new email address">
                         </div>
                         <div style="text-align: right; margin-top: 2rem;">
-                            <button class="btn-primary" onclick="searchSecSave('Email verification sent!')">Update
+                            <button class="btn-primary" onclick="updateEmail()">Update
                                 Email</button>
                         </div>
                     </div>
@@ -561,6 +751,7 @@
                                     other sessions</a></span>
                         </div>
                         <script>
+
                             function logoutDevice(rowId) {
                                 if (confirm('Are you sure you want to log out this device?')) {
                                     const row = document.getElementById(rowId);
@@ -634,62 +825,11 @@
             </div>
 
             <div class="modal-body" style="max-height: 500px; overflow-y: auto; padding-right: 0.5rem;">
-                <!-- Issue 1 -->
-                <div
-                    style="border-left: 3px solid #ef4444; padding: 1rem; background: var(--bg-panel); margin-bottom: 1rem; border-radius: 0 8px 8px 0; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-weight: 600; color: #ef4444; margin-bottom: 0.25rem;">Walay Kuryente - Purok 4
-                        </div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
-                            <span>#1027</span> • Whiskey Itable • 12 mins ago
-                        </div>
+                <div id="critical-list-container">
+                    <!-- Dynamically populated or empty -->
+                    <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        No critical issues at the moment.
                     </div>
-                    <button class="btn-primary"
-                        style="background: #fee2e2; color: #ef4444; padding: 0.5rem 1rem; font-size: 0.85rem;"
-                        onclick="resolveAndRedirect('#1027', 'Walay Kuryente', 'Whiskey Itable', 'Today', 'Critical', 'Walay kuryente sa among area sukad pa ganihang hapon.')">Resolve</button>
-                </div>
-
-                <!-- Issue 2 -->
-                <div
-                    style="border-left: 3px solid #ef4444; padding: 1rem; background: var(--bg-panel); margin-bottom: 1rem; border-radius: 0 8px 8px 0; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-weight: 600; color: #ef4444; margin-bottom: 0.25rem;">Saba nga Karaoke</div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
-                            <span>#1024</span> • James Paul Silayan • 1 hour ago
-                        </div>
-                    </div>
-                    <button class="btn-primary"
-                        style="background: #fee2e2; color: #ef4444; padding: 0.5rem 1rem; font-size: 0.85rem;"
-                        onclick="resolveAndRedirect('#1024', 'Saba nga Karaoke', 'James Paul Silayan', 'Today', 'Critical', 'Saba kaayo ang karaoke sa silingan bisag lawom na ang gabii. Dili na mi katulog.')">Resolve</button>
-                </div>
-
-                <!-- Issue 3 -->
-                <div
-                    style="border-left: 3px solid #ef4444; padding: 1rem; background: var(--bg-panel); margin-bottom: 1rem; border-radius: 0 8px 8px 0; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-weight: 600; color: #ef4444; margin-bottom: 0.25rem;">Water Leakage - Main St.
-                        </div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
-                            <span>#1030</span> • Maria Clara • 2 hours ago
-                        </div>
-                    </div>
-                    <button class="btn-primary"
-                        style="background: #fee2e2; color: #ef4444; padding: 0.5rem 1rem; font-size: 0.85rem;"
-                        onclick="resolveAndRedirect('#1030', 'Water Leakage', 'Maria Clara', 'Today', 'Critical', 'Major water pipe burst affecting 5 households.')">Resolve</button>
-                </div>
-
-                <!-- Issue 4 -->
-                <div
-                    style="border-left: 3px solid #ef4444; padding: 1rem; background: var(--bg-panel); margin-bottom: 1rem; border-radius: 0 8px 8px 0; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-weight: 600; color: #ef4444; margin-bottom: 0.25rem;">Blocked Drainage</div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
-                            <span>#1019</span> • Pedro Penduko • Yesterday
-                        </div>
-                    </div>
-                    <button class="btn-primary"
-                        style="background: #fee2e2; color: #ef4444; padding: 0.5rem 1rem; font-size: 0.85rem;"
-                        onclick="resolveAndRedirect('#1019', 'Blocked Drainage', 'Pedro Penduko', 'Yesterday', 'Critical', 'Drainage overflow causing street flooding.')">Resolve</button>
                 </div>
             </div>
         </div>
@@ -735,6 +875,31 @@
         });
     </script>
 
+    <!-- Map Modal -->
+    <div class="modal-overlay" id="mapModal" style="z-index: 3000;">
+        <div class="map-modal-card">
+            <div class="modal-header"
+                style="background: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 1.25rem 1.5rem;">
+                <h2 class="modal-title"
+                    style="font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="map-pin" style="color: #ef4444;"></i>
+                    Location Map
+                </h2>
+                <button class="modal-close" onclick="closeMapModal()" style="font-size: 1.5rem;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 1rem; background: var(--bg-panel);">
+                <div id="g-map-full"></div>
+                <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div id="g-map-coords"
+                        style="font-family: monospace; font-size: 0.85rem; color: var(--text-secondary);">
+                        Lat: 0, Lng: 0
+                    </div>
+                    <button class="btn-primary" onclick="closeMapModal()">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Chat Widget -->
     <!-- Chat Widget Removed -->
 
@@ -745,6 +910,10 @@
         } else {
             console.warn('Lucide icons library not loaded.');
         }
+
+        const API_BASE_URL = (window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:')
+            ? 'http://localhost:3000'
+            : '';
 
         // --- NOTIFICATION DROPDOWN LOGIC ---
         const notifBtn = document.getElementById('notif-btn');
@@ -902,6 +1071,12 @@
         const globalModal = document.getElementById('globalModal');
         let currentIssueId = null;
         let currentIssueName = null;
+        let currentLat = null;
+        let currentLng = null;
+        let miniMap = null;
+        let fullMap = null;
+        let miniMarker = null;
+        let fullMarker = null;
 
         // Mock Attachments Data
         const mockAttachments = {
@@ -918,13 +1093,42 @@
             ]
         };
 
-        window.openGlobalModal = function (id, name, reporter, date, status, desc) {
+        window.openGlobalModal = function (data) {
+            const { id, name, reporter, date, status, desc, images, priority, postStatus, barangay, street, landmarks, lat, lng } = data;
             currentIssueId = id;
             currentIssueName = name;
+            currentLat = lat || 7.4477; // Default Tagum
+            currentLng = lng || 125.8447;
+
             document.getElementById('g-id').innerText = id;
             document.getElementById('g-name').innerText = name;
             document.getElementById('g-reporter').innerText = reporter;
             document.getElementById('g-date').innerText = date;
+
+            // Address Fields
+            document.getElementById('g-brgy').innerText = barangay || 'Unknown Barangay';
+            document.getElementById('g-street').innerText = street || 'No Street Provided';
+            document.getElementById('g-landmarks').innerText = landmarks ? `Landmarks: ${landmarks}` : 'No Landmarks';
+
+            // Priority and Post Status
+            const priorityEl = document.getElementById('g-priority');
+            const postStatusEl = document.getElementById('g-post-status');
+            priorityEl.innerText = priority || 'Low';
+
+            // Normalize for display and logic
+            const normalizedPostStatus = (postStatus || 'pending').toLowerCase().trim();
+            postStatusEl.innerText = normalizedPostStatus;
+
+            // Priority Color
+            const prioLower = (priority || '').toLowerCase();
+            if (prioLower === 'high' || prioLower === 'critical') priorityEl.style.color = '#ef4444';
+            else if (prioLower === 'medium') priorityEl.style.color = '#f59e0b';
+            else priorityEl.style.color = '#10b981';
+
+            // Post Status Color
+            if (normalizedPostStatus === 'approved') postStatusEl.style.color = '#10b981';
+            else if (normalizedPostStatus === 'rejected') postStatusEl.style.color = '#ef4444';
+            else postStatusEl.style.color = '#f59e0b';
 
             const statusEl = document.getElementById('g-status');
             statusEl.innerText = status;
@@ -937,21 +1141,28 @@
             const mediaContainer = document.getElementById('g-media');
             if (mediaContainer) {
                 mediaContainer.innerHTML = '';
-                const attachments = mockAttachments[id] || [];
+                const mediaList = (images && Array.isArray(images)) ? images : [];
 
-                if (attachments.length > 0) {
-                    attachments.forEach(media => {
+                if (mediaList.length > 0) {
+                    mediaList.forEach(media => {
                         const item = document.createElement('div');
                         item.className = 'media-item';
+                        let src = media.url || media.src || media;
+                        let type = media.type || 'image';
 
-                        if (media.type === 'image') {
+                        if (typeof src === 'string' && src.match(/\.(mp4|webm|ogg)$/i)) {
+                            type = 'video';
+                        }
+
+                        if (type === 'image' || type.startsWith('image/')) {
                             const img = document.createElement('img');
-                            img.src = media.src;
-                            img.onclick = () => openLightbox(media.src);
+                            img.src = src;
+                            img.alt = 'Attachment';
+                            img.onclick = () => window.openLightbox(src);
                             item.appendChild(img);
-                        } else if (media.type === 'video') {
+                        } else {
                             const vid = document.createElement('video');
-                            vid.src = media.src;
+                            vid.src = src;
                             vid.controls = true;
                             item.appendChild(vid);
                         }
@@ -962,10 +1173,293 @@
                 }
             }
 
+            // Reset Reactions
+            document.getElementById('g-likes').innerText = '0';
+            document.getElementById('g-dislikes').innerText = '0';
+            fetchReactions(id);
+
+            // Fetch Comments
+            fetchComments(id);
+
             document.getElementById('response-date').valueAsDate = new Date();
             document.getElementById('response-time').value = '08:00'; // Default
-            updateModalButtons(status);
+            updateModalButtons(status, postStatus);
             globalModal.classList.add('active');
+
+            // Initialize icons in modal
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            // Set Mapbox Token
+            mapboxgl.accessToken = 'pk.eyJ1IjoiZWpzZWd1aWRvIiwiYSI6ImNtaDdkOGJqODAyMzMya3Exb2ZyYWlmcXUifQ.UDeG5YHwJOAhFpc_tpDAuQ';
+
+            // Initialize Minimap
+            setTimeout(() => {
+                if (!miniMap) {
+                    miniMap = new mapboxgl.Map({
+                        container: 'g-minimap',
+                        style: 'mapbox://styles/mapbox/light-v11',
+                        center: [currentLng, currentLat],
+                        zoom: 14,
+                        interactive: false,
+                        attributionControl: false
+                    });
+                    miniMarker = new mapboxgl.Marker({ color: '#ef4444' }).setLngLat([currentLng, currentLat]).addTo(miniMap);
+                } else {
+                    miniMap.setCenter([currentLng, currentLat]);
+                    miniMarker.setLngLat([currentLng, currentLat]);
+                    miniMap.resize();
+                }
+            }, 300);
+        }
+
+        const mapModal = document.getElementById('mapModal');
+        window.openMapModal = function () {
+            mapModal.classList.add('active');
+            document.getElementById('g-map-coords').innerText = `Lat: ${currentLat.toFixed(6)}, Lng: ${currentLng.toFixed(6)}`;
+
+            setTimeout(() => {
+                if (!fullMap) {
+                    fullMap = new mapboxgl.Map({
+                        container: 'g-map-full',
+                        style: 'mapbox://styles/mapbox/light-v11', // Light mode for better visibility
+                        center: [currentLng, currentLat],
+                        zoom: 16.5,
+                        pitch: 60,
+                        bearing: -20,
+                        antialias: true
+                    });
+
+                    fullMap.on('load', () => {
+                        // 3D Buildings
+                        const layers = fullMap.getStyle().layers;
+                        const labelLayerId = layers.find(
+                            (layer) => layer.type === 'symbol' && layer.layout['text-field']
+                        ).id;
+
+                        fullMap.addLayer(
+                            {
+                                'id': 'add-3d-buildings',
+                                'source': 'composite',
+                                'source-layer': 'building',
+                                'filter': ['==', 'extrude', 'true'],
+                                'type': 'fill-extrusion',
+                                'minzoom': 15,
+                                'paint': {
+                                    'fill-extrusion-color': '#94a3b8',
+                                    'fill-extrusion-height': ['get', 'height'],
+                                    'fill-extrusion-base': ['get', 'min_height'],
+                                    'fill-extrusion-opacity': 0.5
+                                }
+                            },
+                            labelLayerId
+                        );
+                    });
+
+                    fullMarker = new mapboxgl.Marker({ color: '#ef4444' })
+                        .setLngLat([currentLng, currentLat])
+                        .addTo(fullMap);
+
+                    fullMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
+                } else {
+                    fullMap.setCenter([currentLng, currentLat]);
+                    fullMarker.setLngLat([currentLng, currentLat]);
+                    fullMap.resize();
+                }
+            }, 300);
+        }
+
+        window.closeMapModal = function () {
+            mapModal.classList.remove('active');
+        }
+
+        mapModal.addEventListener('click', (e) => {
+            if (e.target === mapModal) closeMapModal();
+        });
+
+        window.toggleReaction = async function (type) {
+            console.log('toggleReaction called with type:', type);
+
+            let userId = 1; // Default
+            try {
+                const user = JSON.parse(localStorage.getItem('user_token'));
+                if (user && user.id) userId = user.id;
+            } catch (e) { }
+            console.log('Using userId:', userId);
+
+            // Use the ID as is (encoded for URL safety)
+            const rawId = currentIssueId;
+            console.log('Report ID:', rawId);
+
+            if (!rawId) {
+                console.error('Error: No report ID found');
+                return;
+            }
+
+            try {
+                // Encode the ID to handle '#' correctly in URL
+                const url = `${API_BASE_URL}/api/reports/${encodeURIComponent(rawId)}/reactions`;
+                console.log('Sending POST to:', url);
+
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userId, reactionType: type })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    console.error('Reaction update failed:', err);
+                    throw new Error(err.error || `Server Error ${res.status}`);
+                }
+
+                console.log('Reaction updated successfully');
+                fetchReactions(rawId);
+            } catch (err) {
+                console.error('Reaction error:', err);
+                alert('Reaction Failed: ' + err.message);
+            }
+        }
+
+        async function fetchReactions(reportId) {
+            // Encode the ID to handle '#' correctly
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/reports/${encodeURIComponent(reportId)}/reactions`);
+                if (!res.ok) throw new Error('Failed to fetch reactions');
+
+                const data = await res.json();
+                document.getElementById('g-likes').innerText = data.like_count || 0;
+                document.getElementById('g-dislikes').innerText = data.dislike_count || 0;
+            } catch (err) {
+                console.error('Error fetching reactions:', err);
+            }
+        }
+
+        async function fetchComments(reportId) {
+            const list = document.getElementById('g-comments-list');
+            list.innerHTML = '<div style="padding: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">Loading comments...</div>';
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/reports/${encodeURIComponent(reportId)}/comments`);
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Failed to fetch comments');
+                }
+                const comments = await res.json();
+
+                list.innerHTML = '';
+                if (comments.length === 0) {
+                    list.innerHTML = '<div style="padding: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">No comments yet.</div>';
+                } else {
+                    comments.forEach(c => {
+                        const fullName = (c.first_name && c.last_name) ? `${c.first_name} ${c.last_name}` : c.username;
+                        const deptTag = c.department_name ? ` (${c.department_name})` : '';
+
+                        const div = document.createElement('div');
+                        div.style.padding = '0.5rem';
+                        div.style.marginBottom = '0.5rem';
+                        div.style.background = 'var(--bg-panel)';
+                        div.style.borderRadius = '6px';
+                        div.style.fontSize = '0.85rem';
+                        div.innerHTML = `
+                            <div style="font-weight: 600; color: var(--text-primary); display: flex; justify-content: space-between;">
+                                <span>${fullName}${deptTag}</span>
+                                <span style="font-weight: 400; color: var(--text-secondary); font-size: 0.75rem;">
+                                    ${c.created_at ? new Date(c.created_at).toLocaleString('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : 'Just now'}
+                                </span>
+                            </div>
+                            <div style="color: var(--text-secondary); margin-top: 0.25rem;">${c.body}</div>
+                        `;
+                        list.appendChild(div);
+                    });
+                    list.scrollTop = list.scrollHeight;
+                }
+            } catch (err) {
+                list.innerHTML = `<div style="padding: 0.5rem; color: #ef4444; font-size: 0.85rem;">Error: ${err.message}</div>`;
+            }
+        }
+
+        window.postComment = async function () {
+            const input = document.getElementById('g-comment-input');
+            const body = input.value.trim();
+            if (!body) return;
+
+            // Get user info
+            let userId = 1; // Default
+            try {
+                const user = JSON.parse(localStorage.getItem('user_token'));
+                if (user && user.id) userId = user.id;
+            } catch (e) { }
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/reports/${encodeURIComponent(currentIssueId)}/comments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ body: body, userId: userId })
+                });
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Failed to post comment');
+                }
+                input.value = '';
+                fetchComments(currentIssueId);
+            } catch (err) {
+                alert('Comment Error: ' + err.message);
+            }
+        }
+
+        window.moderateIssue = async function (newPostStatus) {
+            if (!confirm(`Are you sure you want to ${newPostStatus} this issue?`)) return;
+
+            // 1. Disable buttons to prevent double-click
+            const btnApprove = document.querySelector('.btn-approve');
+            const btnDecline = document.querySelector('.btn-decline');
+            if (btnApprove) btnApprove.disabled = true;
+            if (btnDecline) btnDecline.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/reports/${encodeURIComponent(currentIssueId)}/post-status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newPostStatus.toLowerCase() })
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    // If already moderated, alert but refresh
+                    if (res.status === 400) {
+                        alert(`Notice: ${errData.error || 'This report has already been processed.'}`);
+                        closeGlobalModal();
+                        const iframe = document.getElementById('content-frame');
+                        if (iframe && iframe.contentWindow && iframe.contentWindow.fetchIssues) {
+                            iframe.contentWindow.fetchIssues();
+                        }
+                        return;
+                    }
+                    throw new Error(errData.error || 'Failed to update status');
+                }
+
+                const postStatusEl = document.getElementById('g-post-status');
+                postStatusEl.innerText = newPostStatus;
+                if (newPostStatus.toLowerCase() === 'approved') postStatusEl.style.color = '#10b981';
+                else if (newPostStatus.toLowerCase() === 'rejected') postStatusEl.style.color = '#ef4444';
+
+                alert(`Issue has been ${newPostStatus}.`);
+
+                // Update modal buttons to hide the moderation card
+                const statusEl = document.getElementById('g-status');
+                updateModalButtons(statusEl.innerText, newPostStatus);
+
+                // Refresh Iframe list
+                const iframe = document.getElementById('content-frame');
+                if (iframe && iframe.contentWindow && iframe.contentWindow.fetchIssues) {
+                    iframe.contentWindow.fetchIssues();
+                }
+            } catch (err) {
+                alert('Moderation Error: ' + err.message);
+                // Re-enable if it failed
+                if (btnApprove) btnApprove.disabled = false;
+                if (btnDecline) btnDecline.disabled = false;
+            }
         }
 
         function applyStatusColor(el, status) {
@@ -975,29 +1469,35 @@
             else el.style.color = '#1e293b';
         }
 
-        function updateModalButtons(status) {
-            const actions = document.getElementById('modal-actions');
-            const btnRespond = actions.querySelector('.btn-respond');
-            const btnComplete = actions.querySelector('.btn-complete');
-            const dateInput = document.getElementById('response-date');
-            const timeInput = document.getElementById('response-time');
+        function updateModalButtons(status, postStatus) {
+            const modCard = document.getElementById('admin-moderation-card');
+            const respondSection = document.getElementById('respond-section');
+            const btnComplete = document.getElementById('btn-mark-completed');
 
-            btnRespond.style.display = 'none';
-            btnComplete.style.display = 'none';
-            dateInput.style.display = 'none';
-            timeInput.style.display = 'none';
-
-            if (status === 'Pending' || status === 'In Review' || status === 'Critical') {
-                btnRespond.style.display = 'inline-block';
-                dateInput.style.display = 'inline-block';
-                timeInput.style.display = 'inline-block';
-            } else if (status === 'Ongoing') {
-                btnComplete.style.display = 'inline-block';
+            // 1. Moderation Panel Visibility
+            const ps = (postStatus || '').toLowerCase().trim();
+            // Only show moderation card if it's truly pending
+            if (ps === 'pending' || ps === '') {
+                modCard.style.display = 'block';
+            } else {
+                modCard.style.display = 'none';
             }
 
-            // Delete always available
-            const btnDelete = actions.querySelector('.btn-delete');
-            if (btnDelete) btnDelete.style.display = 'inline-block';
+            // 2. Response & Completion Section Visibility
+            // Normalizing status to match cases
+            const s = (status || '').toLowerCase();
+
+            if (s === 'pending' || s === 'in review' || s === 'critical' || s === 'error') {
+                respondSection.style.display = 'flex';
+                btnComplete.style.display = 'none';
+            } else if (s === 'ongoing' || s === 'in progress') {
+                respondSection.style.display = 'none';
+                btnComplete.style.display = 'block';
+            } else {
+                // Resolved or something else
+                respondSection.style.display = 'none';
+                btnComplete.style.display = 'none';
+            }
         }
 
         window.handleRespond = function () {
@@ -1007,38 +1507,62 @@
                 alert("Please select a date to schedule this response.");
                 return;
             }
-            // Optional: check for time, or just let it be empty if allowed. But user asked to "add a time... so admin can set time".
-            // Let's assume it defaults or user sets it.
 
             saveSchedule(currentIssueId, currentIssueName, dateInput.value, timeInput.value, 'Ongoing');
+            updateStatusInDB(currentIssueId, 'In Progress'); // Sync with DB
             updateIssueStatus('Ongoing');
         }
 
-        window.deleteIssue = function () {
-            if (confirm('Are you sure you want to delete this issue? This action cannot be undone.')) {
-                // Here you would send a delete request to the backend
-                alert(`Issue ${currentIssueId} has been deleted.`);
-
-                // For demo: Remove the row if it exists in a visible table (dashboard/issues page)
-                // Since this is index.html, we might not have direct access to iframe content easily
-                // But we can try to notify the iframe if needed, or just close modal.
-                closeGlobalModal();
+        async function updateStatusInDB(reportId, dbStatus) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/reports/${encodeURIComponent(reportId)}/status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: dbStatus })
+                });
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    console.error('Failed to sync status to DB:', errData.error || res.statusText);
+                }
+            } catch (e) {
+                console.error('Failed to sync status to DB:', e);
             }
         }
 
-        function saveSchedule(id, name, date, time, status) {
-            const newIssue = { id, name, date, time: time || '08:00', status };
-            let schedules = JSON.parse(localStorage.getItem('adminSchedules') || '[]');
-            schedules = schedules.filter(s => s.id !== id);
-            schedules.push(newIssue);
-            localStorage.setItem('adminSchedules', JSON.stringify(schedules));
+        window.deleteIssue = async function () {
+            if (!currentIssueId) return;
+            if (!confirm(`Are you sure you want to delete report ${currentIssueId}?`)) return;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/reports/${encodeURIComponent(currentIssueId)}`, {
+                    method: 'DELETE'
+                });
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Failed to delete report');
+                }
+
+                alert('Report deleted successfully.');
+                closeGlobalModal();
+
+                // Refresh iframe
+                const iframe = document.getElementById('content-frame');
+                if (iframe && iframe.contentWindow && iframe.contentWindow.fetchIssues) {
+                    iframe.contentWindow.fetchIssues();
+                }
+            } catch (err) {
+                alert('Error deleting report: ' + err.message);
+            }
         }
 
         window.updateIssueStatus = function (newStatus) {
+            console.log('Changing status for ID:', currentIssueId, 'to:', newStatus);
             const statusEl = document.getElementById('g-status');
             statusEl.innerText = newStatus;
             applyStatusColor(statusEl, newStatus);
-            updateModalButtons(newStatus);
+
+            // Sync with Database
+            updateStatusInDB(currentIssueId, newStatus);
 
             const iframe = document.getElementById('content-frame');
             if (iframe && iframe.contentWindow && iframe.contentWindow.updateRowStatus) {
@@ -1059,7 +1583,7 @@
                     iframe.contentWindow.highlightRow(id);
                 }
                 // Also open the modal
-                openGlobalModal(id, title, reporter, date, status, desc);
+                openGlobalModal({ id, name: title, reporter, date, status, desc });
 
                 // Remove listener to avoid duplicate triggers
                 iframe.onload = null;
@@ -1313,7 +1837,7 @@
 
             // Open Modal after delay
             setTimeout(() => {
-                openGlobalModal(id, title, reporter, date, status, 'Reported via Notification System');
+                openGlobalModal({ id, name: title, reporter, date, status, desc: 'Reported via Notification System' });
             }, 300);
         }
 
@@ -1764,6 +2288,329 @@
 
                     // Redirect
                     window.location.href = '../admin-login/index.html';
+                }
+
+                // Profile Modal Functions
+                window.openProfileModal = async function () {
+                    window.selectedProfileFile = null; // Reset selection
+                    const modal = document.getElementById('profileModal');
+                    modal.classList.add('active');
+
+                    // Load user data
+                    await loadProfileData();
+                    lucide.createIcons();
+                }
+
+                window.closeProfileModal = function () {
+                    document.getElementById('profileModal').classList.remove('active');
+                }
+
+                window.loadProfileData = async function () {
+                    try {
+                        const user = JSON.parse(localStorage.getItem('user_token') || '{}');
+
+                        // Set basic fields from localStorage
+                        document.getElementById('p-name').value = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Admin User';
+                        document.getElementById('p-username').value = user.username || '';
+                        document.getElementById('p-email').value = user.email || '';
+
+                        // Fetch full user data including department from API
+                        const API_BASE_URL = window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:'
+                            ? 'http://localhost:3000'
+                            : '';
+
+                        const response = await fetch(`${API_BASE_URL}/api/users/admins?department_id=${user.department_id || ''}`);
+                        const admins = await response.json();
+                        const currentUser = admins.find(a => a.id === user.id);
+
+                        if (currentUser) {
+                            // Update department field
+                            document.getElementById('p-department').value = currentUser.department_name || 'Not Assigned';
+
+                            // Update profile photo if available
+                            if (currentUser.profile_photo) {
+                                const previewImg = document.getElementById('preview-avatar');
+                                const defaultIcon = document.getElementById('default-avatar-icon');
+                                previewImg.src = currentUser.profile_photo;
+                                previewImg.style.display = 'block';
+                                defaultIcon.style.display = 'none';
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error loading profile data:', error);
+                    }
+                }
+
+                window.selectedProfileFile = null; // Store the file object
+
+                window.handleImageUpload = function (event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        window.selectedProfileFile = file; // Save for upload
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            const previewImg = document.getElementById('preview-avatar');
+                            const defaultIcon = document.getElementById('default-avatar-icon');
+                            previewImg.src = e.target.result;
+                            previewImg.style.display = 'block';
+                            defaultIcon.style.display = 'none';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+
+                window.saveProfile = async function (event) {
+                    event.preventDefault(); // Good practice even for type="button" to stop propagation
+                    console.log('saveProfile called');
+
+                    let saveBtn = event.target;
+                    // Ensure we have the button if clicked on inner text
+                    if (saveBtn.tagName !== 'BUTTON') {
+                        saveBtn = saveBtn.closest('button');
+                    }
+
+                    const originalBtnText = saveBtn.innerText;
+                    saveBtn.innerText = "Saving...";
+                    saveBtn.disabled = true;
+
+                    try {
+                        const user = JSON.parse(localStorage.getItem('user_token') || '{}');
+                        if (!user.id) throw new Error('User ID not found. Please relogin.');
+
+                        const fullName = document.getElementById('p-name').value.trim();
+                        const [firstName, ...lastNameParts] = fullName.split(' ');
+                        const lastName = lastNameParts.join(' ');
+
+                        const API_BASE_URL = window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:'
+                            ? 'http://127.0.0.1:3000'
+                            : '';
+
+                        // 1. Handle Image Upload if exists
+                        let uploadedPhotoUrl = null;
+                        if (window.selectedProfileFile) {
+                            console.log('Starting image upload...');
+                            const formData = new FormData();
+                            formData.append('image', window.selectedProfileFile);
+
+                            try {
+                                const uploadRes = await fetch(`${API_BASE_URL}/api/upload/avatar`, {
+                                    method: 'POST',
+                                    body: formData
+                                });
+
+                                if (!uploadRes.ok) {
+                                    const errText = await uploadRes.text();
+                                    throw new Error(`Upload failed (${uploadRes.status}): ${errText}`);
+                                }
+
+                                const uploadData = await uploadRes.json();
+                                uploadedPhotoUrl = uploadData.url;
+                                console.log('Image uploaded successfully:', uploadedPhotoUrl);
+                            } catch (uploadErr) {
+                                console.error('Image Upload Error:', uploadErr);
+                                throw new Error('Image upload failed: ' + uploadErr.message);
+                            }
+                        }
+
+                        // 2. Update Profile Data
+                        console.log('Updating profile data...');
+                        const updatedData = {
+                            first_name: firstName || '',
+                            last_name: lastName || '',
+                            username: document.getElementById('p-username').value.trim(),
+                            email: document.getElementById('p-email').value.trim()
+                        };
+
+                        if (uploadedPhotoUrl) {
+                            updatedData.profile_photo = uploadedPhotoUrl;
+                        }
+
+                        const response = await fetch(`${API_BASE_URL}/api/users/${user.id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(updatedData)
+                        });
+
+                        if (response.ok) {
+                            // Update localStorage
+                            user.firstName = firstName;
+                            user.lastName = lastName;
+                            user.username = updatedData.username;
+                            user.email = updatedData.email;
+                            if (uploadedPhotoUrl) {
+                                user.profile_photo = uploadedPhotoUrl;
+                                // Force update current avatar images in UI
+                                const mainAvatar = document.querySelector('#avatar-btn img') || document.querySelector('#avatar-btn i');
+                                if (mainAvatar.tagName === 'IMG') mainAvatar.src = uploadedPhotoUrl;
+                            }
+                            localStorage.setItem('user_token', JSON.stringify(user));
+
+                            alert('Profile updated successfully!');
+                            closeProfileModal();
+                        } else {
+                            const error = await response.json();
+                            throw new Error('Update failed: ' + (error.error || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error in saveProfile:', error);
+                        alert(error.message);
+                    } finally {
+                        saveBtn.innerText = originalBtnText;
+                        saveBtn.disabled = false;
+                        window.selectedProfileFile = null;
+                    }
+                }
+
+                // Security Modal Functions
+                window.openSecurityModal = async function () {
+                    const modal = document.getElementById('securityModal');
+                    modal.classList.add('active');
+
+                    // Load current email
+                    await loadSecurityData();
+                    lucide.createIcons();
+                }
+
+                window.closeSecurityModal = function () {
+                    document.getElementById('securityModal').classList.remove('active');
+
+                    // Clear password fields for security
+                    document.getElementById('sec-current-password').value = '';
+                    document.getElementById('sec-new-password').value = '';
+                    document.getElementById('sec-confirm-password').value = '';
+                }
+
+                window.loadSecurityData = async function () {
+                    try {
+                        const user = JSON.parse(localStorage.getItem('user_token') || '{}');
+
+                        // Set current email
+                        document.getElementById('sec-current-email').value = user.email || 'Not set';
+                    } catch (error) {
+                        console.error('Error loading security data:', error);
+                    }
+                }
+
+                window.updatePassword = async function () {
+                    const currentPassword = document.getElementById('sec-current-password').value.trim();
+                    const newPassword = document.getElementById('sec-new-password').value.trim();
+                    const confirmPassword = document.getElementById('sec-confirm-password').value.trim();
+
+                    // Validation
+                    if (!currentPassword || !newPassword || !confirmPassword) {
+                        alert('Please fill in all password fields');
+                        return;
+                    }
+
+                    if (newPassword.length < 8) {
+                        alert('New password must be at least 8 characters long');
+                        return;
+                    }
+
+                    if (newPassword !== confirmPassword) {
+                        alert('New passwords do not match');
+                        return;
+                    }
+
+                    try {
+                        const user = JSON.parse(localStorage.getItem('user_token') || '{}');
+
+                        const API_BASE_URL = window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:'
+                            ? 'http://localhost:3000'
+                            : '';
+
+                        const response = await fetch(`${API_BASE_URL}/api/users/${user.id}/password`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                currentPassword: currentPassword,
+                                newPassword: newPassword
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            alert('Password updated successfully!');
+                            // Clear fields
+                            document.getElementById('sec-current-password').value = '';
+                            document.getElementById('sec-new-password').value = '';
+                            document.getElementById('sec-confirm-password').value = '';
+                        } else {
+                            alert('Error: ' + (data.error || 'Failed to update password'));
+                        }
+                    } catch (error) {
+                        console.error('Error updating password:', error);
+                        alert('Error updating password. Please try again.');
+                    }
+                }
+
+                window.updateEmail = async function () {
+                    const newEmail = document.getElementById('sec-new-email').value.trim();
+
+                    if (!newEmail) {
+                        alert('Please enter a new email address');
+                        return;
+                    }
+
+                    // Basic email validation
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(newEmail)) {
+                        alert('Please enter a valid email address');
+                        return;
+                    }
+
+                    try {
+                        const user = JSON.parse(localStorage.getItem('user_token') || '{}');
+
+                        const API_BASE_URL = window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:'
+                            ? 'http://localhost:3000'
+                            : '';
+
+                        const response = await fetch(`${API_BASE_URL}/api/users/${user.id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                email: newEmail
+                            })
+                        });
+
+                        if (response.ok) {
+                            // Update localStorage
+                            user.email = newEmail;
+                            localStorage.setItem('user_token', JSON.stringify(user));
+
+                            // Update current email display
+                            document.getElementById('sec-current-email').value = newEmail;
+                            document.getElementById('sec-new-email').value = '';
+
+                            alert('Email updated successfully!');
+                        } else {
+                            const error = await response.json();
+                            alert('Error: ' + (error.error || 'Failed to update email'));
+                        }
+                    } catch (error) {
+                        console.error('Error updating email:', error);
+                        alert('Error updating email. Please try again.');
+                    }
+                }
+
+                window.switchSecTab = function (tab, element) {
+                    // Hide all views
+                    document.querySelectorAll('.sec-view').forEach(v => v.classList.remove('active'));
+                    document.querySelectorAll('.sec-nav-item').forEach(n => n.classList.remove('active'));
+
+                    // Show selected view
+                    document.getElementById('sec-view-' + tab).classList.add('active');
+                    element.classList.add('active');
+
+                    lucide.createIcons();
                 }
             })();
     </script>

@@ -4,1435 +4,515 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../css/content.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
     <title>Messages</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Override default body padding for full-height app feel */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --border: #334155;
+        }
+
         body {
-            padding: 0 !important;
-            margin: 0 !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             height: 100vh;
             overflow: hidden;
+        }
+
+        .container {
             display: flex;
-            flex-direction: column;
-            background-color: var(--bg-card);
-            /* Fallback to card color matching layout */
-        }
-
-        .messenger-layout {
-            display: grid;
-            grid-template-columns: 320px 1fr 300px;
-            height: 100%;
-            background: var(--bg-card);
-            /* Fallback */
-            overflow: hidden;
-        }
-
-        /* Variables for this page specifically to match the dark messenger look */
-        :root {
-            --msg-bg-sidebar: #1e1e1e;
-            --msg-bg-main: #000000;
-            --msg-bg-info: #1e1e1e;
-            --msg-hover: rgba(255, 255, 255, 0.1);
-            --msg-bubble-sent: #6366f1;
-            --msg-bubble-received: #3e4042;
-            --msg-text-primary: #e4e6eb;
-            --msg-text-secondary: #b0b3b8;
+            height: 100vh;
         }
 
         /* Sidebar */
-        .msg-sidebar {
-            background: var(--bg-card);
-            /* Use theme variable */
-            border-right: 1px solid var(--border-color);
+        .sidebar {
+            width: 320px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
         }
 
-        .msg-header {
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
         }
 
-        .msg-title {
+        .sidebar-title {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--text-primary);
         }
 
-        .msg-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .icon-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: var(--text-primary);
-            transition: background 0.2s;
-        }
-
-        .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .search-bar {
-            padding: 0 1rem 1rem 1rem;
-        }
-
-        .search-input-wrapper {
-            background: var(--bg-panel);
-            border-radius: 20px;
-            padding: 0.5rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .search-box {
+            padding: 1rem;
         }
 
         .search-input {
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
             width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
             outline: none;
-            font-size: 0.95rem;
         }
 
-        .msg-filters {
-            display: flex;
-            gap: 0.5rem;
-            padding: 0 1rem 1rem 1rem;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-
-        .filter-pill {
-            background: transparent;
-            color: var(--text-secondary);
-            padding: 0.4rem 0.8rem;
-            border-radius: 16px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .filter-pill.active {
-            background: rgba(99, 102, 241, 0.2);
-            color: #818cf8;
-        }
-
-        .chat-list {
+        .conversations-list {
             flex: 1;
             overflow-y: auto;
-            padding: 0 0.5rem;
         }
 
-        .chat-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            border-radius: 8px;
+        .conversation-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
             cursor: pointer;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
             transition: background 0.2s;
         }
 
-        .chat-item:hover,
-        .chat-item.active {
-            background: var(--bg-panel);
+        .conversation-item:hover {
+            background: var(--bg-tertiary);
         }
 
-        .avatar-container {
-            position: relative;
+        .conversation-item.active {
+            background: var(--bg-tertiary);
         }
 
         .avatar {
             width: 48px;
             height: 48px;
             border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
             object-fit: cover;
         }
 
-        .status-dot {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            width: 12px;
-            height: 12px;
-            background: #10b981;
-            border-radius: 50%;
-            border: 2px solid var(--bg-card);
-        }
-
-        .chat-info {
+        .conversation-info {
             flex: 1;
             min-width: 0;
         }
 
-        .chat-name {
+        .conversation-name {
             font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.2rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .chat-preview {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .chat-preview.unread {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        /* Main Chat Area */
-        .msg-main {
-            background: var(--bg-panel);
-            /* Slightly different shade */
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .main-header {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--bg-card);
-            z-index: 10;
-        }
-
-        .header-user {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-            color: var(--accent-color);
-        }
-
-        /* Messages Area */
-        .messages-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .message-row {
-            display: flex;
-            margin-bottom: 0.5rem;
-            align-items: center;
-        }
-
-        .message-row.sent {
-            justify-content: flex-end;
-        }
-
-        /* Chat Item Hover Menu */
-        .chat-item {
-            position: relative;
-            /* For absolute positioning of button */
-        }
-
-        .chat-item-menu-btn {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: transparent;
-            /* Transparent default */
-            border: none;
-            /* No border */
-            display: none;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 10;
-            /* Above chat content */
-            color: var(--text-secondary);
-            box-shadow: none;
-            /* No shadow */
-        }
-
-        .chat-item:hover .chat-item-menu-btn {
-            display: flex;
-        }
-
-        .chat-item-menu-btn:hover {
-            background: rgba(255, 255, 255, 0.05);
-            /* Very subtle hover */
-            color: var(--text-primary);
-        }
-
-        /* Generic Dropdown for Chat Item */
-        .chat-context-menu {
-            position: absolute;
-            background: var(--bg-dropdown);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 0.5rem;
-            width: 140px;
-            z-index: 1000;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            display: none;
-        }
-
-        .chat-context-menu.active {
-            display: block;
-        }
-
-        .chat-context-item {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.9rem;
-            color: var(--text-primary);
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: background 0.2s;
-        }
-
-        .chat-context-item:hover {
-            background: var(--bg-panel);
-        }
-
-        .chat-context-item.delete {
-            color: #ef4444;
-        }
-
-        .chat-context-item.delete:hover {
-            background: #fef2f2;
-        }
-
-        .message-row.received {
-            justify-content: flex-start;
-        }
-
-        .msg-bubble {
-            max-width: 60%;
-            padding: 0.75rem 1rem;
-            border-radius: 18px;
-            font-size: 0.95rem;
-            line-height: 1.4;
-            position: relative;
-        }
-
-        .msg-bubble.sent {
-            background: var(--accent-color);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-
-        .msg-bubble.received {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            border-bottom-left-radius: 4px;
-        }
-
-        .msg-bubble img {
-            max-width: 200px;
-            border-radius: 12px;
-            margin-top: 0.5rem;
-        }
-
-        .msg-timestamp {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            margin-top: 0.25rem;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-
-        /* Message Hover Actions (3 dots) */
-        .msg-actions-hover {
-            opacity: 0;
-            transition: opacity 0.2s;
-            display: flex;
-            align-items: center;
-            padding: 0 0.75rem;
-            /* Increased padding */
-            cursor: pointer;
-            position: relative;
-            height: 100%;
-            /* Ensure full height for centering if needed, but align-items center on row works best */
-        }
-
-        .message-row:hover .msg-actions-hover {
-            opacity: 1;
-        }
-
-        /* Dropdown for Reply/Forward */
-        .msg-item-dropdown {
-            position: absolute;
-            top: 100%;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 0.5rem;
-            display: none;
-            /* JS to toggle */
-            flex-direction: column;
-            width: 120px;
-            z-index: 50;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .message-row.sent .msg-item-dropdown {
-            right: 0;
-        }
-
-        .message-row.received .msg-item-dropdown {
-            left: 0;
-        }
-
-        .msg-item-btn {
-            padding: 0.5rem;
-            font-size: 0.85rem;
-            color: var(--text-primary);
-            cursor: pointer;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .msg-item-btn:hover {
-            background: var(--bg-panel);
-        }
-
-        /* Hover Timestamp Tooltip */
-        .msg-tooltip {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 4px 8px;
-            font-size: 0.7rem;
-            border-radius: 4px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s;
-            white-space: nowrap;
-            top: -25px;
-            /* Adjust as needed */
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-        }
-
-        .msg-bubble:hover .msg-tooltip {
-            opacity: 1;
-        }
-
-        /* Input Area */
-        .input-area {
-            padding: 1rem;
-            border-top: 1px solid var(--border-color);
-            background: var(--bg-card);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .input-actions {
-            display: flex;
-            gap: 0.5rem;
-            color: var(--accent-color);
-        }
-
-        .chat-input-box {
-            flex: 1;
-            background: var(--bg-panel);
-            border-radius: 20px;
-            padding: 0.6rem 1rem;
-            border: none;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            outline: none;
-        }
-
-        /* Right Sidebar (Info) */
-        .msg-info {
-            background: var(--bg-card);
-            border-left: 1px solid var(--border-color);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .info-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin-bottom: 1rem;
-            object-fit: cover;
-        }
-
-        .info-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-primary);
             margin-bottom: 0.25rem;
         }
 
-        .info-status {
-            font-size: 0.85rem;
+        .conversation-preview {
+            font-size: 0.875rem;
             color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .info-actions {
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
             display: flex;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            flex-direction: column;
+            background: var(--bg-primary);
         }
 
-        .action-col {
+        .empty-state {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.25rem;
-            cursor: pointer;
-        }
-
-        .action-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--bg-panel);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            color: var(--text-primary);
-            transition: 0.2s;
-        }
-
-        .action-icon:hover {
-            background: var(--border-color);
-        }
-
-        .action-label {
-            font-size: 0.75rem;
             color: var(--text-secondary);
         }
 
-        .info-menu {
-            width: 100%;
+        .chat-container {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
         }
 
-        .menu-item {
+        .chat-container.active {
             display: flex;
-            justify-content: space-between;
+        }
+
+        .chat-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
+            display: flex;
             align-items: center;
-            padding: 0.75rem 0;
-            cursor: pointer;
+            gap: 1rem;
+            min-height: 72px;
+        }
+
+        .chat-header-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-header-info p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 0.75rem;
+            max-width: 70%;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-bubble {
+            background: var(--bg-secondary);
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+        }
+
+        .message.sent .message-bubble {
+            background: var(--accent);
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Input Area - FIXED AT BOTTOM */
+        .input-area {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            background: var(--bg-secondary);
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            min-height: 72px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 0.75rem 1.25rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 24px;
             color: var(--text-primary);
-            font-weight: 500;
-            border-bottom: 1px solid var(--border-color);
+            outline: none;
+            font-size: 0.95rem;
         }
 
-        .menu-item:hover {
-            color: var(--accent-color);
+        .send-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .msg-info {
-                display: none;
-            }
-
-            .messenger-layout {
-                grid-template-columns: 280px 1fr;
-            }
+        .send-button:hover {
+            opacity: 0.9;
         }
 
-        @media (max-width: 768px) {
-            .messenger-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .msg-main {
-                display: none;
-            }
-
-            .msg-main.active {
-                display: flex;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 100;
-            }
-
-            .msg-info {
-                display: none;
-            }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
         }
     </style>
 </head>
 
 <body>
-    <div class="messenger-layout">
+    <div class="container">
         <!-- Sidebar -->
-        <div class="msg-sidebar">
-            <div class="msg-header">
-                <span class="msg-title">Chats</span>
-                <div class="msg-actions">
-                    <div class="icon-btn"><i data-lucide="more-horizontal"></i></div>
-                    <div class="icon-btn"><i data-lucide="edit"></i></div>
-                </div>
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="sidebar-title">Chats</h1>
             </div>
 
-            <div class="search-bar">
-                <div class="search-input-wrapper">
-                    <i data-lucide="search" width="18" style="color: var(--text-secondary);"></i>
-                    <input type="text" class="search-input" placeholder="Search Messenger">
-                </div>
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="Search conversations..." id="searchInput">
             </div>
 
-            <div class="msg-filters">
-                <div class="filter-pill active" onclick="setFilter('all', this)">All</div>
-                <div class="filter-pill" onclick="setFilter('unread', this)">Unread</div>
-                <div class="filter-pill" onclick="setFilter('archive', this)">Archive</div>
-            </div>
-
-            <div class="chat-list" id="chat-list">
-                <!-- Chat Items (Injected) -->
+            <div class="conversations-list" id="conversationsList">
+                <div class="loading">Loading conversations...</div>
             </div>
         </div>
 
-        <!-- Main Chat -->
-        <div class="msg-main" id="msg-main-view">
-            <div class="main-header">
-                <div class="header-user">
-                    <!-- Mobile Back Button -->
-                    <i data-lucide="arrow-left" width="24"
-                        style="color: var(--text-primary); cursor: pointer; display: none;" class="mobile-back"
-                        onclick="toggleMobileChat(false)"></i>
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="empty-state" id="emptyState">
+                <i data-lucide="message-circle" width="64" height="64"></i>
+                <h3 style="margin-top: 1rem;">Select a conversation</h3>
+                <p>Choose a conversation from the list to start messaging</p>
+            </div>
 
-                    <div class="avatar-container">
-                        <img src="https://i.pravatar.cc/150?u=john" class="avatar" style="width: 40px; height: 40px;">
-                        <div class="status-dot"></div>
-                    </div>
-                    <div>
-                        <div class="chat-name" style="font-size: 1rem;">John Paul</div>
-                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Active now</div>
+            <div class="chat-container" id="chatContainer">
+                <div class="chat-header">
+                    <div class="avatar" id="chatAvatar">U</div>
+                    <div class="chat-header-info">
+                        <h3 id="chatName">User Name</h3>
+                        <p id="chatDepartment">Department</p>
                     </div>
                 </div>
-                <div class="header-actions">
-                    <i data-lucide="phone" style="cursor: pointer;"></i>
-                    <i data-lucide="video" style="cursor: pointer;"></i>
-                    <i data-lucide="info" style="cursor: pointer;" onclick="toggleInfoPanel()"></i>
-                </div>
-            </div>
 
-            <div class="messages-container" id="messages-container">
-                <!-- Messages Injected -->
-            </div>
-
-            <div class="input-area">
-                <div class="input-actions">
-                    <i data-lucide="plus-circle" width="24" style="cursor: pointer;"></i>
-                    <i data-lucide="image" width="24" style="cursor: pointer;"></i>
-                    <i data-lucide="sticky-note" width="24" style="cursor: pointer;"></i>
-                    <i data-lucide="gift" width="24" style="cursor: pointer;"></i>
-                </div>
-                <input type="text" class="chat-input-box" placeholder="Aa" id="msg-input" onkeypress="handleKey(event)">
-                <div style="color: var(--accent-color); cursor: pointer;" onclick="sendMessage()">
-                    <i data-lucide="thumbs-up" width="24" id="send-icon"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Info Panel -->
-        <div class="msg-info" id="msg-info-panel">
-            <img src="https://i.pravatar.cc/150?u=john" class="info-avatar">
-            <div class="info-name">John Paul</div>
-            <div class="info-status"><span
-                    style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></span> Active now</div>
-
-            <div class="info-actions">
-                <div class="action-col">
-                    <div class="action-icon"><i data-lucide="user"></i></div>
-                    <span class="action-label">Profile</span>
-                </div>
-                <div class="action-col" onclick="openMuteModal()">
-                    <div class="action-icon"><i data-lucide="bell"></i></div>
-                    <span class="action-label">Mute</span>
-                </div>
-                <div class="action-col">
-                    <div class="action-icon"><i data-lucide="search"></i></div>
-                    <span class="action-label">Search</span>
-                </div>
-            </div>
-
-            <div class="info-menu">
-                <div class="menu-item">
-                    <span>Chat info</span>
-                    <i data-lucide="chevron-down" width="16"></i>
+                <div class="messages-area" id="messagesArea">
+                    <!-- Messages will be loaded here -->
                 </div>
 
-                <div class="menu-item">
-                    <span>Privacy & support</span>
-                    <i data-lucide="chevron-down" width="16"></i>
+                <div class="input-area">
+                    <input type="text" class="message-input" id="messageInput" placeholder="Type a message..."
+                        onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button class="send-button" onclick="sendMessage()">
+                        <i data-lucide="send" width="20"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-    </div>
-
-    <!-- Mute Modal -->
-    <div class="mute-modal-overlay" id="mute-modal" onclick="closeMuteModal(event)">
-        <div class="mute-modal">
-            <div class="mute-header">
-                <h3>Mute conversation</h3>
-                <i data-lucide="x" onclick="closeMuteModal(event, true)" style="cursor: pointer;"></i>
-            </div>
-            <div class="mute-options">
-                <label class="mute-option">
-                    <input type="radio" name="mute-duration" value="24h">
-                    <span>For 24 hours</span>
-                </label>
-                <label class="mute-option">
-                    <input type="radio" name="mute-duration" value="12h">
-                    <span>For 12 hours</span>
-                </label>
-                <label class="mute-option">
-                    <input type="radio" name="mute-duration" value="indefinite">
-                    <span>Until I turn it back on</span>
-                </label>
-            </div>
-            <div class="mute-actions">
-                <button class="mute-btn cancel" onclick="closeMuteModal(event, true)">Cancel</button>
-                <button class="mute-btn confirm" onclick="confirmMute()">Mute</button>
-            </div>
-        </div>
-    </div>
-
-    <style>
-        .mute-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s;
-        }
-
-        .mute-modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .mute-modal {
-            background: #242526;
-            width: 90%;
-            max-width: 400px;
-            border-radius: 12px;
-            padding: 1rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            transform: scale(0.95);
-            transition: transform 0.2s;
-            color: #e4e6eb;
-        }
-
-        .mute-modal-overlay.active .mute-modal {
-            transform: scale(1);
-        }
-
-        .mute-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid #3e4042;
-        }
-
-        .mute-header h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .mute-options {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .mute-option {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-
-        .mute-option:hover {
-            background: #3e4042;
-        }
-
-        .mute-option input[type="radio"] {
-            accent-color: #6366f1;
-            width: 18px;
-            height: 18px;
-        }
-
-        .mute-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.8rem;
-        }
-
-        .mute-btn {
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 6px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .mute-btn:hover {
-            opacity: 0.9;
-        }
-
-        .mute-btn.cancel {
-            background: transparent;
-            color: #b0b3b8;
-        }
-
-        .mute-btn.confirm {
-            background: #6366f1;
-            color: white;
-        }
-    </style>
 
     <script>
         lucide.createIcons();
 
-        // Sample Data matching Issues & Dashboard names
-        const chats = [
-            {
-                id: 1,
-                name: 'James Paul Silayan',
-                time: '2m',
-                unread: true,
-                active: true,
-                avatar: null, // No avatar
-                messages: [
-                    { text: 'mayng gabie sir', sent: false, time: '7:00 PM' },
-                    { text: 'O', sent: true, time: '7:01 PM' },
-                    { text: 'saba kaayo diri sir naay nag videoke', sent: false, time: '7:02 PM' },
-                    { text: 'OK', sent: true, time: '7:03 PM' },
-                    { text: 'unsay ok sir', sent: false, time: '7:05 PM' },
-                    { text: 'gago ka', sent: true, time: '7:06 PM' }
-                ]
-            },
-            {
-                id: 2,
-                name: 'John Vitor Vetvet',
-                time: '15m',
-                unread: false,
-                avatar: null,
-                messages: [
-                    { text: 'Sir naay dako nga bangag diri sa dalan', sent: false, time: 'Yesterday' },
-                    { text: 'Delikado kaayo sa mga motorist', sent: false, time: 'Yesterday' },
-                    { text: 'Asa dapit sir?', sent: true, time: 'Yesterday' },
-                    { text: 'Sa may main road dapit sa skina', sent: false, time: 'Yesterday' }
-                ]
-            },
-            {
-                id: 3,
-                name: 'Khristian Dove',
-                time: '1h',
-                unread: true,
-                avatar: null,
-                messages: [
-                    { text: 'Good morning sir', sent: false, time: '8:00 AM' },
-                    { text: 'Report lang nako ang bangga', sent: false, time: '8:01 AM' }
-                ]
-            },
-            {
-                id: 4,
-                name: 'Whiskey Itable',
-                time: '2h',
-                unread: false,
-                avatar: null,
-                messages: [
-                    { text: 'Way kuryente diri sir', sent: false, time: '10:00 AM' },
-                    { text: 'Sige sir amo i-coordinate sa electric coop', sent: true, time: '10:05 AM' }
-                ]
-            },
-            {
-                id: 5,
-                name: 'Elmer Solayao',
-                time: '3h',
-                unread: false,
-                avatar: null,
-                messages: [
-                    { text: 'Reklamo ko sa mga istambay', sent: false, time: '9:30 AM' }
-                ]
+        const API_BASE_URL = window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:'
+            ? 'http://localhost:3000'
+            : '';
+
+        let conversations = [];
+        let currentConversation = null;
+        let currentUser = null;
+        let socket = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            currentUser = JSON.parse(localStorage.getItem('user_token') || '{}');
+
+            if (!currentUser.id) {
+                alert('Please login first');
+                return;
             }
-        ];
 
-        // Initial Render
-        const chatList = document.getElementById('chat-list');
-        const msgContainer = document.getElementById('messages-container');
-
-        // Initial Active User
-        let activeChatId = 1;
-        let currentFilter = 'all';
-
-        // Add archived property to chats if missing
-        chats.forEach(c => {
-            if (typeof c.archived === 'undefined') c.archived = false;
+            initSocket();
+            await loadConversations();
         });
 
-        function setFilter(filter, el) {
-            currentFilter = filter;
-            // Update UI
-            document.querySelectorAll('.filter-pill').forEach(pill => pill.classList.remove('active'));
-            if (el) el.classList.add('active');
-            renderChatList();
+        // Socket.IO
+        function initSocket() {
+            socket = io(API_BASE_URL);
+
+            socket.on('connect', () => console.log('Connected to server'));
+
+            socket.on('new_message', (data) => {
+                if (currentConversation && data.conversation_id === currentConversation.id) {
+                    addMessage(data);
+                }
+                loadConversations();
+            });
         }
 
-        function renderChatList() {
-            chatList.innerHTML = '';
+        // Load conversations
+        async function loadConversations() {
+            try {
+                const queryParams = currentUser.role === 'admin'
+                    ? `?role=admin&department_id=${currentUser.department_id}`
+                    : `?role=user`;
 
-            // Filter Logic
-            const filteredChats = chats.filter(chat => {
-                if (currentFilter === 'all') return !chat.archived;
-                if (currentFilter === 'unread') return !chat.archived && chat.unread;
-                if (currentFilter === 'archive') return chat.archived;
-                return true;
-            });
+                const response = await fetch(`${API_BASE_URL}/api/conversations/${currentUser.id}${queryParams}`);
+                conversations = await response.json();
 
-            filteredChats.forEach(chat => {
+                renderConversations();
+            } catch (error) {
+                console.error('Error loading conversations:', error);
+                document.getElementById('conversationsList').innerHTML = '<div class="loading">Error loading conversations</div>';
+            }
+        }
+
+        // Render conversations
+        function renderConversations() {
+            const list = document.getElementById('conversationsList');
+
+            if (conversations.length === 0) {
+                list.innerHTML = '<div class="loading">No conversations yet</div>';
+                return;
+            }
+
+            list.innerHTML = '';
+
+            conversations.forEach(conv => {
                 const div = document.createElement('div');
-                div.className = `chat-item ${chat.id === activeChatId ? 'active' : ''}`;
-                // Note: we move onclick to a separate handler or ensure row click doesn't fire when button clicked
-                div.onclick = (e) => {
-                    // Start load chat unless we clicked the menu button or menu itself
-                    if (!e.target.closest('.chat-item-menu-btn') && !e.target.closest('.chat-context-menu')) {
-                        loadChat(chat.id);
-                    }
-                };
-
-                // Avatar HTML
-                const avatarHTML = chat.avatar
-                    ? `<img src="${chat.avatar}" class="avatar" style="background: #333;">`
-                    : `<div class="avatar" style="background: #333; display: flex; align-items: center; justify-content: center;">
-                         <i data-lucide="user" style="color: #64748b;" width="24" height="24"></i>
-                       </div>`;
-
-                // Status/Mute Indicator HTML
-                let statusHTML = '';
-                if (chat.muted) {
-                    statusHTML = `<div style="position: absolute; bottom: -2px; right: -2px; background: #242526; border-radius: 50%; padding: 2px; border: 2px solid var(--bg-card); display: flex;"><i data-lucide="bell-off" width="10" height="10" style="color: #ef4444;"></i></div>`;
-                } else {
-                    statusHTML = `<div class="status-dot" style="display: ${chat.active ? 'block' : 'none'}; background: #10b981;"></div>`;
+                div.className = 'conversation-item';
+                if (currentConversation && currentConversation.id === conv.id) {
+                    div.classList.add('active');
                 }
 
-                // Name Mute Icon HTML
-                const nameMuteIcon = chat.muted
-                    ? `<i data-lucide="bell-off" width="12" height="12" style="display: inline; vertical-align: middle; margin-left: 4px; color: var(--text-secondary);"></i>`
-                    : '';
+                const initials = conv.user_name ? conv.user_name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+                const avatarHTML = conv.profile_photo
+                    ? `<div class="avatar"><img src="${conv.profile_photo}" alt="${conv.user_name}"></div>`
+                    : `<div class="avatar">${initials}</div>`;
 
-                // Last Message Preview
-                let lastMsg = '';
-                if (chat.messages && chat.messages.length > 0) {
-                    const lastMsgObj = chat.messages[chat.messages.length - 1];
-                    lastMsg = lastMsgObj.text;
-                    if (lastMsgObj.sent) {
-                        lastMsg = `You: ${lastMsg}`;
-                    }
-                } else if (chat.msg) {
-                    lastMsg = chat.msg;
-                }
-
-                // Inject content
                 div.innerHTML = `
-                    <div class="avatar-container">
-                        ${avatarHTML}
-                        ${statusHTML}
-                    </div>
-                    <div class="chat-info">
-                        <div class="chat-name">
-                             ${chat.name}
-                             ${nameMuteIcon}
-                        </div>
-                        <div class="chat-preview ${chat.unread ? 'unread' : ''}">${lastMsg} · ${chat.time}</div>
-                    </div>
-                    
-                    <!-- Hover Action Button -->
-                    <div class="chat-item-menu-btn" onclick="toggleChatContextMenu(event, ${chat.id})">
-                        <i data-lucide="more-horizontal" width="16" height="16"></i>
-                    </div>
-                    
-                    <!-- Context Menu -->
-                    <div class="chat-context-menu" id="ctx-menu-${chat.id}">
-                        <div class="chat-context-item" onclick="archiveChat(${chat.id})">
-                            <i data-lucide="${chat.archived ? 'refresh-ccw' : 'archive'}" width="14"></i>
-                            ${chat.archived ? 'Unarchive' : 'Archive'}
-                        </div>
-                        <div class="chat-context-item" onclick="muteChat(${chat.id})">
-                            <i data-lucide="${chat.muted ? 'bell' : 'bell-off'}" width="14"></i>
-                            ${chat.muted ? 'Unmute' : 'Mute'}
-                        </div>
-                        <div class="chat-context-item delete" onclick="deleteChat(${chat.id})">
-                            <i data-lucide="trash-2" width="14"></i>
-                            Delete
-                        </div>
+                    ${avatarHTML}
+                    <div class="conversation-info">
+                        <div class="conversation-name">${conv.user_name || 'Unknown User'}</div>
+                        <div class="conversation-preview">${conv.last_message || 'No messages yet'}</div>
                     </div>
                 `;
-                chatList.appendChild(div);
+
+                div.onclick = () => openConversation(conv);
+                list.appendChild(div);
             });
+
             lucide.createIcons();
         }
 
-        // Global click to close chat context menus
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.chat-item-menu-btn')) {
-                document.querySelectorAll('.chat-context-menu').forEach(el => el.classList.remove('active'));
-            }
-        });
+        // Open conversation
+        async function openConversation(conv) {
+            currentConversation = conv;
 
-        function toggleChatContextMenu(e, id) {
-            e.stopPropagation();
-            // Close others
-            document.querySelectorAll('.chat-context-menu').forEach(el => {
-                if (el.id !== `ctx-menu-${id}`) el.classList.remove('active');
+            if (socket) {
+                socket.emit('join_conversation', conv.id);
+            }
+
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('chatContainer').classList.add('active');
+
+            const initials = conv.user_name ? conv.user_name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+            const chatAvatar = document.getElementById('chatAvatar');
+
+            if (conv.profile_photo) {
+                chatAvatar.innerHTML = `<img src="${conv.profile_photo}" alt="${conv.user_name}">`;
+            } else {
+                chatAvatar.textContent = initials;
+            }
+
+            document.getElementById('chatName').textContent = conv.user_name || 'Unknown User';
+            document.getElementById('chatDepartment').textContent = `Messaging ${conv.department_name || 'Department'}`;
+
+            await loadMessages(conv.id);
+            renderConversations();
+        }
+
+        // Load messages
+        async function loadMessages(conversationId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/conversations/${conversationId}/messages`);
+                const messages = await response.json();
+
+                const container = document.getElementById('messagesArea');
+                container.innerHTML = '';
+
+                messages.forEach(msg => addMessage(msg));
+
+                // Scroll to bottom after messages are rendered
+                setTimeout(() => {
+                    container.scrollTop = container.scrollHeight;
+                }, 100);
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        // Add message to view
+        function addMessage(msg) {
+            const container = document.getElementById('messagesArea');
+            const div = document.createElement('div');
+
+            const isSent = msg.sender_id === currentUser.id;
+            div.className = `message ${isSent ? 'sent' : 'received'}`;
+
+            // Display EXACT time from database without any conversion
+            const dbDate = new Date(msg.created_at);
+
+            const today = new Date();
+            const isToday = dbDate.toDateString() === today.toDateString();
+
+            const time = dbDate.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
             });
 
-            const menu = document.getElementById(`ctx-menu-${id}`);
-            if (menu) {
-                // simple positioning logic if needed, but absolute inside relative item usually works
-                // Issue: if item is bottom of list, menu might be cut.
-                // Re-positioning trick:
-                const rect = e.currentTarget.getBoundingClientRect();
-                const listRect = chatList.getBoundingClientRect();
+            const dateStr = isToday ? 'Today' : dbDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+            });
 
-                // If we are too close to bottom, show upwards? 
-                // For simplicity, let's just toggle. CSS handles basic positioning.
-                menu.classList.toggle('active');
-            }
+            const fullTime = `${dateStr}, ${time}`;
+
+            div.innerHTML = `
+                <div class="message-bubble">
+                    ${msg.message}
+                    <div class="message-time">${fullTime}</div>
+                </div>
+            `;
+
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
         }
 
-        function archiveChat(id) {
-            const chat = chats.find(c => c.id === id);
-            if (chat) {
-                chat.archived = !chat.archived;
-                renderChatList();
-                // If active chat was archived and filter is all/unread, maybe clear view?
-                // But generally ok to keep view or switch.
-            }
-        }
+        // Send message
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
 
-        function deleteChat(id) {
-            if (confirm('Delete this conversation?')) {
-                const idx = chats.findIndex(c => c.id === id);
-                if (idx > -1) {
-                    chats.splice(idx, 1);
-                    if (activeChatId === id) {
-                        msgContainer.innerHTML = ''; // Clear view
-                        document.querySelector('.header-user .chat-name').innerText = 'Select a chat';
-                    }
-                    renderChatList();
-                }
-            }
-        }
-
-        function muteChat(id) {
-            const chat = chats.find(c => c.id === id);
-            if (chat) {
-                // Reuse existing modal logic? Or simple toggle?
-                // User said "connect to current mute function" which is a modal.
-                // So we should open the modal.
-                // Issue: modal relies on `activeChatId`.
-                // So let's update activeChatId implicitly or pass it.
-                // Current `openMuteModal` uses global activeChatId logic or UI state.
-                // Providing a direct mute toggle here is faster. 
-                // If we want modal, we need to call openMuteModal(). 
-                // But openMuteModal might need context.
-                // Let's just do a simple toggle for list convenience, OR:
-                if (chat.muted) {
-                    // If muted, unmute immediately
-                    chat.muted = false;
-                    renderChatList();
-                    if (activeChatId === id) loadChat(id); // refresh header
-                } else {
-                    // If not muted, show modal? Or just mute indefinitely?
-                    // Let's show the modal for consistency.
-                    // But we need to ensure the modal knows WHICH chat.
-                    // The current modal logic assumes active chat.
-                    // Let's set activeChat to this one temporarily? No that forces context switch.
-                    // Let's just simple mute for 24h as default or indefinite default for list action.
-                    chat.muted = true;
-                    renderChatList();
-                    if (activeChatId === id) loadChat(id);
-                }
-            }
-        }
-
-        function renderMessages(currentMessages) {
-            msgContainer.innerHTML = '';
-            // Timestamp separator (could be dynamic based on date)
-            const ts = document.createElement('div');
-            ts.className = 'msg-timestamp';
-            ts.innerText = 'Today';
-            msgContainer.appendChild(ts);
-
-            if (currentMessages) {
-                currentMessages.forEach((msg, index) => {
-                    const row = document.createElement('div');
-                    row.className = `message-row ${msg.sent ? 'sent' : 'received'}`;
-
-                    // Generate unique ID for dropdown toggling
-                    const msgId = `msg-${index}`;
-
-                    let content = ``;
-
-                    // Actions (3 dots) - Rendered LEFT of bubble for sent, RIGHT for received (usually)
-                    // But typically they appear on hover near the bubble.
-                    // Let's force them to appear on the "inner" side or just appended to row logic.
-                    // Flex direction handles order.
-
-                    const actionsHTML = `
-                        <div class="msg-actions-hover">
-                            <i data-lucide="more-vertical" width="16" height="16" style="color: var(--text-secondary);" onclick="toggleMsgDropdown('${msgId}')"></i>
-                            <div class="msg-item-dropdown" id="${msgId}">
-                                <div class="msg-item-btn"><i data-lucide="reply" width="14"></i> Reply</div>
-                                <div class="msg-item-btn"><i data-lucide="forward" width="14"></i> Forward</div>
-                            </div>
-                        </div>
-                    `;
-
-                    if (msg.sent) {
-                        // Actions first (left of bubble because flex-end reverses? No, row is flex-end. 
-                        // DOM order: Actions -> Bubble. Visual: Actions [space] Bubble.
-                        // Wait, if justify-content is flex-end:
-                        // [Action] [Bubble]  -> |      Action Bubble|
-                        content += actionsHTML;
-                    }
-
-                    let bubbleContent = ``;
-                    if (msg.replyTo) {
-                        bubbleContent += `<div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 2px;">${msg.replyTo}</div>`;
-                    }
-                    // Timestamp Tooltip
-                    bubbleContent += `
-                        ${msg.text}
-                        <div class="msg-tooltip">${msg.time}</div>
-                    `;
-
-                    content += `<div class="msg-bubble ${msg.sent ? 'sent' : 'received'}">${bubbleContent}</div>`;
-
-                    if (!msg.sent) {
-                        // Received: [Bubble] [Action]
-                        content += actionsHTML;
-                    }
-
-                    row.innerHTML = content;
-                    msgContainer.appendChild(row);
-                });
-                lucide.createIcons();
-
-                // Add global click listener to close dropdowns if not clicking inside
-                // Prevent adding multiple listeners
-                if (!window.msgDropdownListenerAdded) {
-                    window.addEventListener('click', (e) => {
-                        if (!e.target.closest('.msg-actions-hover')) {
-                            document.querySelectorAll('.msg-item-dropdown').forEach(el => el.style.display = 'none');
-                        }
-                    });
-                    window.msgDropdownListenerAdded = true;
-                }
-            }
-            msgContainer.scrollTop = msgContainer.scrollHeight;
-        }
-
-        function loadChat(id) {
-            activeChatId = id;
-            const chat = chats.find(c => c.id === id);
-            if (!chat) return;
+            if (!message || !currentConversation) return;
 
             try {
-                // Update Main Header
-                const headerAvatarContainer = document.querySelector('.header-user .avatar-container');
-                const currentHeaderAvatar = headerAvatarContainer ? headerAvatarContainer.querySelector('.avatar') : null;
+                const response = await fetch(`${API_BASE_URL}/api/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sender_id: currentUser.id,
+                        conversation_id: currentConversation.id,
+                        message: message
+                    })
+                });
 
-                if (currentHeaderAvatar) {
-                    if (chat.avatar) {
-                        if (currentHeaderAvatar.tagName === 'IMG') {
-                            currentHeaderAvatar.src = chat.avatar;
-                        } else {
-                            const newImg = document.createElement('img');
-                            newImg.className = 'avatar';
-                            newImg.style.width = '40px';
-                            newImg.style.height = '40px';
-                            newImg.src = chat.avatar;
-                            currentHeaderAvatar.replaceWith(newImg);
-                        }
-                    } else {
-                        // Default Icon
-                        if (currentHeaderAvatar.tagName !== 'DIV' || !currentHeaderAvatar.querySelector('svg')) {
-                            const newDiv = document.createElement('div');
-                            newDiv.className = 'avatar';
-                            newDiv.style.width = '40px';
-                            newDiv.style.height = '40px';
-                            newDiv.style.background = '#333';
-                            newDiv.style.borderRadius = '50%';
-                            newDiv.style.display = 'flex';
-                            newDiv.style.alignItems = 'center';
-                            newDiv.style.justifyContent = 'center';
-                            newDiv.innerHTML = `<i data-lucide="user" style="color: #64748b;" width="20" height="20"></i>`;
-                            currentHeaderAvatar.replaceWith(newDiv);
-                        }
-                    }
+                if (response.ok) {
+                    input.value = '';
                 }
-
-                const nameEl = document.querySelector('.header-user .chat-name');
-                if (nameEl) nameEl.innerText = chat.name;
-
-                // Update Info Panel
-                const infoNameEl = document.querySelector('.info-name');
-                if (infoNameEl) infoNameEl.innerText = chat.name;
-
-                const infoAvatar = document.querySelector('.info-avatar');
-                if (infoAvatar) {
-                    if (chat.avatar) {
-                        if (infoAvatar.tagName === 'IMG') {
-                            infoAvatar.src = chat.avatar;
-                        } else {
-                            const newImg = document.createElement('img');
-                            newImg.className = 'info-avatar';
-                            newImg.src = chat.avatar;
-                            infoAvatar.replaceWith(newImg);
-                        }
-                    } else {
-                        if (infoAvatar.tagName !== 'DIV') {
-                            const newDiv = document.createElement('div');
-                            newDiv.className = 'info-avatar';
-                            newDiv.style.background = '#333';
-                            newDiv.style.display = 'flex';
-                            newDiv.style.alignItems = 'center';
-                            newDiv.style.justifyContent = 'center';
-                            newDiv.innerHTML = `<i data-lucide="user" style="color: #64748b;" width="40" height="40"></i>`;
-                            infoAvatar.replaceWith(newDiv);
-                        }
-                    }
-                }
-
-                // Update Mute Icon State
-                const actionCols = document.querySelectorAll('.action-col');
-                if (actionCols.length >= 2) {
-                    const muteCol = actionCols[1];
-                    const muteLabel = muteCol.querySelector('.action-label');
-                    const muteIconDiv = muteCol.querySelector('.action-icon');
-                    const muteIconSvg = muteIconDiv ? (muteIconDiv.querySelector('svg') || muteIconDiv.querySelector('i')) : null;
-
-                    if (chat.muted) {
-                        if (muteLabel) muteLabel.innerText = 'Unmute';
-                        if (muteIconSvg) muteIconSvg.setAttribute('data-lucide', 'bell-off');
-                        if (muteIconDiv) {
-                            muteIconDiv.style.background = '#fee2e2';
-                            muteIconDiv.style.color = '#ef4444';
-                        }
-                    } else {
-                        if (muteLabel) muteLabel.innerText = 'Mute';
-                        if (muteIconSvg) muteIconSvg.setAttribute('data-lucide', 'bell');
-                        if (muteIconDiv) {
-                            muteIconDiv.style.background = 'var(--bg-panel)';
-                            muteIconDiv.style.color = 'var(--text-primary)';
-                        }
-                    }
-                }
-            } catch (e) {
-                console.error("Error updating chat UI", e);
-            }
-
-            // Render messages for this chat
-            renderMessages(chat.messages);
-
-            // Re-render chat list to update active selection
-            renderChatList();
-
-            // Re-run icons at the end to catch any new injections
-            lucide.createIcons();
-
-            // Open Mobile View
-            if (window.innerWidth <= 768) {
-                toggleMobileChat(true);
-            }
-        }
-
-        // Init
-        // Init
-        // Initialize
-        renderChatList(); // Render immediately so list is never empty
-
-        // Set initial header info
-        const initialChat = chats.find(c => c.id === 1);
-        if (initialChat) {
-            loadChat(initialChat.id);
-        }
-
-        // Interaction
-        function handleKey(e) {
-            if (e.key === 'Enter') sendMessage();
-            const input = document.getElementById('msg-input');
-            const icon = document.getElementById('send-icon');
-            if (input.value.length > 0) {
-                icon.setAttribute('data-lucide', 'send');
-            } else {
-                icon.setAttribute('data-lucide', 'thumbs-up');
-            }
-            lucide.createIcons();
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('msg-input');
-            const chat = chats.find(c => c.id === activeChatId);
-            if (input.value.trim() !== '' && chat) {
-                // Add message to the current chat object
-                if (!chat.messages) chat.messages = [];
-                chat.messages.push({ text: input.value, sent: true, time: 'Now' });
-
-                // Re-render
-                renderMessages(chat.messages);
-                input.value = '';
-
-                // Update preview in list
-                renderChatList();
-            }
-        }
-
-        // Mobile responsiveness
-        function toggleMobileChat(show) {
-            const main = document.getElementById('msg-main-view');
-            const backBtn = document.querySelector('.mobile-back');
-            if (show) {
-                main.classList.add('active');
-                backBtn.style.display = 'block';
-            } else {
-                main.classList.remove('active');
-                backBtn.style.display = 'none';
-            }
-        }
-
-        function toggleInfoPanel() {
-            const panel = document.getElementById('msg-info-panel');
-            if (panel.style.display === 'none') panel.style.display = 'flex';
-            else panel.style.display = 'none';
-        }
-
-        // Mute Modal Logic
-        function openMuteModal() {
-            const chat = chats.find(c => c.id === activeChatId);
-            if (chat.muted) {
-                // If already muted, unmute immediately (simple toggle as per "go back button to unmute" - interpreted as toggle action)
-                // Or better, ask confirmation to unmute?
-                // Request said "click agian that mute button i will show a go back button to unmute"
-                // Let's assume standard toggle behavior for UX, or show simple unmute confirm.
-                // Reusing confirming mute logic for unmuting:
-                if (confirm(`Unmute ${chat.name}?`)) {
-                    chat.muted = false;
-                    loadChat(activeChatId); // Refreshes UI
-                    renderChatList();
-                }
-            } else {
-                document.getElementById('mute-modal').classList.add('active');
-            }
-        }
-
-        function closeMuteModal(e, force = false) {
-            if (force || e.target.id === 'mute-modal') {
-                document.getElementById('mute-modal').classList.remove('active');
-            }
-        }
-
-        function confirmMute() {
-            const selected = document.querySelector('input[name="mute-duration"]:checked');
-            if (selected) {
-                const chat = chats.find(c => c.id === activeChatId);
-                if (chat) {
-                    chat.muted = true;
-                    // Persist selected duration logic here if this was a real backend
-                    // chat.muteDuration = selected.value; 
-
-                    closeMuteModal(null, true);
-                    loadChat(activeChatId); // Updates UI to show Muted state
-                    renderChatList(); // Updates sidebar list
-                }
-            } else {
-                alert('Please select a duration');
-            }
-        }
-
-        // Resize handler to reset mobile view
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                document.getElementById('msg-main-view').classList.remove('active');
-                document.querySelector('.mobile-back').style.display = 'none';
-            }
-        });
-
-        function toggleMsgDropdown(id) {
-            // Close others
-            document.querySelectorAll('.msg-item-dropdown').forEach(el => {
-                if (el.id !== id) el.style.display = 'none';
-            });
-
-            const dropdown = document.getElementById(id);
-            if (dropdown.style.display === 'flex') {
-                dropdown.style.display = 'none';
-            } else {
-                dropdown.style.display = 'flex';
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Failed to send message');
             }
         }
     </script>

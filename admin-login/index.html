@@ -269,7 +269,7 @@
                 <div class="group-icon">
                     <i data-lucide="user"></i>
                 </div>
-                <input type="text" class="custom-pill-input" id="email" value="admin@gmail.com" placeholder="Email">
+                <input type="text" class="custom-pill-input" id="email" placeholder="Email or Username">
             </div>
 
             <div class="custom-input-group">
@@ -277,7 +277,7 @@
                     <i data-lucide="lock"></i>
                 </div>
                 <div style="position: relative; flex: 1;">
-                    <input type="password" class="custom-pill-input" id="password" value="ej123" placeholder="Password"
+                    <input type="password" class="custom-pill-input" id="password" placeholder="Password"
                         style="width: 100%; padding-right: 3rem;">
                     <button type="button" id="toggle-password-btn" onclick="togglePassword()"
                         style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.8; padding: 0;">
@@ -352,59 +352,90 @@
             lucide.createIcons();
         }
 
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('login-btn');
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const notify = document.getElementById('notify-error');
-            const card = document.querySelector('.login-card-new'); // Changed selector
+            const card = document.querySelector('.login-card-new');
 
             // Button Loading State
             const originalText = btn.innerHTML;
             btn.innerHTML = "Authenticating...";
             btn.style.opacity = "0.8";
+            btn.disabled = true;
 
-            setTimeout(() => {
-                if (email === 'admin@gmail.com' && password === 'ej123') {
-                    btn.innerHTML = "Success!";
-                    btn.style.background = "#10b981";
-                    btn.style.color = "white";
-                    setTimeout(() => {
-                        window.location.href = '../admin-portal/index.html';
-                    }, 500);
+            try {
+                // Determine API URL (handle local dev or production)
+                const API_BASE_URL = (window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:')
+                    ? 'http://localhost:3000'
+                    : '';
+
+                const response = await fetch(`${API_BASE_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Check Role
+                    const userRole = (data.user.role || '').toLowerCase();
+
+                    // Allow both Admin and Technician (Super Admin)
+                    if (userRole === 'admin' || userRole === 'technician') {
+                        btn.innerHTML = "Success!";
+                        btn.style.background = "#10b981";
+                        btn.style.color = "white";
+
+                        // Store user session
+                        localStorage.setItem('user_token', JSON.stringify(data.user));
+
+                        setTimeout(() => {
+                            window.location.href = '../admin-portal/index.html';
+                        }, 500);
+                    } else {
+                        throw new Error("Access Denied: You are not authorized.");
+                    }
                 } else {
-                    btn.innerHTML = originalText;
-                    btn.style.opacity = "1";
-                    btn.style.background = ""; // Reset
-                    btn.style.color = "";
-
-                    // Show Error Notification
-                    notify.innerHTML = `
-                        <i data-lucide="alert-circle" color="#ef4444"></i>
-                        <div>
-                            <div style="font-weight: 600; color: #1e293b;">Login Failed</div>
-                            <div style="font-size: 0.875rem; color: #64748b;">Invalid admin credentials.</div>
-                        </div>
-                    `;
-                    lucide.createIcons();
-                    notify.classList.add('active');
-
-                    // Add Shake Animation to card
-                    card.classList.add('shake');
-
-                    // Highlight inputs
-                    document.getElementById('email').style.borderColor = "#ef4444";
-                    document.getElementById('password').style.borderColor = "#ef4444";
-
-                    setTimeout(() => {
-                        notify.classList.remove('active');
-                        card.classList.remove('shake');
-                        document.getElementById('email').style.borderColor = "rgba(255, 255, 255, 0.8)";
-                        document.getElementById('password').style.borderColor = "rgba(255, 255, 255, 0.8)";
-                    }, 3000);
+                    throw new Error(data.error || 'Login failed');
                 }
-            }, 1000);
+
+            } catch (err) {
+                console.error(err);
+                btn.innerHTML = originalText;
+                btn.style.opacity = "1";
+                btn.style.background = ""; // Reset
+                btn.style.color = "";
+                btn.disabled = false;
+
+                // Show Error Notification
+                notify.innerHTML = `
+                    <i data-lucide="alert-circle" color="#ef4444"></i>
+                    <div>
+                        <div style="font-weight: 600; color: #1e293b;">Login Failed</div>
+                        <div style="font-size: 0.875rem; color: #64748b;">${err.message}</div>
+                    </div>
+                `;
+                lucide.createIcons();
+                notify.classList.add('active');
+                card.classList.add('shake');
+
+                // Highlight inputs
+                const emailInput = document.getElementById('email');
+                const passInput = document.getElementById('password');
+                if (emailInput) emailInput.style.borderColor = "#ef4444";
+                if (passInput) passInput.style.borderColor = "#ef4444";
+
+                setTimeout(() => {
+                    notify.classList.remove('active');
+                    card.classList.remove('shake');
+                    if (emailInput) emailInput.style.borderColor = "rgba(255, 255, 255, 0.8)";
+                    if (passInput) passInput.style.borderColor = "rgba(255, 255, 255, 0.8)";
+                }, 3000);
+            }
         }
 
         function toggleForgot(e) {

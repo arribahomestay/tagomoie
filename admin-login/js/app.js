@@ -106,18 +106,34 @@ document.addEventListener('DOMContentLoaded', () => {
         loginBtn.style.cursor = 'wait';
 
         // Simulate Network Delay
-        setTimeout(() => {
-            if (email === 'admin@gmail.com' && password === 'ej123') {
-                // Success
-                loginBtn.innerText = 'Success!';
-                loginBtn.style.background = '#10b981'; // Emerald 500
-                showNotification('Login Successful! Redirecting...', 'success');
+        // Network Request to Backend
+        fetch(`${(window.location.port === '5501' || window.location.protocol === 'file:') ? 'http://localhost:3000' : ''}/api/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Success
+                    loginBtn.innerText = 'Success!';
+                    loginBtn.style.background = '#10b981'; // Emerald 500
+                    showNotification(`Welcome back, ${data.user.firstName}!`, 'success');
 
-                setTimeout(() => {
-                    // Redirect to the Admin Portal
-                    window.location.href = '../admin-portal/index.html';
-                }, 1000);
-            } else {
+                    // Store user info if needed
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    setTimeout(() => {
+                        // Redirect to the Admin Portal
+                        window.location.href = '../admin-portal/index.html';
+                    }, 1000);
+                } else {
+                    throw new Error(data.error || 'Login failed');
+                }
+            })
+            .catch(err => {
                 // Failure
                 loginBtn.innerText = originalText;
                 loginBtn.disabled = false;
@@ -125,11 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 loginBtn.style.opacity = '1';
                 loginBtn.style.cursor = 'pointer';
 
-                showNotification('Invalid email or password', 'error');
+                showNotification(err.message, 'error');
                 shakeInputs();
                 document.getElementById('password').value = '';
                 document.getElementById('password').focus();
-            }
-        }, 800);
+            });
     });
 });

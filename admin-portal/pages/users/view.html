@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/content.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Users</title>
+    <style>
+        .tabs-header {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-left: 0.5rem;
+        }
+
+        .tab-btn {
+            padding: 1rem 0;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .tab-btn.active {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e0e7ff;
+            color: #4f46e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .status-verified {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-unverified {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .role-badge {
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 0.5rem;
+        }
+
+        .role-admin {
+            background: #fee2e2;
+            color: #ef4444;
+            border: 1px solid #fecaca;
+        }
+
+        .role-tech {
+            background: #e0e7ff;
+            color: #4338ca;
+            border: 1px solid #c7d2fe;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>User Management</h1>
+
+    <!-- Tabs -->
+    <div class="tabs-header">
+        <button class="tab-btn active" id="tab-all" onclick="switchTab('all', this)">All Users</button>
+        <button class="tab-btn" id="tab-verified" onclick="switchTab('verified', this)">Verified</button>
+        <button class="tab-btn" id="tab-unverified" onclick="switchTab('unverified', this)">Unverified</button>
+        <button class="tab-btn" id="tab-staff" onclick="switchTab('staff', this)">Staff / Admins</button>
+    </div>
+
+    <div class="card" style="margin-top: 1.5rem;">
+        <table>
+            <thead>
+                <tr id="table-header">
+                    <!-- Dynamic header -->
+                </tr>
+            </thead>
+            <tbody id="users-table-body">
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Loading
+                        users...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let usersData = [];
+        let staffData = [];
+        let currentTab = 'all';
+
+        const API_BASE_URL = (window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:')
+            ? 'http://localhost:3000'
+            : '';
+
+        async function fetchData() {
+            try {
+                // Fetch Normal Users
+                const resUsers = await fetch(`${API_BASE_URL}/api/users`);
+                usersData = await resUsers.json();
+
+                // Fetch Staff (Admins/Techs) with Dept Filtering
+                let deptId = null;
+                try {
+                    const user = JSON.parse(localStorage.getItem('user_token'));
+                    if (user) deptId = user.department_id;
+                } catch (e) { }
+
+                let staffUrl = `${API_BASE_URL}/api/users/admins`;
+                if (deptId) staffUrl += `?department_id=${deptId}`;
+
+                const resStaff = await fetch(staffUrl);
+                staffData = await resStaff.json();
+
+                renderUI();
+            } catch (err) {
+                console.error(err);
+                document.getElementById('users-table-body').innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444;">Error loading data: ${err.message}</td></tr>`;
+            }
+        }
+
+        function switchTab(tab, btn) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderUI();
+        }
+
+        function renderUI() {
+            const header = document.getElementById('table-header');
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+
+            if (currentTab === 'staff') {
+                header.innerHTML = `
+                    <th style="width: 50px;">Avatar</th>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Role</th>
+                    <th>Department</th>
+                    <th>Email</th>
+                    <th>Date Joined</th>
+                `;
+
+                if (staffData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-secondary);">No staff found in your department.</td></tr>';
+                    return;
+                }
+
+                staffData.forEach(s => {
+                    const initials = (s.first_name?.[0] || '') + (s.last_name?.[0] || '');
+                    const roleClass = s.role === 'admin' ? 'role-admin' : 'role-tech';
+                    const deptName = s.department_name || 'N/A';
+                    const tr = document.createElement('tr');
+                    const avatarContent = s.profile_photo ? `<img src="${s.profile_photo}" alt="">` : initials;
+                    tr.innerHTML = `
+                        <td><div class="user-avatar">${avatarContent}</div></td>
+                        <td>#${s.id}</td>
+                        <td style="font-weight: 500; color: var(--text-primary);">${s.first_name} ${s.last_name}</td>
+                        <td><span class="role-badge ${roleClass}">${s.role}</span></td>
+                        <td>${deptName}</td>
+                        <td>${s.email}</td>
+                        <td style="color: var(--text-secondary);">${s.date_joined || 'N/A'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                header.innerHTML = `
+                    <th style="width: 50px;">Avatar</th>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Verified</th>
+                    <th>Joined Date</th>
+                `;
+
+                const filtered = usersData.filter(u => {
+                    if (currentTab === 'verified') return u.email_verified_at != null;
+                    if (currentTab === 'unverified') return u.email_verified_at == null;
+                    return true;
+                });
+
+                if (filtered.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-secondary);">No users found.</td></tr>';
+                    return;
+                }
+
+                filtered.forEach(u => {
+                    const initials = (u.first_name?.[0] || '') + (u.last_name?.[0] || '');
+                    const isVerified = u.email_verified_at != null;
+                    const statusClass = isVerified ? 'status-verified' : 'status-unverified';
+                    const statusText = isVerified ? 'Verified' : 'Unverified';
+                    const date = u.created_at ? new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+
+                    const tr = document.createElement('tr');
+                    const avatarContent = u.profile_photo ? `<img src="${u.profile_photo}" alt="">` : initials;
+                    tr.innerHTML = `
+                        <td><div class="user-avatar">${avatarContent}</div></td>
+                        <td>#${u.id}</td>
+                        <td style="font-weight: 500; color: var(--text-primary);">${u.first_name} ${u.last_name}</td>
+                        <td>${u.username || '-'}</td>
+                        <td>${u.email}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td style="color: var(--text-secondary);">${date}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        // Initial Load
+        fetchData();
+    </script>
+</body>
+
+</html>

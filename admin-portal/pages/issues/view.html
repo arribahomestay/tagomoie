@@ -6,444 +6,788 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/content.css">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <title>Issues</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <title>Issue Kanban Board</title>
     <style>
-        /* Tabs */
-        .tabs-header {
+        body {
+            background: var(--bg-content);
+            height: 100vh;
+            margin: 0;
             display: flex;
-            gap: 2rem;
-            margin-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-left: 0.5rem;
-        }
-
-        .tab-btn {
-            padding: 1rem 0;
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid transparent;
-            color: var(--text-secondary);
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.95rem;
-        }
-
-        .tab-btn.active {
-            color: var(--accent-color);
-            border-bottom-color: var(--accent-color);
-        }
-
-        .tab-btn:hover {
+            flex-direction: column;
+            overflow: hidden;
+            font-family: var(--font-family);
             color: var(--text-primary);
         }
 
-        /* Enhanced Table Styles */
-        .cat-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+        /* Header / Filters */
+        .page-header {
+            padding: 1.25rem 2rem;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 10;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--text-primary);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1.25rem;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 0.7rem 1.25rem 0.7rem 2.5rem;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-color);
             background: var(--bg-panel);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
+            color: var(--text-primary);
+            outline: none;
+            cursor: pointer;
+            min-width: 200px;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+        .filter-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px var(--accent-light);
         }
 
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #e0e7ff;
-            color: #4f46e5;
+        /* Kanban Board */
+        .kanban-board {
+            display: flex;
+            gap: 1.75rem;
+            padding: 2rem;
+            flex: 1;
+            overflow-x: auto;
+            align-items: flex-start;
+            background: var(--bg-content);
+        }
+
+        .kanban-column {
+            flex: 1;
+            min-width: 340px;
+            max-width: 420px;
+            background: var(--bg-panel);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            max-height: 100%;
+            border: 1px solid var(--border-color);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .kanban-column.drag-over {
+            background-color: var(--bg-active);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 25px var(--accent-light);
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        .column-header {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 800;
+            color: var(--text-primary);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.03);
+            background: rgba(0, 0, 0, 0.01);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .column-title {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 700;
+            gap: 0.85rem;
+            font-size: 1rem;
             text-transform: uppercase;
+            letter-spacing: 0.08em;
         }
 
-        /* Priority Indicators */
-        tr {
-            transition: background-color 0.2s;
+        .column-title i {
+            width: 20px;
+            height: 20px;
         }
 
-        tr.priority-critical td:first-child {
-            box-shadow: inset 4px 0 0 -1px #ef4444;
+        .issue-count {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 0.25rem 0.85rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            border: 1px solid var(--border-color);
+            font-weight: 800;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
-        tr.priority-warning td:first-child {
-            box-shadow: inset 4px 0 0 -1px #f59e0b;
+        .card-list {
+            padding: 1rem;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            min-height: 400px;
+            transition: all 0.3s;
         }
 
-        tr.priority-normal td:first-child {
-            box-shadow: inset 4px 0 0 -1px #10b981;
-        }
-
-        /* Active Row Highlight */
-        /* Active Row Highlight */
-        .row-active {
-            background-color: rgba(99, 102, 241, 0.08) !important;
-        }
-
-        /* Mobile View Styles */
-        .mobile-issues-view {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .card {
-                display: none;
-                /* Hide Desktop Table */
-            }
-
-            .mobile-issues-view {
-                display: block;
-            }
-
-            .tabs-header {
-                justify-content: space-between;
-                gap: 0;
-            }
-
-            .tab-btn {
-                flex: 1;
-                /* text-align: center; */
-                font-size: 0.9rem;
-                padding: 0.75rem 0;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-                margin-bottom: 1rem;
-            }
-        }
-
-        .m-issue-item {
+        /* Kanban Card Compact Modernization */
+        .kanban-card {
             background: var(--bg-card);
             border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1rem;
+            padding: 0.85rem 1rem;
             border: 1px solid var(--border-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+            cursor: grab;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .dark-mode .kanban-card {
+            backdrop-filter: blur(12px);
+            background: rgba(30, 41, 59, 0.7);
+        }
+
+        /* Status Accent Bar */
+        .kanban-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: transparent;
+            transition: all 0.3s;
+        }
+
+        .kanban-card:hover {
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
+            border-color: var(--text-muted);
+        }
+
+        /* Custom Hover Glows based on status */
+        .col-pending .kanban-card:hover {
+            box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.15);
+        }
+
+        .col-inreview .kanban-card:hover {
+            box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.15);
+        }
+
+        .col-resolved .kanban-card:hover {
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.15);
+        }
+
+        .kanban-card:active {
+            cursor: grabbing;
+        }
+
+        .kanban-card.is-dragging {
+            opacity: 0.5;
+            transform: scale(0.95) rotate(-1deg);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
+            border: 2px dashed var(--accent-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-id {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--accent-color);
+            background: var(--accent-light);
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            letter-spacing: 0.05em;
+        }
+
+        .card-category {
+            color: var(--text-muted);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .card-meta {
             display: flex;
             align-items: center;
             gap: 1rem;
-            cursor: pointer;
-            transition: transform 0.2s;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
         }
 
-        .m-issue-item:active {
-            transform: scale(0.98);
-            background: var(--bg-panel);
-        }
-
-        .m-issue-icon-box {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-            background: var(--bg-panel);
+        .meta-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
-            flex-shrink: 0;
+            gap: 0.4rem;
         }
 
-        .m-issue-info {
-            flex: 1;
-            min-width: 0;
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.6rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 0.2rem;
         }
 
-        .m-issue-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 1rem;
-            margin-bottom: 0.25rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .m-issue-meta {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
+        .reporter-info {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .m-issue-status {
-            font-size: 0.75rem;
-            padding: 0.15rem 0.5rem;
-            border-radius: 4px;
-            font-weight: 500;
+        .reporter-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--bg-active);
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 800;
+            border: 1.5px solid var(--border-color);
+            overflow: hidden;
         }
 
-        .status-critical {
+        .reporter-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .reporter-name {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+
+        .priority-badge {
+            font-size: 0.6rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Modern Priority Pills */
+        .prio-critical,
+        .prio-high {
+            background: rgba(239, 68, 68, 0.2);
             color: #ef4444;
-            background: #fef2f2;
-            border: 1px solid #fecaca;
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
-        .status-pending {
+        .prio-warning,
+        .prio-medium {
+            background: rgba(245, 158, 11, 0.2);
             color: #f59e0b;
-            background: #fffbeb;
-            border: 1px solid #fde68a;
+            border: 1px solid rgba(245, 158, 11, 0.3);
         }
 
-        .status-success {
+        .prio-normal,
+        .prio-low {
+            background: rgba(16, 185, 129, 0.2);
             color: #10b981;
-            background: #ecfdf5;
-            border: 1px solid #a7f3d0;
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
 
-        /* Dark Mode Tweaks handled by vars, but specific overrides */
+        /* Color Codes for Columns */
+        .col-pending .column-header {
+            border-top: 5px solid #ef4444;
+        }
+
+        .col-pending .kanban-card::before {
+            background: #ef4444;
+        }
+
+        .col-inreview .column-header {
+            border-top: 5px solid #3b82f6;
+        }
+
+        .col-inreview .kanban-card::before {
+            background: #3b82f6;
+        }
+
+        .col-resolved .column-header {
+            border-top: 5px solid #10b981;
+        }
+
+        .col-resolved .kanban-card::before {
+            background: #10b981;
+        }
+
+        /* Custom Scrollbar */
+        .card-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .card-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .card-list::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: 20px;
+        }
+
+        /* Responsive Improvements */
+        @media (max-width: 1024px) {
+            .kanban-board {
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .kanban-column {
+                min-width: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .kanban-board {
+                flex-direction: column;
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
+
+            .kanban-column {
+                min-width: 100%;
+                max-width: 100%;
+                height: auto;
+                max-height: none;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <h1>Issue Tracker</h1>
-
-    <!-- Tabs -->
-    <div class="tabs-header" style="align-items: center;">
-        <div style="display: flex; gap: 2rem; flex: 1;">
-            <button class="tab-btn active" onclick="switchTab('Active', this)">Active Issues</button>
-            <button class="tab-btn" onclick="switchTab('Scheduled', this)">Scheduled</button>
-            <button class="tab-btn" onclick="switchTab('History', this)">History</button>
+    <div class="page-header">
+        <div class="header-title">
+            <h1>Issue Tracking Board</h1>
         </div>
-        <div style="position: relative;">
-            <i data-lucide="map-pin" width="16"
-                style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
-            <select id="barangay-filter" onchange="filterByBarangay(this.value)"
-                style="padding: 0.6rem 1rem 0.6rem 2.2rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-panel); color: var(--text-primary); outline: none; cursor: pointer; min-width: 180px;">
-                <option value="All">All Barangays</option>
-                <!-- Generated by JS -->
-            </select>
+        <div class="header-actions">
+            <div style="position: relative;">
+                <i data-lucide="map-pin" width="16"
+                    style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
+                <select id="barangay-filter" onchange="filterByBarangay(this.value)" class="filter-select">
+                    <option value="All">All Barangays</option>
+                </select>
+            </div>
+            <!-- Notification Bell Removed -->
+            <button onclick="fetchIssues()" class="btn-action"
+                style="background: var(--accent-color); color: white; border: none; padding: 0.6rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="refresh-cw" width="16"></i> Refresh
+            </button>
         </div>
     </div>
 
-    <div class="card" style="margin-top: 1.5rem;">
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 50px;">Type</th>
-                    <th>ID</th>
-                    <th>Issue Name</th>
-                    <th>Reported By</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="desktop-table-body">
-                <!-- Rows moved to JS data source for shared rendering -->
-            </tbody>
-        </table>
-    </div>
+    <div class="kanban-board">
+        <!-- Pending Column -->
+        <div class="kanban-column col-pending" id="col-pending" ondragover="allowDrop(event)"
+            ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'Pending')">
+            <div class="column-header">
+                <div class="column-title">
+                    <i data-lucide="clock" width="20" style="color: #ef4444;"></i>
+                    <span>Pending</span>
+                    <span class="issue-count" id="count-pending">0</span>
+                </div>
+            </div>
+            <div class="card-list" id="list-pending">
+                <!-- Cards injected here -->
+            </div>
+        </div>
 
-    <!-- Mobile Issues List -->
-    <div class="mobile-issues-view" id="mobile-issues-list">
-        <!-- Injected via JS -->
+        <!-- In Review Column -->
+        <div class="kanban-column col-inreview" id="col-in-review" ondragover="allowDrop(event)"
+            ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'In Review')">
+            <div class="column-header">
+                <div class="column-title">
+                    <i data-lucide="eye" width="20" style="color: #3b82f6;"></i>
+                    <span>In Review</span>
+                    <span class="issue-count" id="count-in-review">0</span>
+                </div>
+            </div>
+            <div class="card-list" id="list-in-review">
+                <!-- Cards injected here -->
+            </div>
+        </div>
+
+        <!-- Resolved Column -->
+        <div class="kanban-column col-resolved" id="col-resolved" ondragover="allowDrop(event)"
+            ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'Resolved')">
+            <div class="column-header">
+                <div class="column-title">
+                    <i data-lucide="check-circle" width="20" style="color: #10b981;"></i>
+                    <span>Resolved</span>
+                    <span class="issue-count" id="count-resolved">0</span>
+                </div>
+            </div>
+            <div class="card-list" id="list-resolved">
+                <!-- Cards injected here -->
+            </div>
+        </div>
     </div>
 
     <script>
-        // Data Source
-        const issuesData = [
-            { id: '#1024', status: 'Critical', desc: 'Saba kaayo ang karaoke sa silingan bisag lawom na ang gabii. Dili na mi katulog.', icon: 'volume-2', name: 'Saba nga Karaoke', reporter: 'James Paul Silayan', avatar: 'JS', date: 'Oct 24, 2023', barangay: 'Apokon' },
-            { id: '#1025', status: 'In Review', desc: 'Naay dako nga bangag sa dalan dapit sa Purok 3. Daghan na na-disgrasya nga motor.', icon: 'alert-triangle', name: 'Guba ang Dalan', reporter: 'John Vitor Vetvet', avatar: 'JV', date: 'Oct 25, 2023', avStyle: 'background: #fef3c7; color: #b45309;', barangay: 'Mankilam' },
-            { id: '#1026', status: 'Ongoing', desc: 'Bangga sa may crossing ganihang buntag involving van ug motor.', icon: 'car', name: 'Vehicular Accident', reporter: 'Khristian Dove', avatar: 'KD', date: 'Oct 26, 2023', avStyle: 'background: #dcfce7; color: #15803d;', barangay: 'Visayan Village' },
-            { id: '#1027', status: 'Critical', desc: 'Walay kuryente sa among area sukad pa ganihang hapon.', icon: 'zap', name: 'Walay Kuryente', reporter: 'Whiskey Itable', avatar: 'WI', date: 'Oct 27, 2023', barangay: 'Magugpo Poblacion' },
-            { id: '#1028', status: 'Resolved', desc: 'Naay nireklamo sa mga istambay nga sabaan sa kanto.', icon: 'users', name: 'Mga Istambay', reporter: 'Elmer Solayao', avatar: 'ES', date: 'Oct 28, 2023', avStyle: 'background: #e2e8f0; color: #475569;', barangay: 'San Miguel' }
-        ];
-
-        let currentTab = 'Active';
+        let issuesData = [];
         let currentBarangay = 'All';
+        let notifications = [];
+        let socket = null;
 
-        // Initialize Icons
-        // lucide.createIcons() called after render
+        const API_BASE_URL = (window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:')
+            ? 'http://localhost:3000'
+            : '';
+
+        // Initialize Socket.IO for real-time notifications
+        function initSocket() {
+            socket = io(API_BASE_URL);
+
+            socket.on('connect', () => {
+                console.log('Connected to notification server');
+            });
+
+            socket.on('dashboard_update', (data) => {
+                console.log('Dashboard update received:', data);
+                if (data.type === 'new_report') {
+                    handleNewReport(data);
+                }
+            });
+        }
+
+        // Handle new report notification
+        function handleNewReport(data) {
+            // Play notification sound
+            playNotificationSound();
+
+            console.log('New report received:', data);
+
+            // Refresh the board to show the new report
+            fetchIssues();
+        }
+
+        // Play notification sound
+        function playNotificationSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // Update notification badge
+        function updateNotificationBadge() {
+            const unreadCount = notifications.filter(n => !n.read).length;
+            const badge = document.getElementById('notif-badge');
+
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // Update notification list
+        function updateNotificationList() {
+            const list = document.getElementById('notif-list');
+
+            if (notifications.length === 0) {
+                list.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">No new notifications</div>';
+                return;
+            }
+
+            list.innerHTML = notifications.map(notif => `
+                <div onclick="openNotification('${notif.id}')" style="padding: 1rem; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.2s; ${!notif.read ? 'background: var(--bg-hover);' : ''}" onmouseover="this.style.background='var(--bg-active)'" onmouseout="this.style.background='${!notif.read ? 'var(--bg-hover)' : 'transparent'}'">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.25rem;">
+                        <div style="font-weight: ${!notif.read ? '700' : '500'}; color: var(--text-primary); font-size: 0.9rem;">${notif.title}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap; margin-left: 0.5rem;">${formatTime(notif.time)}</div>
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">${notif.message}</div>
+                    ${!notif.read ? '<div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; position: absolute; left: 0.5rem; top: 50%; transform: translateY(-50%);"></div>' : ''}
+                </div>
+            `).join('');
+        }
+
+        // Format notification time
+        function formatTime(date) {
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000); // seconds
+
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+            return `${Math.floor(diff / 86400)}d ago`;
+        }
+
+        // Open notification and show issue details
+        function openNotification(reportId) {
+            // Mark as read
+            const notif = notifications.find(n => n.id === reportId);
+            if (notif) notif.read = true;
+            updateNotificationBadge();
+            updateNotificationList();
+
+            // Close dropdown
+            document.getElementById('notif-dropdown').style.display = 'none';
+
+            // Open issue details
+            openDetails(reportId);
+        }
+
+        // Toggle notification dropdown
+        // Initialize handlers
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Socket.IO
+            initSocket();
+        });
+
+
+        async function fetchIssues() {
+            try {
+                let deptId = null;
+                try {
+                    const user = JSON.parse(localStorage.getItem('user_token'));
+                    if (user) deptId = user.department_id;
+                } catch (e) { }
+
+                let url = `${API_BASE_URL}/api/reports`;
+                if (deptId) url += `?department_id=${deptId}`;
+
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`Server Error ${res.status}`);
+
+                issuesData = await res.json();
+                console.log('Received issues data:', issuesData);
+                console.log('First issue status:', issuesData[0]?.status);
+                renderBoard();
+
+            } catch (err) {
+                console.error('Error loading issues:', err);
+            }
+        }
 
         async function fetchBarangays() {
             const select = document.getElementById('barangay-filter');
             try {
-                // Try fetching from backend first
-                const res = await fetch('/api/barangays');
-                if (!res.ok) throw new Error('API failed');
+                const res = await fetch(`${API_BASE_URL}/api/barangays`);
                 const data = await res.json();
-
+                select.innerHTML = '<option value="All">All Barangays</option>';
                 data.forEach(brgy => {
                     const option = document.createElement('option');
                     option.value = brgy.barangay_name;
                     option.textContent = brgy.barangay_name;
                     select.appendChild(option);
                 });
-            } catch (err) {
-                console.warn('Using fallback barangay list', err);
-                const fallback = ['Apokon', 'Bincungan', 'Busaon', 'Canocotan', 'Cuambogan', 'La Filipina', 'Liboganon', 'Madaum', 'Magdum', 'Mankilam', 'New Balamban', 'Nueva Fuerza', 'Pagsabangan', 'Pandapan', 'Magugpo Poblacion', 'San Agustin', 'San Isidro', 'San Miguel', 'Visayan Village'];
-                fallback.forEach(name => {
-                    const option = document.createElement('option');
-                    option.value = name;
-                    option.textContent = name;
-                    select.appendChild(option);
-                });
-            }
+            } catch (err) { }
         }
 
         function filterByBarangay(val) {
             currentBarangay = val;
-            renderAll();
+            renderBoard();
         }
 
-        function renderAll() {
-            renderDesktopTable();
-            renderMobileList();
-            if (window.lucide) window.lucide.createIcons();
-        }
-
-        function filterIssues(tab) {
-            return issuesData.filter(item => {
-                // Filter by Tab
-                let tabMatch = false;
-                if (tab === 'Active') tabMatch = ['Critical', 'In Review', 'Pending', 'Error'].includes(item.status);
-                else if (tab === 'Scheduled') tabMatch = ['Ongoing'].includes(item.status);
-                else if (tab === 'History') tabMatch = ['Resolved', 'Completed', 'Archived'].includes(item.status);
-
-                // Filter by Barangay
-                let brgyMatch = true;
-                if (currentBarangay !== 'All') {
-                    brgyMatch = item.barangay === currentBarangay;
-                }
-
-                return tabMatch && brgyMatch;
+        function renderBoard() {
+            const filtered = issuesData.filter(item => {
+                if (currentBarangay !== 'All' && item.barangay !== currentBarangay) return false;
+                return true;
             });
-        }
 
-        function renderDesktopTable() {
-            const tbody = document.getElementById('desktop-table-body');
-            tbody.innerHTML = '';
+            const lists = {
+                'Pending': document.getElementById('list-pending'),
+                'In Review': document.getElementById('list-in-review'),
+                'Resolved': document.getElementById('list-resolved')
+            };
 
-            const filtered = filterIssues(currentTab);
+            // Clear lists
+            Object.values(lists).forEach(l => l.innerHTML = '');
+
+            const counts = { 'Pending': 0, 'In Review': 0, 'Resolved': 0 };
 
             filtered.forEach(item => {
-                const tr = document.createElement('tr');
-                // Determine priority class
-                let prioClass = 'priority-normal';
-                let badgeClass = 'status-badge row-status';
+                // Determine column based on status mapping
+                let col = 'Pending';
+                if (item.status === 'In Review') col = 'In Review';
+                else if (item.status === 'Resolved') col = 'Resolved';
+                else col = 'Pending';
 
-                if (['Critical', 'Error'].includes(item.status)) { prioClass = 'priority-critical'; badgeClass += ' status-error'; }
-                else if (['In Review', 'Ongoing'].includes(item.status)) { prioClass = 'priority-warning'; badgeClass += ' status-pending'; }
-                else { badgeClass += ' status-active'; }
-
-                tr.className = prioClass;
-                tr.setAttribute('data-id', item.id);
-                tr.setAttribute('data-status', item.status);
-                tr.setAttribute('data-desc', item.desc);
-
-                tr.innerHTML = `
-                    <td><div class="cat-icon"><i data-lucide="${item.icon}" width="18"></i></div></td>
-                    <td class="row-id">${item.id}</td>
-                    <td class="row-name">${item.name}</td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar" style="${item.avStyle || ''}">${item.avatar}</div>
-                            <span class="row-reporter">${item.reporter}</span>
-                        </div>
-                    </td>
-                    <td class="row-date">${item.date}</td>
-                    <td><span class="${badgeClass}">${item.status}</span></td>
-                    <td>
-                        <button class="btn-action btn-view" onclick="openDetails('${item.id}')">View</button>
-                        <button class="btn-action btn-delete" onclick="deleteRow(this)">Delete</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function renderMobileList() {
-            const listContainer = document.getElementById('mobile-issues-list');
-            listContainer.innerHTML = '';
-
-            const filtered = filterIssues(currentTab);
-
-            if (filtered.length === 0) {
-                listContainer.innerHTML = `<div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">No issues found in this tab.</div>`;
-                return;
-            }
-
-            filtered.forEach(item => {
-                let statusClass = 'status-success';
-                if (['Critical', 'Error'].includes(item.status)) statusClass = 'status-critical';
-                else if (['In Review', 'Ongoing'].includes(item.status)) statusClass = 'status-pending';
+                counts[col]++;
 
                 const card = document.createElement('div');
-                card.className = 'm-issue-item';
+                card.className = 'kanban-card';
+                card.draggable = true;
+                card.id = `card-${item.id}`;
+                card.dataset.reportId = item.id;
+                card.ondragstart = (e) => handleDragStart(e, item.id);
+                card.ondragend = (e) => handleDragEnd(e);
                 card.onclick = () => openDetails(item.id);
 
+                const prioClass = `prio-${(item.priority || 'low').toLowerCase()}`;
+
                 card.innerHTML = `
-                    <div class="m-issue-icon-box">
-                        <i data-lucide="${item.icon}" width="24"></i>
+                    <div class="card-header">
+                        <span class="card-id">#${item.id}</span>
+                        <span class="priority-badge ${prioClass}">${item.priority}</span>
                     </div>
-                    <div class="m-issue-info">
-                        <div class="m-issue-title">${item.name}</div>
-                        <div class="m-issue-meta">
-                            <span class="m-issue-status ${statusClass}">${item.status}</span>
-                            <span>• ${item.date}</span>
+                    <div class="card-title">${item.name}</div>
+                    <div class="card-meta">
+                        <div class="meta-item"><i data-lucide="map-pin" width="12"></i> ${item.barangay}</div>
+                        <div class="meta-item"><i data-lucide="calendar" width="12"></i> ${item.date}</div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="reporter-info">
+                            <div class="reporter-avatar" style="${item.avStyle || ''}">
+                                <span>${item.avatar}</span>
+                            </div>
+                            <span class="reporter-name">${item.reporter}</span>
                         </div>
+                        <div class="card-category"><i data-lucide="${item.icon}" width="14"></i></div>
                     </div>
-                    <i data-lucide="chevron-right" style="color: var(--text-secondary); width: 20px;"></i>
                 `;
-                listContainer.appendChild(card);
+                lists[col].appendChild(card);
             });
+
+            // Update counts
+            document.getElementById('count-pending').innerText = counts['Pending'];
+            document.getElementById('count-in-review').innerText = counts['In Review'];
+            document.getElementById('count-resolved').innerText = counts['Resolved'];
+
+            if (window.lucide) lucide.createIcons();
         }
 
-        function switchTab(tabName, btn) {
-            currentTab = tabName;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderAll();
+        // Drag and Drop Functions
+        let draggedId = null;
+
+        function handleDragStart(e, id) {
+            draggedId = id;
+            e.target.classList.add('is-dragging');
+            e.dataTransfer.setData('text/plain', id);
+            e.dataTransfer.effectAllowed = 'move';
         }
 
-        function openDetails(idOrBtn) {
-            let id = idOrBtn;
-            if (typeof idOrBtn !== 'string') {
-                // If called from button click (desktop)
-                const row = idOrBtn.closest('tr'); // this logic was for direct click, but now we pass ID in desktop too
-                // Fallback if needed, but we changed onclick in renderDesktopTable
-                return;
-            }
+        function handleDragEnd(e) {
+            e.target.classList.remove('is-dragging');
+            document.querySelectorAll('.kanban-column').forEach(c => c.classList.remove('drag-over'));
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function dragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        async function handleDrop(e, newStatus) {
+            e.preventDefault();
+            const col = e.currentTarget;
+            col.classList.remove('drag-over');
+
+            const id = e.dataTransfer.getData('text/plain');
+            if (!id) return;
 
             const item = issuesData.find(i => i.id === id);
             if (!item) return;
 
+            // Map UI status to DB status
+            let dbStatus = newStatus;
+            if (newStatus === 'In Review') dbStatus = 'ongoing';
+            else if (newStatus === 'Resolved') dbStatus = 'resolved';
+            else if (newStatus === 'Pending') dbStatus = 'pending';
+
+            // Optimistic Update
+            const oldStatus = item.status;
+            item.status = newStatus;
+            renderBoard();
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/reports/${id}/status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: dbStatus })
+                });
+
+                if (!res.ok) throw new Error('Failed to update status');
+
+                // Refresh to be sure
+                // fetchIssues(); 
+            } catch (err) {
+                console.error(err);
+                alert('Update failed: ' + err.message);
+                item.status = oldStatus;
+                renderBoard();
+            }
+        }
+
+        function openDetails(id) {
+            const item = issuesData.find(i => i.id === id);
+            if (!item) return;
             if (window.parent && window.parent.openGlobalModal) {
-                window.parent.openGlobalModal(item.id, item.name, item.reporter, item.date, item.status, item.desc);
-            } else {
-                console.error('Global modal function not found on parent window.');
+                window.parent.openGlobalModal(item);
             }
         }
 
-        function deleteRow(btn) {
-            if (confirm('Are you sure you want to delete this issue?')) {
-                // Visual only for demo
-                const row = btn.closest('tr');
-                if (row) row.remove();
-
-                // For mobile we'd need to re-render, but this is a mock delete
-                alert("Deleted (Mock)");
-            }
-        }
-
-        // Initial load
-        fetchBarangays();
-        renderAll();
-        switchTab('Active', document.querySelector('.tab-btn.active'));
+        // Initial Load
+        (async () => {
+            await fetchBarangays();
+            await fetchIssues();
+        })();
     </script>
 </body>
 
