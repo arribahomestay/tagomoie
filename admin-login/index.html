@@ -392,6 +392,7 @@
 
                         // Store user session
                         localStorage.setItem('user_token', JSON.stringify(data.user));
+                        if (data.session_id) localStorage.setItem('current_session_id', data.session_id);
 
                         setTimeout(() => {
                             window.location.href = '../admin-portal/index.html';

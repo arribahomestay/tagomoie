@@ -219,7 +219,35 @@
                 const iframe = document.getElementById('content-frame');
                 const sidebar = document.getElementById('sidebar');
 
-                // Load Profile Photo if exists
+                // Define API URL for sync
+                const API_BASE_URL = (window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:')
+                    ? 'http://localhost:3000'
+                    : '';
+
+                // Sync Profile Data (Self-Repair)
+                (async () => {
+                    try {
+                        if (user.id && user.role !== 'user') {
+                            const res = await fetch(`${API_BASE_URL}/api/users/admins`);
+                            if (res.ok) {
+                                const admins = await res.json();
+                                const me = admins.find(u => u.id === user.id);
+                                if (me && me.profile_photo && me.profile_photo !== user.profile_photo) {
+                                    // Update Storage
+                                    user.profile_photo = me.profile_photo;
+                                    localStorage.setItem('user_token', JSON.stringify(user));
+                                    // Update UI
+                                    const avatarBtn = document.getElementById('avatar-btn');
+                                    if (avatarBtn) {
+                                        avatarBtn.innerHTML = `<img src="${user.profile_photo}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e) { console.error('Profile Sync Error', e); }
+                })();
+
+                // Load Profile Photo (Initial Render) using (possibly updated) user object
                 if (user.profile_photo) {
                     const avatarBtn = document.getElementById('avatar-btn');
                     if (avatarBtn) {
@@ -228,41 +256,49 @@
                 }
 
                 if (user.role === 'technician') {
-                    // Technician View
-                    iframe.src = "pages/tech/view.html";
-                    // Modify Sidebar for Technician
-                    sidebar.innerHTML = `
-                        <div class="sidebar-header">
-                            <div class="nav-icon">
-                                <i data-lucide="cpu" color="#6366f1"></i>
-                            </div>
-                            <span class="logo-text">TECH<span style="color: #6366f1;">NICIAN</span></span>
-                        </div>
-                        <nav class="nav-menu">
-                            <a href="#" class="nav-item active" onclick="loadTechPage(this, 'pages/tech/view.html'); return false;">
-                                <div class="nav-icon"><i data-lucide="server"></i></div>
-                                <span class="nav-label">Admin Management</span>
-                            </a>
-                            <a href="#" class="nav-item" onclick="loadTechPage(this, 'pages/tech/users.html'); return false;">
-                                <div class="nav-icon"><i data-lucide="users"></i></div>
-                                <span class="nav-label">User Management</span>
-                            </a>
-                        </nav>
-                        <div class="sidebar-footer"></div>
-                    `;
-                    lucide.createIcons();
+                    // Define Technician Tab Switcher (Re-renders sidebar to guarantee state)
+                    window.switchTechTab = function (page) {
+                        const sidebar = document.getElementById('sidebar');
+                        const iframe = document.getElementById('content-frame');
 
-                    // Define page switcher logic
-                    window.loadTechPage = function (el, url) {
-                        const items = document.querySelectorAll('.nav-item');
-                        items.forEach(item => {
-                            item.classList.remove('active');
-                            item.style.pointerEvents = 'auto';
-                        });
-                        el.classList.add('active');
-                        el.style.pointerEvents = 'none';
-                        document.getElementById('content-frame').src = url;
+                        // Determine Active Classes
+                        const adminClass = page === 'admin' ? 'active' : '';
+                        const usersClass = page === 'users' ? 'active' : '';
+
+                        // Render Sidebar
+                        sidebar.innerHTML = `
+                            <div class="sidebar-header">
+                                <div class="nav-icon">
+                                    <lottie-player class="logo-lottie" src="assets/animations/SAS.json" background="transparent" speed="1" loop autoplay></lottie-player>
+                                </div>
+                                <span class="logo-text">TECH<span style="color: #6366f1;">NICIAN</span></span>
+                            </div>
+                            <nav class="nav-menu">
+                                <a href="#" class="nav-item ${adminClass}" onclick="switchTechTab('admin'); return false;">
+                                    <div class="nav-icon"><i data-lucide="server"></i></div>
+                                    <span class="nav-label">Admin Management</span>
+                                </a>
+                                <a href="#" class="nav-item ${usersClass}" onclick="switchTechTab('users'); return false;">
+                                    <div class="nav-icon"><i data-lucide="users"></i></div>
+                                    <span class="nav-label">User Management</span>
+                                </a>
+                            </nav>
+                            <div class="sidebar-footer"></div>
+                        `;
+
+                        // Re-init icons
+                        if (window.lucide) lucide.createIcons();
+
+                        // Navigate Iframe
+                        const targetUrl = page === 'admin' ? 'pages/tech/view.html' : 'pages/tech/users.html';
+                        if (iframe && !iframe.src.endsWith(targetUrl)) {
+                            iframe.src = targetUrl;
+                        }
                     };
+
+                    // Initial Load
+                    switchTechTab('admin');
+
                 } else if (user.role === 'admin') {
                     // Default Admin View
                     iframe.src = "pages/dashboard/view.html";
@@ -2517,12 +2553,78 @@
                 window.loadSecurityData = async function () {
                     try {
                         const user = JSON.parse(localStorage.getItem('user_token') || '{}');
+                        const currentSessionId = localStorage.getItem('current_session_id');
 
                         // Set current email
-                        document.getElementById('sec-current-email').value = user.email || 'Not set';
+                        const emailInput = document.getElementById('sec-current-email');
+                        if (emailInput) emailInput.value = user.email || 'Not set';
+
+                        // Fetch Sessions
+                        const API_BASE_URL = (window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:')
+                            ? 'http://localhost:3000'
+                            : '';
+
+                        const res = await fetch(`${API_BASE_URL}/api/users/${user.id}/sessions`);
+                        if (res.ok) {
+                            const sessions = await res.json();
+                            const tbody = document.querySelector('#sec-view-alerts tbody');
+
+                            if (tbody) {
+                                tbody.innerHTML = '';
+                                if (sessions.length === 0) {
+                                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 1rem; color: var(--text-secondary);">No active sessions found.</td></tr>';
+                                }
+
+                                sessions.forEach(session => {
+                                    const isCurrent = (session.id == currentSessionId);
+                                    const dateStr = new Date(session.login_time).toLocaleString();
+                                    const deviceLower = (session.device || '').toLowerCase();
+                                    let icon = 'monitor';
+                                    if (deviceLower.includes('phone') || deviceLower.includes('mobile') || deviceLower.includes('android') || deviceLower.includes('iphone')) icon = 'smartphone';
+
+                                    const tr = document.createElement('tr');
+                                    if (isCurrent) tr.style.background = 'rgba(16, 185, 129, 0.05)';
+
+                                    tr.innerHTML = `
+                                        <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <i data-lucide="${icon}" width="16" style="color: ${isCurrent ? '#6366f1' : 'var(--text-secondary)'};"></i>
+                                                <span style="font-weight: ${isCurrent ? '500' : 'normal'}; color: var(--text-primary);">${session.device || 'Unknown'} ${isCurrent ? '(Current)' : ''}</span>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary);">
+                                            ${session.location || 'Unknown'}
+                                        </td>
+                                        <td style="padding: 1rem; border-bottom: 1px solid var(--border-color); color: ${isCurrent ? '#10b981' : 'var(--text-secondary)'}; font-weight: ${isCurrent ? '500' : 'normal'};">
+                                            ${isCurrent ? 'Active Now' : dateStr}
+                                        </td>
+                                        <td style="padding: 1rem; border-bottom: 1px solid var(--border-color); text-align: right;">
+                                            ${isCurrent ?
+                                            '<span style="font-size: 0.8rem; color: #94a3b8;">Current</span>' :
+                                            `<button onclick="window.logoutDevice(${session.id})" style="background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#ef4444'">Log Out</button>`
+                                        }
+                                        </td>
+                                    `;
+                                    tbody.appendChild(tr);
+                                });
+                                lucide.createIcons();
+                            }
+                        }
                     } catch (error) {
                         console.error('Error loading security data:', error);
                     }
+                }
+
+                // Global Logout Device Function
+                window.logoutDevice = async function (sessionId) {
+                    if (!confirm('Are you sure you want to log out this session?')) return;
+                    try {
+                        const API_BASE_URL = (window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:')
+                            ? 'http://localhost:3000'
+                            : '';
+                        await fetch(`${API_BASE_URL}/api/sessions/${sessionId}`, { method: 'DELETE' });
+                        loadSecurityData(); // Refresh list
+                    } catch (e) { alert('Error logging out device'); }
                 }
 
                 window.updatePassword = async function () {

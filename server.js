@@ -9,9 +9,18 @@ require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
+
+// Cors Options
+const corsOptions = {
+    origin: ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+
 const io = new Server(server, {
     cors: {
-        origin: "*", // Allow all origins for now
+        origin: "*", // Allow all for socket
         methods: ["GET", "POST"]
     }
 });
@@ -54,7 +63,7 @@ io.on('connection', (socket) => {
 // Middleware
 
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -575,7 +584,37 @@ app.post('/api/login', async (req, res) => {
             return res.status(403).json({ error: 'This account has been deactivated. Please contact your admin.' });
         }
 
-        // Return User Info (exclude password)
+        // --- Session Tracking Logic ---
+        // Ensure table exists
+        await pool.query(`CREATE TABLE IF NOT EXISTS user_sessions (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            user_id INT UNSIGNED NOT NULL,
+            device VARCHAR(255),
+            location VARCHAR(255),
+            ip_address VARCHAR(45),
+            login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )`);
+
+        // Detect Device
+        const ua = req.headers['user-agent'] || '';
+        let device = 'Unknown Device';
+        if (ua.includes('Windows')) device = 'Windows PC';
+        else if (ua.includes('Macintosh')) device = 'MacBook/Mac';
+        else if (ua.includes('iPhone')) device = 'iPhone';
+        else if (ua.includes('Android')) device = 'Android Device';
+        else if (ua.includes('Linux')) device = 'Linux Machine';
+
+        const ip = req.ip || (req.connection && req.connection.remoteAddress) || 'Unknown';
+
+        // Insert Session
+        const [sessionRes] = await pool.query(
+            'INSERT INTO user_sessions (user_id, device, location, ip_address) VALUES (?, ?, ?, ?)',
+            [user.id, device, 'Davao City, PH (Approx)', ip]
+        );
+
+        // Return User Info (exclude password) + Session ID
         res.json({
             success: true,
             user: {
@@ -586,12 +625,36 @@ app.post('/api/login', async (req, res) => {
                 firstName: user.first_name,
                 lastName: user.last_name,
                 department_id: user.department_id,
-                status: user.status
-            }
+                status: user.status,
+                profile_photo: user.profile_photo
+            },
+            session_id: sessionRes.insertId
         });
 
     } catch (err) {
         console.error('Login Error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get User Sessions
+app.get('/api/users/:id/sessions', async (req, res) => {
+    if (!pool) return res.status(503).json({ error: 'No DB connection' });
+    try {
+        const [rows] = await pool.query('SELECT * FROM user_sessions WHERE user_id = ? ORDER BY last_active DESC', [req.params.id]);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete Session (Logout Device)
+app.delete('/api/sessions/:id', async (req, res) => {
+    if (!pool) return res.status(503).json({ error: 'No DB connection' });
+    try {
+        await pool.query('DELETE FROM user_sessions WHERE id = ?', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
@@ -641,7 +704,7 @@ cloudinary.config({
 });
 
 // Multer Setup
-const upload = mult({ dest: 'uploads/' });
+const upload = mult({ dest: require('os').tmpdir() });
 
 // Upload Avatar Endpoint
 app.post('/api/upload/avatar', upload.single('image'), async (req, res) => {
@@ -1218,6 +1281,11 @@ function getCategoryIcon(title) {
     return 'alert-circle';
 }
 
-server.listen(port, () => {
-    console.log(`Server running on port ${port} `);
-});
+// Export for Vercel
+if (require.main === module) {
+    server.listen(port, () => {
+        console.log(`Server running on port ${port} `);
+    });
+}
+
+module.exports = app;

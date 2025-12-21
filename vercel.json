@@ -1,0 +1,35 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "server.js",
+            "use": "@vercel/node"
+        },
+        {
+            "src": "admin-login/**/*",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "admin-portal/**/*",
+            "use": "@vercel/static"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "/server.js"
+        },
+        {
+            "src": "/admin-login/(.*)",
+            "dest": "/admin-login/$1"
+        },
+        {
+            "src": "/admin-portal/(.*)",
+            "dest": "/admin-portal/$1"
+        },
+        {
+            "src": "/",
+            "dest": "/admin-login/index.html"
+        }
+    ]
+}
